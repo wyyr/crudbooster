@@ -4,20 +4,19 @@ namespace crocodicstudio\crudbooster\middlewares;
 
 use Closure;
 use crocodicstudio\crudbooster\helpers\CRUDBooster;
+use Illuminate\Http\Request;
 
 class CBAuthAPI
 {
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request $request
-     * @param  \Closure $next
+     * @param Request $request
+     * @param Closure $next
      * @return mixed
      */
-    public function handle($request, Closure $next)
+    public function handle(Request $request, Closure $next)
     {
-
-
         CRUDBooster::authAPI();
 
         return $next($request);

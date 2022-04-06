@@ -1,6 +1,8 @@
-<?php namespace crocodicstudio\crudbooster\controllers;
+<?php
 
-use CRUDBooster;
+namespace crocodicstudio\crudbooster\controllers;
+
+use crocodicstudio\crudbooster\helpers\CRUDBooster;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Excel;
 use Illuminate\Support\Facades\PDF;
@@ -42,7 +44,7 @@ class StatisticBuilderController extends CBController
         ];
 
         $this->addaction = [];
-        $this->addaction[] = ['label' => 'Builder', 'url' => CRUDBooster::mainpath('builder').'/[id]', 'icon' => 'fa fa-wrench'];
+        $this->addaction[] = ['label' => 'Builder', 'url' => CRUDBooster::mainpath('builder') . '/[id]', 'icon' => 'fa fa-wrench'];
     }
 
     public function getShowDashboard()
@@ -65,8 +67,8 @@ class StatisticBuilderController extends CBController
     {
         $this->cbLoader();
 
-        $menus= DB::table('cms_menus')
-            ->whereRaw("cms_menus.id IN (select id_cms_menus from cms_menus_privileges where id_cms_privileges = '".CRUDBooster::myPrivilegeId()."')")
+        $menus = DB::table('cms_menus')
+            ->whereRaw("cms_menus.id IN (select id_cms_menus from cms_menus_privileges where id_cms_privileges = '" . CRUDBooster::myPrivilegeId() . "')")
             ->where('is_dashboard', 1)
             ->where('is_active', 1)
             ->first();
@@ -83,7 +85,7 @@ class StatisticBuilderController extends CBController
         $data['id_cms_statistics'] = $id_cms_statistics;
         $data['page_title'] = $page_title;
 
-        return view('crudbooster::statistic_builder.show',$data);
+        return view('crudbooster::statistic_builder.show', $data);
     }
 
     public function getShow($slug)
@@ -100,7 +102,7 @@ class StatisticBuilderController extends CBController
     {
         $this->cbLoader();
 
-        if (! CRUDBooster::isSuperadmin()) {
+        if (!CRUDBooster::isSuperadmin()) {
             CRUDBooster::insertLog(cbLang("log_try_view", ['name' => 'Builder', 'module' => 'Statistic']));
             CRUDBooster::redirect(CRUDBooster::adminPath(), cbLang('denied_access'));
         }
@@ -122,7 +124,7 @@ class StatisticBuilderController extends CBController
 
         $component = DB::table('cms_statistic_components')->where('componentID', $componentID)->first();
         $command = 'layout';
-        $layout = view('crudbooster::statistic_builder.components.'.$component->component_name, compact('command', 'componentID'))->render();
+        $layout = view('crudbooster::statistic_builder.components.' . $component->component_name, compact('command', 'componentID'))->render();
 
         $component_name = $component->component_name;
         $area_name = $component->area_name;
@@ -131,8 +133,8 @@ class StatisticBuilderController extends CBController
             foreach ($config as $key => $value) {
                 if ($value) {
                     $command = 'showFunction';
-                    $value = view('crudbooster::statistic_builder.components.'.$component_name, compact('command', 'value', 'key', 'config', 'componentID'))->render();
-                    $layout = str_replace('['.$key.']', $value, $layout);
+                    $value = view('crudbooster::statistic_builder.components.' . $component_name, compact('command', 'value', 'key', 'config', 'componentID'))->render();
+                    $layout = str_replace('[' . $key . ']', $value, $layout);
                 }
             }
         }
@@ -151,7 +153,7 @@ class StatisticBuilderController extends CBController
         $componentID = md5(time());
 
         $command = 'layout';
-        $layout = view('crudbooster::statistic_builder.components.'.$component_name, compact('command', 'componentID'))->render();
+        $layout = view('crudbooster::statistic_builder.components.' . $component_name, compact('command', 'componentID'))->render();
 
         $data = [
             'id_cms_statistics' => $id_cms_statistics,
@@ -180,7 +182,7 @@ class StatisticBuilderController extends CBController
     {
         $this->cbLoader();
 
-        if (! CRUDBooster::isSuperadmin()) {
+        if (!CRUDBooster::isSuperadmin()) {
             CRUDBooster::insertLog(cbLang("log_try_view", ['name' => 'Edit Component', 'module' => 'Statistic']));
             CRUDBooster::redirect(CRUDBooster::adminPath(), cbLang('denied_access'));
         }
@@ -191,7 +193,7 @@ class StatisticBuilderController extends CBController
 
         $command = 'configuration';
 
-        return view('crudbooster::statistic_builder.components.'.$component_row->component_name, compact('command', 'componentID', 'config'));
+        return view('crudbooster::statistic_builder.components.' . $component_row->component_name, compact('command', 'componentID', 'config'));
     }
 
     public function postSaveComponent()
@@ -206,7 +208,7 @@ class StatisticBuilderController extends CBController
 
     public function getDeleteComponent($id)
     {
-        if (! CRUDBooster::isSuperadmin()) {
+        if (!CRUDBooster::isSuperadmin()) {
             CRUDBooster::insertLog(cbLang("log_try_view", ['name' => 'Delete Component', 'module' => 'Statistic']));
             CRUDBooster::redirect(CRUDBooster::adminPath(), cbLang('denied_access'));
         }

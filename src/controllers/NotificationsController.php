@@ -1,9 +1,12 @@
-<?php namespace crocodicstudio\crudbooster\controllers;
+<?php
 
-use CRUDBooster;
+namespace crocodicstudio\crudbooster\controllers;
+
+use crocodicstudio\crudbooster\helpers\CRUDBooster;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Excel;
 use Illuminate\Support\Facades\PDF;
+use Illuminate\Support\Facades\Schema;
 
 class NotificationsController extends CBController
 {
@@ -21,10 +24,10 @@ class NotificationsController extends CBController
         $this->button_import = false;
         $this->global_privilege = true;
 
-        $read_notification_url = url(config('crudbooster.ADMIN_PATH')).'/notifications/read';
+        $read_notification_url = url(config('crudbooster.ADMIN_PATH')) . '/notifications/read';
 
         $this->col = [];
-        $this->col[] = ["label" => "Content", "name" => "content", "callback_php" => '"<a href=\"'.$read_notification_url.'/$row->id\">$row->content</a>"'];
+        $this->col[] = ["label" => "Content", "name" => "content", "callback_php" => '"<a href=\"' . $read_notification_url . '/$row->id\">$row->content</a>"'];
         $this->col[] = [
             'label' => 'Read',
             'name' => 'is_read',
@@ -47,7 +50,7 @@ class NotificationsController extends CBController
     {
 
         $rows = DB::table('cms_notifications')->where('id_cms_users', 0)->orWhere('id_cms_users', CRUDBooster::myId())->orderby('id', 'desc')->where('is_read', 0)->take(25);
-        if (\Schema::hasColumn('cms_notifications', 'deleted_at')) {
+        if (Schema::hasColumn('cms_notifications', 'deleted_at')) {
             $rows->whereNull('deleted_at');
         }
 

@@ -1,10 +1,13 @@
-<?php namespace crocodicstudio\crudbooster\controllers;
+<?php
 
-use CRUDbooster;
+namespace crocodicstudio\crudbooster\controllers;
+
+use crocodicstudio\crudbooster\helpers\CRUDBooster;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Excel;
 use Illuminate\Support\Facades\PDF;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
 
 class ApiCustomController extends CBController
@@ -26,7 +29,7 @@ class ApiCustomController extends CBController
     {
         $this->cbLoader();
 
-        if (! CRUDBooster::isSuperadmin()) {
+        if (!CRUDBooster::isSuperadmin()) {
             CRUDBooster::insertLog(cbLang("log_try_view", ['name' => 'API Index', 'module' => 'API']));
             CRUDBooster::redirect(CRUDBooster::adminPath(), cbLang('denied_access'));
         }
@@ -56,7 +59,7 @@ class ApiCustomController extends CBController
         $data = [];
         $data['variables'] = [];
         $data['info'] = [
-            'name' => CRUDBooster::getSetting('appname').' - API',
+            'name' => CRUDBooster::getSetting('appname') . ' - API',
             '_postman_id' => "1765dd11-73d1-2978-ae11-36921dc6263d",
             'description' => '',
             'schema' => 'https://schema.getpostman.com/json/collection/v2.0.0/collection.json',
@@ -81,7 +84,7 @@ class ApiCustomController extends CBController
 
             if (strtolower($a->method_type) == 'get') {
                 if ($httpbuilder) {
-                    $httpbuilder = "?".http_build_query($httpbuilder);
+                    $httpbuilder = "?" . http_build_query($httpbuilder);
                 } else {
                     $httpbuilder = '';
                 }
@@ -92,7 +95,7 @@ class ApiCustomController extends CBController
             $items[] = [
                 'name' => $a->nama,
                 'request' => [
-                    'url' => url('api/'.$a->permalink).$httpbuilder,
+                    'url' => url('api/' . $a->permalink) . $httpbuilder,
                     'method' => $a->method_type ?: 'GET',
                     'header' => [],
                     'body' => [
@@ -107,9 +110,9 @@ class ApiCustomController extends CBController
 
         $json = json_encode($data);
 
-        return \Response::make($json, 200, [
+        return Response::make($json, 200, [
             'Content-Type' => 'application/json',
-            'Content-Disposition' => 'attachment; filename='.CRUDBooster::getSetting('appname').' - API For POSTMAN.json',
+            'Content-Disposition' => 'attachment; filename=' . CRUDBooster::getSetting('appname') . ' - API For POSTMAN.json',
         ]);
     }
 
@@ -127,7 +130,7 @@ class ApiCustomController extends CBController
     {
         $this->cbLoader();
 
-        if (! CRUDBooster::isSuperadmin()) {
+        if (!CRUDBooster::isSuperadmin()) {
             CRUDBooster::insertLog(cbLang("log_try_view", ['name' => 'API Index', 'module' => 'API']));
             CRUDBooster::redirect(CRUDBooster::adminPath(), cbLang('denied_access'));
         }
@@ -152,7 +155,7 @@ class ApiCustomController extends CBController
     {
         $this->cbLoader();
 
-        if (! CRUDBooster::isSuperadmin()) {
+        if (!CRUDBooster::isSuperadmin()) {
             CRUDBooster::insertLog(cbLang("log_try_view", ['name' => 'API Edit', 'module' => 'API']));
             CRUDBooster::redirect(CRUDBooster::adminPath(), cbLang('denied_access'));
         }
@@ -265,7 +268,7 @@ class ApiCustomController extends CBController
 
                             $type_field = CRUDBooster::getFieldType($table2, $t);
                             $t = str_replace("_$table2", "", $t);
-                            $new_result[] = ['name' => $table2.'_'.$t, 'type' => $type_field];
+                            $new_result[] = ['name' => $table2 . '_' . $t, 'type' => $type_field];
                         }
                     }
                 }
@@ -354,7 +357,7 @@ class ApiCustomController extends CBController
 
         $controllername = ucwords(str_replace('_', ' ', $row->permalink));
         $controllername = str_replace(' ', '', $controllername);
-        @unlink(base_path("app/Http/Controllers/Api".$controllername."Controller.php"));
+        @unlink(base_path("app/Http/Controllers/Api" . $controllername . "Controller.php"));
 
         return response()->json(['status' => 1]);
     }

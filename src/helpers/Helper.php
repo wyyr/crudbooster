@@ -10,63 +10,76 @@
 */
 
 
-if(!function_exists('ends_with')) {
+use crocodicstudio\crudbooster\helpers\CB;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\Translation\Translator;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+
+if (!function_exists('ends_with')) {
     /**
      * Laravel ends_with alternative
      * @param $text
      * @param $need
      * @return bool
      */
-    function ends_with($text, $need) {
-        return \Illuminate\Support\Str::endsWith($text, $need);
+    function ends_with($text, $need)
+    {
+        return Str::endsWith($text, $need);
     }
 }
 
-if(!function_exists('cbLang')) {
+if (!function_exists('cbLang')) {
     /**
      * @param $key
      * @param array $replace
      * @param null $locale
-     * @return array|\Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Translation\Translator|string|null
+     * @return array|Application|Translator|string|null
      */
-    function cbLang($key, array $replace = [], $locale = null) {
-        return trans("crudbooster::crudbooster.".$key, $replace, $locale);
+    function cbLang($key, array $replace = [], $locale = null)
+    {
+        return trans("crudbooster::crudbooster." . $key, $replace, $locale);
     }
 }
 
-if(!function_exists('db')) {
+if (!function_exists('db')) {
     /**
      * @param string $table
-     * @return \Illuminate\Database\Query\Builder
+     * @return Builder
      */
-    function db(string $table) {
-        return \Illuminate\Support\Facades\DB::table($table);
+    function db(string $table)
+    {
+        return DB::table($table);
     }
 }
 
-if(!function_exists('assetThumbnail')) {
-    function assetThumbnail($path) {
-        $path = str_replace('uploads/','uploads_thumbnail/',$path);
+if (!function_exists('assetThumbnail')) {
+    function assetThumbnail($path)
+    {
+        $path = str_replace('uploads/', 'uploads_thumbnail/', $path);
         return asset($path);
     }
 }
 
-if(!function_exists('assetResize')) {
-    function assetResize($path,$width,$height=null,$quality=70) {
+if (!function_exists('assetResize')) {
+    function assetResize($path, $width, $height = null, $quality = 70)
+    {
         $basename = basename($path);
         $pathWithoutName = str_replace($basename, '', $path);
-        $newLocation = $pathWithoutName.'/w_'.$width.'_h_'.$height.'_'.$basename;
-        if(Storage::exists($newLocation)) {
+        $newLocation = $pathWithoutName . '/w_' . $width . '_h_' . $height . '_' . $basename;
+        if (Storage::exists($newLocation)) {
             return asset($newLocation);
-        }else{
-            $img = Image::make(storage_path($path))->fit($width,$height);
-            $img->save(storage_path($newLocation),$quality);
+        } else {
+            $img = Image::make(storage_path($path))->fit($width, $height);
+            $img->save(storage_path($newLocation), $quality);
             return asset($newLocation);
         }
     }
 }
 
-if(!function_exists('extract_unit')) {
+if (!function_exists('extract_unit')) {
     /*
     Credits: Bit Repository
     URL: http://www.bitrepository.com/extract-content-between-two-delimiters-with-php.html
@@ -84,8 +97,9 @@ if(!function_exists('extract_unit')) {
 }
 
 
-if(!function_exists('now')) {
-    function now() {
+if (!function_exists('now')) {
+    function now()
+    {
         return date('Y-m-d H:i:s');
     }
 }
@@ -98,67 +112,73 @@ if(!function_exists('now')) {
 |
 */
 
-if(!function_exists('get_setting')) {
+if (!function_exists('get_setting')) {
     /**
      * @param $key
      * @param null $default
      * @return bool
      */
-    function get_setting($key, $default = null) {
-        $setting = \crocodicstudio\crudbooster\helpers\CB::getSetting($key);
-        $setting = ($setting)?:$default;
+    function get_setting($key, $default = null)
+    {
+        $setting = CB::getSetting($key);
+        $setting = ($setting) ?: $default;
         return $setting;
     }
 }
 
-if(!function_exists('str_random')) {
-    function str_random($length = 16) {
-        return \Illuminate\Support\Str::random($length);
+if (!function_exists('str_random')) {
+    function str_random($length = 16)
+    {
+        return Str::random($length);
     }
 }
 
-if(!function_exists('str_slug')) {
-    function str_slug($text, $separator = "-", $language = "en") {
-        return \Illuminate\Support\Str::slug($text, $separator, $language);
+if (!function_exists('str_slug')) {
+    function str_slug($text, $separator = "-", $language = "en")
+    {
+        return Str::slug($text, $separator, $language);
     }
 }
 
-if(!function_exists('g')) {
+if (!function_exists('g')) {
     /**
      * @param $key
      * @param null $default
-     * @return array|\Illuminate\Contracts\Foundation\Application|\Illuminate\Http\Request|string
+     * @return array|Application|Request|string
      */
-    function g($key, $default = null) {
+    function g($key, $default = null)
+    {
         return request($key, $default);
     }
 }
 
-if(!function_exists('min_var_export')) {
-    function min_var_export($input) {
-        if(is_array($input)) {
+if (!function_exists('min_var_export')) {
+    function min_var_export($input)
+    {
+        if (is_array($input)) {
             $buffer = [];
-            foreach($input as $key => $value)
-                $buffer[] = var_export($key, true)."=>".min_var_export($value);
-            return "[".implode(",",$buffer)."]";
+            foreach ($input as $key => $value)
+                $buffer[] = var_export($key, true) . "=>" . min_var_export($value);
+            return "[" . implode(",", $buffer) . "]";
         } else
             return var_export($input, true);
     }
 }
 
-if(!function_exists('rrmdir')) {
+if (!function_exists('rrmdir')) {
     /*
     * http://stackoverflow.com/questions/3338123/how-do-i-recursively-delete-a-directory-and-its-entire-contents-files-sub-dir
     */
-    function rrmdir($dir) {
+    function rrmdir($dir)
+    {
         if (is_dir($dir)) {
             $objects = scandir($dir);
             foreach ($objects as $object) {
                 if ($object != "." && $object != "..") {
-                    if (is_dir($dir."/".$object))
-                        rrmdir($dir."/".$object);
+                    if (is_dir($dir . "/" . $object))
+                        rrmdir($dir . "/" . $object);
                     else
-                        unlink($dir."/".$object);
+                        unlink($dir . "/" . $object);
                 }
             }
             rmdir($dir);
