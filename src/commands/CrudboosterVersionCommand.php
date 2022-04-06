@@ -1,6 +1,7 @@
-<?php namespace crocodicstudio\crudbooster\commands;
+<?php
 
-use App;
+namespace crocodicstudio\crudbooster\commands;
+
 use Illuminate\Console\Command;
 
 class CrudboosterVersionCommand extends Command
@@ -25,7 +26,7 @@ class CrudboosterVersionCommand extends Command
      * @return mixed
      */
 
-    public static $version = "5.5.7";
+    public static $version = "1.1.1";
 
     public function handle()
     {

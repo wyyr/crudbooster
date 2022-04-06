@@ -1,11 +1,9 @@
-<?php namespace crocodicstudio\crudbooster\commands;
+<?php
+
+namespace crocodicstudio\crudbooster\commands;
 
 use App;
-use Cache;
-use CRUDBooster;
-use DB;
 use Illuminate\Console\Command;
-use Request;
 use Symfony\Component\Process\Process;
 
 class CrudboosterInstallationCommand extends Command
@@ -40,7 +38,7 @@ class CrudboosterInstallationCommand extends Command
 
         if ($this->confirm('Do you have setting the database configuration at .env ?')) {
 
-            if (! file_exists(public_path('vendor'))) {
+            if (!file_exists(public_path('vendor'))) {
                 mkdir(public_path('vendor'), 0777);
             }
 
@@ -51,8 +49,8 @@ class CrudboosterInstallationCommand extends Command
             $composer = $this->findComposer();
 
             $process = (app()->version() >= 7.0)
-                ? new Process([$composer.' dumpautoload'])
-                : new Process($composer.' dumpautoload');
+                ? new Process([$composer . ' dumpautoload'])
+                : new Process($composer . ' dumpautoload');
 
             $process->setWorkingDirectory(base_path())->run();
 
@@ -94,20 +92,20 @@ class CrudboosterInstallationCommand extends Command
         $system_failed = 0;
         $laravel = app();
 
-        $this->info("Your laravel version: ".$laravel::VERSION);
+        $this->info("Your laravel version: " . $laravel::VERSION);
         $this->info("---");
 
-        if (version_compare($laravel::VERSION, "6.0", ">=")) {
-            $this->info('Laravel Version (>= 6.x): [Good]');
+        if (version_compare($laravel::VERSION, "5.8.0", ">=")) {
+            $this->info('Laravel Version (>= 5.8.*): [Good]');
         } else {
-            $this->info('Laravel Version (>= 6.x): [Bad]');
+            $this->info('Laravel Version (>= 5.8.*): [Bad]');
             $system_failed++;
         }
 
-        if (version_compare(phpversion(), '7.2.0', '>=')) {
-            $this->info('PHP Version (>= 7.2.*): [Good]');
+        if (version_compare(phpversion(), '7.3.0', '>=')) {
+            $this->info('PHP Version (>= 7.3.*): [Good]');
         } else {
-            $this->info('PHP Version (>= 7.2.*): [Bad] Yours: '.phpversion());
+            $this->info('PHP Version (>= 7.3.*): [Bad] Yours: ' . phpversion());
             $system_failed++;
         }
 
@@ -171,6 +169,7 @@ class CrudboosterInstallationCommand extends Command
             $this->info('Sorry unfortunately your system is not meet with our requirements !');
             $this->footer(false);
         }
+
         $this->info('--');
     }
 
@@ -181,11 +180,13 @@ class CrudboosterInstallationCommand extends Command
         $this->info('Github : https://github.com/crocodic-studio/crudbooster');
         $this->info('Documentation : https://github.com/crocodic-studio/crudbooster/blob/master/docs/en/index.md');
         $this->info('====================================================================');
+
         if ($success == true) {
             $this->info('------------------- :===: Completed !! :===: ------------------------');
         } else {
             $this->info('------------------- :===: Failed !!    :===: ------------------------');
         }
+
         exit;
     }
 
@@ -196,8 +197,8 @@ class CrudboosterInstallationCommand extends Command
      */
     protected function findComposer()
     {
-        if (file_exists(getcwd().'/composer.phar')) {
-            return '"'.PHP_BINARY.'" '.getcwd().'/composer.phar';
+        if (file_exists(getcwd() . '/composer.phar')) {
+            return '"' . PHP_BINARY . '" ' . getcwd() . '/composer.phar';
         }
 
         return 'composer';

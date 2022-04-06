@@ -1,11 +1,10 @@
-<?php namespace crocodicstudio\crudbooster\commands;
+<?php
+
+namespace crocodicstudio\crudbooster\commands;
 
 use App;
-use Cache;
-use CRUDBooster;
-use DB;
 use Illuminate\Console\Command;
-use Request;
+use Illuminate\Support\Facades\Cache;
 use Symfony\Component\Process\Process;
 
 class CrudboosterUpdateCommand extends Command
@@ -37,7 +36,7 @@ class CrudboosterUpdateCommand extends Command
 
         $this->info('Updating: ');
 
-        if (! file_exists(public_path('vendor'))) {
+        if (!file_exists(public_path('vendor'))) {
             mkdir(public_path('vendor'), 0777);
         }
 
@@ -62,7 +61,7 @@ class CrudboosterUpdateCommand extends Command
 
         $this->info('Dumping the autoloaded files and reloading all new files...');
         $composer = $this->findComposer();
-        $process = new Process($composer.' dumpautoload');
+        $process = new Process($composer . ' dumpautoload');
         $process->setWorkingDirectory(base_path())->run();
 
         $this->info('Migrating database...');
@@ -99,17 +98,17 @@ class CrudboosterUpdateCommand extends Command
         $system_failed = 0;
         $laravel = app();
 
-        if ($laravel::VERSION >= 5.3) {
-            $this->info('Laravel Version (>= 5.3.*): [Good]');
+        if ($laravel::VERSION >= 5.8) {
+            $this->info('Laravel Version (>= 5.8.*): [Good]');
         } else {
-            $this->info('Laravel Version (>= 5.3.*): [Bad]');
+            $this->info('Laravel Version (>= 5.8.*): [Bad]');
             $system_failed++;
         }
 
-        if (version_compare(phpversion(), '5.6.0', '>=')) {
-            $this->info('PHP Version (>= 5.6.*): [Good]');
+        if (version_compare(phpversion(), '7.3.0', '>=')) {
+            $this->info('PHP Version (>= 7.3.*): [Good]');
         } else {
-            $this->info('PHP Version (>= 5.6.*): [Bad] Yours: '.phpversion());
+            $this->info('PHP Version (>= 7.3.*): [Bad] Yours: ' . phpversion());
             $system_failed++;
         }
 
@@ -173,6 +172,7 @@ class CrudboosterUpdateCommand extends Command
             $this->info('Sorry unfortunately your system is not meet with our requirements !');
             $this->footer(false);
         }
+
         $this->info('--');
     }
 
@@ -183,11 +183,13 @@ class CrudboosterUpdateCommand extends Command
         $this->info('Github : https://github.com/crocodic-studio/crudbooster');
         $this->info('Documentation : https://github.com/crocodic-studio/crudbooster/blob/master/docs/en/index.md');
         $this->info('====================================================================');
+
         if ($success == true) {
             $this->info('------------------- :===: Completed !! :===: ------------------------');
         } else {
             $this->info('------------------- :===: Failed !!    :===: ------------------------');
         }
+
         exit;
     }
 
@@ -198,8 +200,8 @@ class CrudboosterUpdateCommand extends Command
      */
     protected function findComposer()
     {
-        if (file_exists(getcwd().'/composer.phar')) {
-            return '"'.PHP_BINARY.'" '.getcwd().'/composer.phar';
+        if (file_exists(getcwd() . '/composer.phar')) {
+            return '"' . PHP_BINARY . '" ' . getcwd() . '/composer.phar';
         }
 
         return 'composer';
