@@ -12,8 +12,8 @@ CRUDBooster is CRUD Generator for laravel, with the most important features web 
   - SQLite
   - SQL Server
 - Composer
-- Laravel 6.* / 7.* / 8.*
-- Php 7.2 or higher and the extensions:
+- Laravel 5.8 / 6.* / 7.*
+- Php 7.3 or higher and the extensions:
   - Mcrypt
   - OpenSSL
   - Mbstring
@@ -22,11 +22,11 @@ CRUDBooster is CRUD Generator for laravel, with the most important features web 
 
 ## Installation
 
-0. Please make sure you have install laravel project, please follow [https://laravel.com/docs/8.x/installation](https://laravel.com/docs/8.x/installation)
+0. Please make sure you have install laravel project, please follow [https://laravel.com/docs/installation](https://laravel.com/docs/installation)
 
 1. Open the terminal, navigate to your laravel project directory.
 ```php
-$ composer require crocodicstudio/crudbooster=5.6.*
+$ composer require wyyr/crudbooster
 ```
 
 2. Setting the database configuration, open .env file at project root directory
