@@ -3,10 +3,7 @@
 namespace App\Http\Controllers;
 
 use crocodicstudio\crudbooster\controllers\CBController;
-use CRUDbooster;
-use DB;
-use Request;
-use Session;
+use crocodicstudio\crudbooster\helpers\CRUDBooster;
 
 class AdminCmsUsersController extends CBController
 {
