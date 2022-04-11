@@ -3,8 +3,14 @@ Showing a select2 combo box (Spinner) input type. Select2 is the jQuery replacem
 
 ### Code Sample With Your Own Enum
 ```php
-$this->form[] = ['label'=>'Platform','name'=>'platform','type'=>'select2','dataenum'=>'Android;Ios;Website'];
+$this->form[] = ['label' => 'Platform', 'name' => 'platform', 'type' => 'select2', 'dataenum' => 'Android;Ios;Website'];
 ```
+#### Or you can make different value and label with pipe symbol
+Use `value|LabelForOption` to your dataenum
+```php
+$this->form[] = ['label' => 'Platform', 'name' => 'platform', 'type' => 'select2', 'dataenum' => 'android|Android;ios|Ios;website|Website'];
+```
+
 ### Looking Up To A Table
 #### categories Table
 | Field Name | Data Type |

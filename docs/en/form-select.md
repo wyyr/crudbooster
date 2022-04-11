@@ -3,8 +3,14 @@ Showing a combo box (Spinner) input type
 
 ### Code Sample With Your Own Enum
 ```php
-$this->form[] = ['label'=>'Platform','name'=>'platform','type'=>'select','dataenum'=>'Android;Ios;Website'];
+$this->form[] = ['label' => 'Platform', 'name' => 'platform', 'type' => 'select', 'dataenum' => 'Android;Ios;Website'];
 ```
+#### Or you can make different value and label with pipe symbol
+Use `value|LabelForOption` to your dataenum
+```php
+$this->form[] = ['label' => 'Platform', 'name' => 'platform', 'type' => 'select', 'dataenum' => 'android|Android;ios|Ios;website|Website'];
+```
+
 ### Looking Up To A Table
 #### categories Table
 | Field Name | Data Type |
