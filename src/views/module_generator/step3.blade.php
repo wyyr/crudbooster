@@ -428,8 +428,8 @@
         <div class="box-header with-border">
             <h3 class="box-title">Form Display</h3>
         </div>
-        <div class="box-body">
-            <form method="post" autocomplete="off" action="{{Route('ModulsControllerPostStep4')}}">
+        <form method="post" autocomplete="off" action="{{Route('ModulsControllerPostStep4')}}">
+            <div class="box-body">
                 <input type="hidden" name="_token" value="{{csrf_token()}}">
                 <input type="hidden" name="id" value="{{$id}}">
 
@@ -597,14 +597,13 @@
 
                     </tbody>
                 </table>
-            </form>
-        </div>
-        <div class="box-footer">
-            <div align="right">
-                <button type="button" onclick="location.href='{{CRUDBooster::mainpath('step2').'/'.$id}}'" class="btn btn-default">&laquo; Back</button>
-                <input type="submit" class="btn btn-primary" value="Step 4 &raquo;">
             </div>
-        </div>
+            <div class="box-footer">
+                <div align="right">
+                    <button type="button" onclick="location.href='{{CRUDBooster::mainpath('step2').'/'.$id}}'" class="btn btn-default">&laquo; Back</button>
+                    <input type="submit" class="btn btn-primary" value="Step 4 &raquo;">
+                </div>
+            </div>
         </form>
     </div>
 
