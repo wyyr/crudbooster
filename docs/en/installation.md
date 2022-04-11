@@ -26,7 +26,7 @@ CRUDBooster is CRUD Generator for laravel, with the most important features web 
 
 1. Open the terminal, navigate to your laravel project directory.
 ```php
-$ composer require wyyr/crudbooster
+composer require wyyr/crudbooster
 ```
 
 2. Setting the database configuration, open .env file at project root directory
@@ -38,7 +38,7 @@ DB_PASSWORD=**password**
 
 3. Run the following command at the terminal
 ```php
-$ php artisan crudbooster:install
+php artisan crudbooster:install
 ```
 
 ## Backend URL
