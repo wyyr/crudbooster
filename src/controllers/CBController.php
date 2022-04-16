@@ -7,6 +7,7 @@ error_reporting(E_ALL ^ E_NOTICE);
 use crocodicstudio\crudbooster\export\DefaultExportXls;
 use crocodicstudio\crudbooster\helpers\CB;
 use crocodicstudio\crudbooster\helpers\CRUDBooster;
+use crocodicstudio\crudbooster\imports\DefaultImportExcel;
 use Exception;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
@@ -1468,23 +1469,25 @@ class CBController extends Controller
         if (request('file') && !request('import')) {
             $file = base64_decode(request('file'));
             $file = storage_path('app/' . $file);
-            $rows = Excel::load($file, function ($reader) {
-            })->get();
+            $import = new DefaultImportExcel();
+            Excel::import($import, $file);
 
-            $countRows = ($rows) ? count($rows) : 0;
+            $countRows = array_sum(array_map('count', $import->sheetData));
 
             Session::put('total_data_import', $countRows);
 
             $data_import_column = [];
-            foreach ($rows as $value) {
-                $a = [];
-                foreach ($value as $k => $v) {
-                    $a[] = $k;
+            foreach ($import->sheetData as $rows) {
+                foreach ($rows as $value) {
+                    $a = [];
+                    foreach ($value as $k => $v) {
+                        $a[] = $k;
+                    }
+                    if ($a && count($a)) {
+                        $data_import_column = $a;
+                    }
+                    break;
                 }
-                if ($a && count($a)) {
-                    $data_import_column = $a;
-                }
-                break;
             }
 
             $table_columns = DB::getSchemaBuilder()->getColumnListing($this->table);
@@ -1529,92 +1532,104 @@ class CBController extends Controller
         $file = base64_decode(request('file'));
         $file = storage_path('app/' . $file);
 
-        $rows = Excel::load($file, function ($reader) {
-        })->get();
+        $import = new DefaultImportExcel();
+        Excel::import($import, $file);
 
         $has_created_at = false;
         if (CRUDBooster::isColumnExists($this->table, 'created_at')) {
             $has_created_at = true;
         }
 
-        $data_import_column = [];
-        foreach ($rows as $value) {
-            $a = [];
-            foreach ($select_column as $sk => $s) {
-                $colname = $table_columns[$sk];
+        $has_password = false;
+        if (CRUDBooster::isColumnExists($this->table, 'password')) {
+            $has_password = true;
+        }
 
-                if (CRUDBooster::isForeignKey($colname)) {
+        foreach ($import->sheetData as $rows) {
+            foreach ($rows as $value) {
+                $a = [];
+                foreach ($select_column as $sk => $s) {
+                    $colname = $table_columns[$sk];
 
-                    //Skip if value is empty
-                    if ($value->$s == '') {
-                        continue;
-                    }
+                    if (CRUDBooster::isForeignKey($colname)) {
 
-                    if (intval($value->$s)) {
-                        $a[$colname] = $value->$s;
-                    } else {
-                        $relation_table = CRUDBooster::getTableForeignKey($colname);
-                        $relation_moduls = DB::table('cms_moduls')->where('table_name', $relation_table)->first();
-
-                        $relation_class = __NAMESPACE__ . '\\' . $relation_moduls->controller;
-                        if (!class_exists($relation_class)) {
-                            $relation_class = '\App\Http\Controllers\\' . $relation_moduls->controller;
-                        }
-                        $relation_class = new $relation_class;
-                        $relation_class->cbLoader();
-
-                        $title_field = $relation_class->title_field;
-
-                        $relation_insert_data = [];
-                        $relation_insert_data[$title_field] = $value->$s;
-
-                        if (CRUDBooster::isColumnExists($relation_table, 'created_at')) {
-                            $relation_insert_data['created_at'] = date('Y-m-d H:i:s');
+                        //Skip if value is empty
+                        if ($value[$s] == '') {
+                            continue;
                         }
 
-                        try {
-                            $relation_exists = DB::table($relation_table)->where($title_field, $value->$s)->first();
-                            if ($relation_exists) {
-                                $relation_primary_key = $relation_class->primary_key;
-                                $relation_id = $relation_exists->$relation_primary_key;
-                            } else {
-                                $relation_id = DB::table($relation_table)->insertGetId($relation_insert_data);
+                        if (intval($value[$s])) {
+                            $a[$colname] = $value[$s];
+                        } else {
+                            $relation_table = CRUDBooster::getTableForeignKey($colname);
+                            $relation_moduls = DB::table('cms_moduls')->where('table_name', $relation_table)->first();
+
+                            $relation_class = __NAMESPACE__ . '\\' . $relation_moduls->controller;
+                            if (!class_exists($relation_class)) {
+                                $relation_class = '\App\Http\Controllers\\' . $relation_moduls->controller;
+                            }
+                            $relation_class = new $relation_class;
+                            $relation_class->cbLoader();
+
+                            $title_field = $relation_class->title_field;
+
+                            $relation_insert_data = [];
+                            $relation_insert_data[$title_field] = $value[$s];
+
+                            if (CRUDBooster::isColumnExists($relation_table, 'created_at')) {
+                                $relation_insert_data['created_at'] = date('Y-m-d H:i:s');
                             }
 
-                            $a[$colname] = $relation_id;
-                        } catch (Exception $e) {
-                            exit($e);
-                        }
-                    } //END IS INT
+                            try {
+                                $relation_exists = DB::table($relation_table)->where($title_field, $value[$s])->first();
+                                if ($relation_exists) {
+                                    $relation_primary_key = $relation_class->primary_key;
+                                    $relation_id = $relation_exists->$relation_primary_key;
+                                } else {
+                                    $relation_id = DB::table($relation_table)->insertGetId($relation_insert_data);
+                                }
 
-                } else {
-                    $a[$colname] = $value->$s;
-                }
-            }
+                                $a[$colname] = $relation_id;
+                            } catch (Exception $e) {
+                                exit($e);
+                            }
+                        } //END IS INT
 
-            $has_title_field = true;
-            foreach ($a as $k => $v) {
-                if ($k == $this->title_field && $v == '') {
-                    $has_title_field = false;
-                    break;
-                }
-            }
-
-            if ($has_title_field == false) {
-                continue;
-            }
-
-            try {
-
-                if ($has_created_at) {
-                    $a['created_at'] = date('Y-m-d H:i:s');
+                    } else {
+                        $a[$colname] = $value[$s];
+                    }
                 }
 
-                DB::table($this->table)->insert($a);
-                Cache::increment('success_' . $file_md5);
-            } catch (Exception $e) {
-                $e = (string)$e;
-                Cache::put('error_' . $file_md5, $e, 500);
+                $has_title_field = true;
+                foreach ($a as $k => $v) {
+                    if ($k == $this->title_field && $v == '') {
+                        $has_title_field = false;
+                        break;
+                    }
+                }
+
+                if ($has_title_field == false) {
+                    continue;
+                }
+
+                try {
+                    // remove spaces
+                    $a = array_map('trim', $a);
+
+                    if ($has_created_at) {
+                        $a['created_at'] = date('Y-m-d H:i:s');
+                    }
+
+                    if ($has_password && $a['password'] != '') {
+                        $a['password'] = bcrypt($a['password']);
+                    }
+
+                    DB::table($this->table)->insert($a);
+                    Cache::increment('success_' . $file_md5);
+                } catch (Exception $e) {
+                    $e = (string)$e;
+                    Cache::put('error_' . $file_md5, $e, 500);
+                }
             }
         }
 

@@ -143,7 +143,7 @@
                                     $help = "<a href='#' title='This is foreign key, so the System will be inserting new data to table `$relational_table` if doesn`t exists'><strong>(?)</strong></a>";
                                 }
                                 ?>
-                                <th data-no-column='{{$k}}'>{{ $column }} {!! $help !!}</th>
+                                <th data-no-column='{{ $k }}' data-column-name='{{ $column }}'>{{ $column }} {!! $help !!}</th>
                             @endforeach
                         </tr>
                         </thead>
@@ -152,7 +152,7 @@
                         <tr>
                             @foreach($table_columns as $k=>$column)
                                 <?php if ($column == 'id' || $column == 'created_at' || $column == 'updated_at' || $column == 'deleted_at') continue;?>
-                                <td data-no-column='{{$k}}'>
+                                <td data-no-column='{{ $k }}' data-column-name='{{ $column }}'>
                                     <select style='width:120px' class='form-control select_column' name='select_column[{{$k}}]'>
                                         <option value=''>** Set Column for {{$column}}</option>
                                         @foreach($data_import_column as $import_column)
