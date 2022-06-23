@@ -12,7 +12,7 @@ CRUDBooster is CRUD Generator for laravel, with the most important features web 
   - SQLite
   - SQL Server
 - Composer
-- Laravel 5.8 / 6.* / 7.*
+- Laravel 8.* / 9.*
 - Php 7.3 or higher and the extensions:
   - Mcrypt
   - OpenSSL
