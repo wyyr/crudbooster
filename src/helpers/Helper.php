@@ -140,6 +140,13 @@ if (!function_exists('str_slug')) {
     }
 }
 
+if (!function_exists('str_limit')) {
+    function str_limit($value, $limit = 100, $end = '...')
+    {
+        return Str::limit($value, $limit, $end);
+    }
+}
+
 if (!function_exists('g')) {
     /**
      * @param $key
