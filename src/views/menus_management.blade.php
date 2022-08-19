@@ -78,7 +78,6 @@
         </script>
     @endpush
     @push('bottom')
-        <script src='{{asset("vendor/crudbooster/assets/jquery-sortable-min.js")}}'></script>
         <script type="text/javascript">
             $(function () {
                 var id_cms_privileges = '{{$id_cms_privileges}}';

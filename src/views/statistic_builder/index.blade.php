@@ -28,6 +28,13 @@
     </script>
 @endpush
 @push('head')
+    <!-- IMPORT STYLES -->
+    @if (config('crudbooster.styles') && count(config('crudbooster.styles')))
+        @foreach (config('crudbooster.styles') as $path)
+            <link rel="stylesheet" type="text/css" href="{{ asset($path) }}">
+        @endforeach
+    @endif
+
     <style type="text/css">
         .control-sidebar ul {
             padding: 0 0 0 0;
@@ -83,11 +90,13 @@
         }
 
     </script>
-    <!--DATATABLE-->
-    <link rel="stylesheet" href="{{ asset ('vendor/crudbooster/assets/adminlte/plugins/datatables/dataTables.bootstrap.css')}}">
-    <script src="{{ asset ('vendor/crudbooster/assets/adminlte/plugins/datatables/jquery.dataTables.min.js')}}"></script>
-    <script src="{{ asset ('vendor/crudbooster/assets/adminlte/plugins/datatables/dataTables.bootstrap.min.js')}}"></script>
-    <!--END HERE-->
+
+    <!-- IMPORT JS SCRIPTS -->
+    @if (config('crudbooster.scripts') && count(config('crudbooster.scripts')))
+        @foreach (config('crudbooster.scripts') as $path)
+            <script type="text/javascript" src="{{ asset($path) }}"></script>
+        @endforeach
+    @endif
 @endpush
 
 

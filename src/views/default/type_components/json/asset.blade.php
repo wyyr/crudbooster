@@ -1,1 +1,1 @@
-<script src='<?php echo asset("vendor/crudbooster/assets/jsoneditor/jsoneditor.min.js")?>'></script>
+<script src='<?php echo asset("crudbooster/assets/jsoneditor/jsoneditor.min.js")?>'></script>

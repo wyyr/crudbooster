@@ -1,6 +1,6 @@
 @push('bottom')
     @if (App::getLocale() != 'en')
-        <script src="{{ asset ('vendor/crudbooster/assets/adminlte/plugins/daterangepicker/locales.min.js') }}"
+        <script src="{{ asset ('crudbooster/assets/adminlte/plugins/daterangepicker/locales.min.js') }}"
                 charset="UTF-8"></script>
     @endif
 
