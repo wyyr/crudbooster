@@ -1,7 +1,7 @@
 @push('bottom')
 
     @if (App::getLocale() != 'en')
-        <script src="{{ asset ('vendor/crudbooster/assets/adminlte/plugins/datepicker/locales/bootstrap-datepicker.'.App::getLocale().'.js') }}"
+        <script src="{{ asset ('crudbooster/assets/adminlte/plugins/datepicker/locales/bootstrap-datepicker.'.App::getLocale().'.js') }}"
                 charset="UTF-8"></script>
     @endif
     <script type="text/javascript">

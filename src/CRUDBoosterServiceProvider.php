@@ -30,10 +30,10 @@ class CRUDBoosterServiceProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->registerSeedsFrom(__DIR__ . '/database/seeds');
-            $this->publishes([__DIR__ . '/configs/crudbooster.php' => config_path('crudbooster.php')], 'cb_config');
+            $this->publishes([__DIR__ . '/config/crudbooster.php' => config_path('crudbooster.php')], 'cb_config');
             $this->publishes([__DIR__ . '/userfiles/controllers/CBHook.php' => app_path('Http/Controllers/CBHook.php')], 'CBHook');
             $this->publishes([__DIR__ . '/userfiles/controllers/AdminCmsUsersController.php' => app_path('Http/Controllers/AdminCmsUsersController.php')], 'cb_user_controller');
-            $this->publishes([__DIR__ . '/assets' => public_path('vendor/crudbooster')], 'cb_asset');
+            $this->publishes([__DIR__ . '/public' => public_path()], 'cb_asset');
         }
 
         $this->customValidation();
@@ -49,7 +49,7 @@ class CRUDBoosterServiceProvider extends ServiceProvider
     {
         require __DIR__ . '/helpers/Helper.php';
 
-        $this->mergeConfigFrom(__DIR__ . '/configs/crudbooster.php', 'crudbooster');
+        $this->mergeConfigFrom(__DIR__ . '/config/crudbooster.php', 'crudbooster');
 
         $this->registerSingleton();
 

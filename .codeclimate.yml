@@ -2,7 +2,7 @@ exclude_patterns:
 - "docs/"
 - "src/views/"
 - "src/assets/"
-- "src/configs/"
+- "src/config/"
 - "src/database/"
 - "src/localization/"
 - "src/laravel-filemanager/"
