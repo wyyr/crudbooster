@@ -1,14 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{{cbLang("page_title_login")}} : {{Session::get('appname')}}</title>
-    <meta name='generator' content='CRUDBooster'/>
-    <meta name='robots' content='noindex,nofollow'/>
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
+    <title>{{ cbLang('page_title_login') }} : {{ session('appname') }}</title>
+    <meta name="robots" content="noindex,nofollow">
     <link rel="shortcut icon"
           href="{{ CRUDBooster::getSetting('favicon')?asset(CRUDBooster::getSetting('favicon')):asset('crudbooster/assets/logo_crudbooster.png') }}">
-
-    <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
 
     <!-- IMPORT STYLES -->
     @if (config('crudbooster.styles') && count(config('crudbooster.styles')))
@@ -17,110 +15,101 @@
         @endforeach
     @endif
 
-    <!-- support rtl-->
-    @if (in_array(App::getLocale(), ['ar', 'fa']))
-        <link rel="stylesheet" href="//cdn.rawgit.com/morteza/bootstrap-rtl/v3.3.4/dist/css/bootstrap-rtl.min.css">
-        <link href="{{ asset("crudbooster/assets/rtl.css")}}" rel="stylesheet" type="text/css"/>
-@endif
-
-<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-    <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
-    <![endif]-->
-
-    <style type="text/css">
-        .login-page, .register-page {
-            background: {{ CRUDBooster::getSetting("login_background_color")?:'#dddddd'}} url('{{ CRUDBooster::getSetting("login_background_image")?asset(CRUDBooster::getSetting("login_background_image")):asset('crudbooster/assets/bg_blur3.jpg') }}');
-            color: {{ CRUDBooster::getSetting("login_font_color")?:'#ffffff' }}  !important;
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: cover;
-        }
-
-        .login-box, .register-box {
-            margin: 2% auto;
-        }
-
-        .login-box-body {
-            box-shadow: 0px 0px 50px rgba(0, 0, 0, 0.8);
-            background: rgba(255, 255, 255, 0.9);
-            color: {{ CRUDBooster::getSetting("login_font_color")?:'#666666' }}  !important;
-        }
-
-        html, body {
-            overflow: hidden;
+    <style>
+        .section-center {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: -100px;
         }
     </style>
 </head>
 
-<body class="login-page">
+<body>
+<div id="app">
+    <section class="section section-center">
+        <div class="container mt-5">
+            <div class="row">
+                <div class="col-12 col-sm-8 offset-sm-2 col-md-6 offset-md-3 col-lg-6 offset-lg-3 col-xl-4 offset-xl-4">
+                    <div class="login-brand">
+                        <img src="{{ CRUDBooster::getSetting("logo")?asset(CRUDBooster::getSetting('logo')):asset('crudbooster/assets/logo_crudbooster.png') }}"
+                             alt="logo" style="max-width: 100%;max-height: 170px;filter: invert(100%);">
+                    </div>
 
-<div class="login-box">
-    <div class="login-logo">
-        <a href="{{url('/')}}">
-            <img title='{!!(Session::get('appname') == 'CRUDBooster')?"<b>CRUD</b>Booster":CRUDBooster::getSetting('appname')!!}'
-                 src='{{ CRUDBooster::getSetting("logo")?asset(CRUDBooster::getSetting('logo')):asset('crudbooster/assets/logo_crudbooster.png') }}'
-                 style='max-width: 100%;max-height:170px'/>
-        </a>
-    </div><!-- /.login-logo -->
-    <div class="login-box-body">
+                    <div class="card card-primary">
+                        <div class="card-body">
+                            @if (session('message') != '')
+                                <div class='alert alert-warning'>
+                                    {{ session('message') }}
+                                </div>
+                            @endif
 
-        @if ( Session::get('message') != '' )
-            <div class='alert alert-warning'>
-                {{ Session::get('message') }}
-            </div>
-        @endif
+                            <p class="text-muted">{{ cbLang('login_message') }}</p>
+                            <form method="POST" action="{{ route('postLogin') }}" class="needs-validation" novalidate="">
+                                @csrf
 
-        <p class='login-box-msg'>{{cbLang("login_message")}}</p>
-        <form autocomplete='off' action="{{ route('postLogin') }}" method="post">
-            <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
-            
-            @if(!empty(config('services.google')))
+                                <div class="form-group">
+                                    <label for="email">Email</label>
+                                    <input id="email" type="email" class="form-control" name="email" tabindex="1" required autofocus>
+                                    <div class="invalid-feedback">
+                                        Please fill in your email
+                                    </div>
+                                </div>
 
-                <div style="margin-bottom:10px" class='row'>
-                    <div class='col-xs-12'>
+                                <div class="form-group">
+                                    <div class="d-block">
+                                        <label for="password" class="control-label">Password</label>
+                                        <div class="float-right">
+                                            <a href="{{ route('getForgot') }}" class="text-small">
+                                                Forgot Password?
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <input id="password" type="password" class="form-control" name="password" tabindex="2" required>
+                                    <div class="invalid-feedback">
+                                        please fill in your password
+                                    </div>
+                                </div>
 
-                        <a href='{{route("redirect", 'google')}}' class="btn btn-primary btn-block btn-flat"><i class='fa fa-google'></i>
-                            Google Login</a>
-
-                        <hr>
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-primary btn-lg btn-block" tabindex="4">
+                                        {{ cbLang('button_sign_in') }}
+                                    </button>
+                                </div>
+                            </form>
+                            @if(!empty(config('services.google')) || !empty(config('services.facebook')))
+                                <div class="text-center mt-4 mb-3">
+                                    <div class="text-job text-muted">Login With Social</div>
+                                </div>
+                                <div class="row justify-content-center sm-gutters">
+                                    @if(!empty(config('services.google')))
+                                        <div class="col-6">
+                                            <a class="btn btn-block btn-social btn-google">
+                                                <span class="fab fa-google"></span> Google
+                                            </a>
+                                        </div>
+                                    @endif
+                                    @if(!empty(config('services.facebook')))
+                                        <div class="col-6">
+                                            <a class="btn btn-block btn-social btn-facebook">
+                                                <span class="fab fa-facebook"></span> Facebook
+                                            </a>
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
+                        </div>
                     </div>
                 </div>
-            @endif
-            
-            <div class="form-group has-feedback">
-                <input autocomplete='off' type="text" class="form-control" name='email' required placeholder="Email"/>
-                <span class="glyphicon glyphicon-user form-control-feedback"></span>
             </div>
-            <div class="form-group has-feedback">
-                <input autocomplete='off' type="password" class="form-control" name='password' required placeholder="Password"/>
-                <span class="glyphicon glyphicon-lock form-control-feedback"></span>
-            </div>
-            <div style="margin-bottom:10px" class='row'>
-                <div class='col-xs-12'>
-                    <button type="submit" class="btn btn-primary btn-block btn-flat"><i class='fa fa-lock'></i> {{cbLang("button_sign_in")}}</button>
-                </div>
-            </div>
-
-            <div class='row'>
-                <div class='col-xs-12' align="center"><p style="padding:10px 0px 10px 0px">{{cbLang("text_forgot_password")}} <a
-                                href='{{route("getForgot")}}'>{{cbLang("click_here")}}</a></p></div>
-            </div>
-        </form>
-
-
-        <br/>
-        <!--a href="#">I forgot my password</a-->
-
-    </div><!-- /.login-box-body -->
-
-</div><!-- /.login-box -->
-
+        </div>
+    </section>
+</div>
 
 <script>
     var ASSET_URL = "{{ asset('/') }}";
+    var APP_NAME = "{{ Session::get('appname') }}";
     var ADMIN_PATH = '{{ url(config("crudbooster.ADMIN_PATH")) }}';
     var NOTIFICATION_JSON = "{{ route('NotificationsControllerGetLatestJson') }}";
     var NOTIFICATION_INDEX = "{{ route('NotificationsControllerGetIndex') }}";

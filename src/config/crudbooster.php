@@ -80,11 +80,7 @@ return [
     // CSS files that are loaded in all pages, using Laravel's asset() helper
     'styles' => [
         // Base css
-        'crudbooster/assets/adminlte/bootstrap/css/bootstrap.min.css',
-        'crudbooster/assets/adminlte/font-awesome/css/font-awesome.min.css',
         'crudbooster/ionic/css/ionicons.min.css',
-        'crudbooster/assets/adminlte/dist/css/AdminLTE.min.css',
-        'crudbooster/assets/adminlte/dist/css/skins/_all-skins.min.css',
         'crudbooster/assets/css/main.css',
 
         // Bootstrap Datepicker
@@ -105,6 +101,14 @@ return [
 
         // Select2
         'crudbooster/assets/select2/dist/css/select2.min.css',
+
+        'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css',
+        'https://use.fontawesome.com/releases/v5.7.2/css/all.css',
+        'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-social/5.1.1/bootstrap-social.min.css',
+
+        // Stisla
+        'crudbooster/themes/stisla/css/style.css',
+        'crudbooster/themes/stisla/css/components.css',
     ],
 
     // --------------
@@ -114,15 +118,16 @@ return [
     // JS files that are loaded in all pages, using Laravel's asset() helper
     'scripts' => [
         // Base JS
-        'crudbooster/assets/adminlte/plugins/jQuery/jquery-2.2.3.min.js',
+        'https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js',
         'crudbooster/assets/adminlte/bootstrap/js/bootstrap.min.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js',
+        'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/jquery.nicescroll/3.7.6/jquery.nicescroll.min.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js',
+        'crudbooster/themes/stisla/js/stisla.js',
+        'crudbooster/themes/stisla/js/scripts.js',
+        'crudbooster/themes/stisla/js/custom.js',
         'crudbooster/assets/js/main.js',
-
-        // AdminLTE App
-        'crudbooster/assets/adminlte/dist/js/app.js',
-
-        // Moment.js
-        'crudbooster/assets/adminlte/plugins/daterangepicker/moment.min.js',
 
         // Bootstrap Datepicker
         'crudbooster/assets/adminlte/plugins/datepicker/bootstrap-datepicker.js',
