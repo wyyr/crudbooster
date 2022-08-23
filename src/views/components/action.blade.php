@@ -17,18 +17,20 @@
         $a['confirmation_closeOnConfirm'] = empty($a['confirmation_closeOnConfirm']) ? 'true' : 'false';
 
         $confirm_box = '
-        swal({   
+        Swal.fire({
             title: "'.$a['confirmation_title'].'",
             text: "'.$a['confirmation_text'].'",
-            type: "'.$a['confirmation_type'].'",
+            icon: "'.$a['confirmation_type'].'",
             showCancelButton: '.$a['confirmation_showCancelButton'].',
             confirmButtonColor: "'.$a['confirmation_confirmButtonColor'].'",
             confirmButtonText: "'.$a['confirmation_confirmButtonText'].'",
             cancelButtonText: "'.$a['confirmation_cancelButtonText'].'",
-            closeOnConfirm: '.$a['confirmation_closeOnConfirm'].', }, 
-            function(){  location.href="'.$a['url'].'"});        
-
-        ';
+            closeOnConfirm: '.$a['confirmation_closeOnConfirm'].'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href="'.$a['url'].'"
+            }
+        })';
     }
 
     $label = $a['label'];
@@ -52,10 +54,10 @@
         }
 
         @eval("if($query) {
-          echo \"<a class='btn btn-xs btn-\$color' title='\$title' onclick='\$confirm_box' href='\$url' target='\$target'><i class='\$icon'></i> $label</a>&nbsp;\";
+          echo \"<a class='btn btn-sm btn-\$color' title='\$title' onclick='\$confirm_box' href='\$url' target='\$target'><i class='\$icon'></i> $label</a>&nbsp;\";
       }");
     } else {
-        echo "<a class='btn btn-xs btn-$color' title='$title' onclick='$confirm_box' href='$url' target='$target'><i class='$icon'></i> $label</a>&nbsp;";
+        echo "<a class='btn btn-sm btn-$color' title='$title' onclick='$confirm_box' href='$url' target='$target'><i class='$icon'></i> $label</a>&nbsp;";
     }
     ?>
 @endforeach
@@ -63,46 +65,46 @@
 @if($button_action_style == 'button_text')
 
     @if(CRUDBooster::isRead() && $button_detail)
-        <a class='btn btn-xs btn-primary btn-detail' title='{{cbLang("action_detail_data")}}'
+        <a class="btn btn-sm btn-primary btn-detail" title="{{ cbLang('action_detail_data') }}"
            href='{{CRUDBooster::mainpath("detail/".$row->$pk)."?return_url=".urlencode(Request::fullUrl())}}'>{{cbLang("action_detail_data")}}</a>
     @endif
 
     @if(CRUDBooster::isUpdate() && $button_edit)
-        <a class='btn btn-xs btn-success btn-edit' title='{{cbLang("action_edit_data")}}'
+        <a class="btn btn-sm btn-success btn-edit" title="{{ cbLang('action_edit_data') }}"
            href='{{CRUDBooster::mainpath("edit/".$row->$pk)."?return_url=".urlencode(Request::fullUrl())."&parent_id=".g("parent_id")."&parent_field=".$parent_field }}'>{{cbLang("action_edit_data")}}</a>
     @endif
 
     @if(CRUDBooster::isDelete() && $button_delete)
         <?php $url = CRUDBooster::mainpath("delete/".$row->$pk);?>
-        <a class='btn btn-xs btn-warning btn-delete' title='{{cbLang("action_delete_data")}}' href='javascript:;'
+        <a class='btn btn-sm btn-warning btn-delete' title='{{cbLang("action_delete_data")}}' href='javascript:;'
            onclick='{{CRUDBooster::deleteConfirm($url)}}'>{{cbLang("action_delete_data")}}</a>
     @endif
 @elseif($button_action_style == 'button_icon_text')
 
 
     @if(CRUDBooster::isRead() && $button_detail)
-        <a class='btn btn-xs btn-primary btn-detail' title='{{cbLang("action_detail_data")}}'
+        <a class='btn btn-sm btn-primary btn-detail' title='{{cbLang("action_detail_data")}}'
            href='{{CRUDBooster::mainpath("detail/".$row->$pk)."?return_url=".urlencode(Request::fullUrl())}}'><i
-                    class='fa fa-eye'></i> {{cbLang("action_detail_data")}}</a>
+                    class="fas fa-eye"></i> {{ cbLang("action_detail_data") }}</a>
     @endif
 
     @if(CRUDBooster::isUpdate() && $button_edit)
-        <a class='btn btn-xs btn-success btn-edit' title='{{cbLang("action_edit_data")}}'
+        <a class='btn btn-sm btn-success btn-edit' title='{{cbLang("action_edit_data")}}'
            href='{{CRUDBooster::mainpath("edit/".$row->$pk)."?return_url=".urlencode(Request::fullUrl())."&parent_id=".g("parent_id")."&parent_field=".$parent_field }}'><i
-                    class='fa fa-pencil'></i> {{cbLang("action_edit_data")}}</a>
+                    class="fas fa-pencil-alt"></i> {{ cbLang("action_edit_data") }}</a>
     @endif
 
     @if(CRUDBooster::isDelete() && $button_delete)
         <?php $url = CRUDBooster::mainpath("delete/".$row->$pk);?>
-        <a class='btn btn-xs btn-warning btn-delete' title='{{cbLang("action_delete_data")}}' href='javascript:;'
+        <a class='btn btn-sm btn-warning btn-delete' title='{{cbLang("action_delete_data")}}' href='javascript:;'
            onclick='{{CRUDBooster::deleteConfirm($url)}}'><i class='fa fa-trash'></i> {{cbLang("action_delete_data")}}</a>
     @endif
 
 @elseif($button_action_style == 'dropdown')
 
     <div class='btn-group btn-group-action'>
-        <button type='button' class='btn btn-xs btn-primary btn-action'>{{cbLang("action_label")}}</button>
-        <button type='button' class='btn btn-xs btn-primary dropdown-toggle' data-toggle='dropdown'>
+        <button type='button' class='btn btn-sm btn-primary btn-action'>{{cbLang("action_label")}}</button>
+        <button type='button' class='btn btn-sm btn-primary dropdown-toggle' data-toggle='dropdown'>
             <span class='caret'></span>
             <span class='sr-only'>Toggle Dropdown</span>
         </button>
@@ -138,13 +140,13 @@
             @if(CRUDBooster::isRead() && $button_detail)
                 <li><a class='btn-detail' title='{{cbLang("action_detail_data")}}'
                        href='{{CRUDBooster::mainpath("detail/".$row->$pk)."?return_url=".urlencode(Request::fullUrl())}}'><i
-                                class='fa fa-eye'></i> {{cbLang("action_detail_data")}}</a></li>
+                                class="fas fa-eye"></i> {{ cbLang("action_detail_data") }}</a></li>
             @endif
 
             @if(CRUDBooster::isUpdate() && $button_edit)
                 <li><a class='btn-edit' title='{{cbLang("action_edit_data")}}'
                        href='{{CRUDBooster::mainpath("edit/".$row->$pk)."?return_url=".urlencode(Request::fullUrl())."&parent_id=".g("parent_id")."&parent_field=".$parent_field}}'><i
-                                class='fa fa-pencil'></i> {{cbLang("action_edit_data")}}</a></li>
+                                class="fas fa-pencil-alt"></i> {{ cbLang("action_edit_data") }}</a></li>
             @endif
 
             @if(CRUDBooster::isDelete() && $button_delete)
@@ -158,20 +160,29 @@
 @else
 
     @if(CRUDBooster::isRead() && $button_detail)
-        <a class='btn btn-xs btn-primary btn-detail' title='{{cbLang("action_detail_data")}}'
-           href='{{CRUDBooster::mainpath("detail/".$row->$pk)."?return_url=".urlencode(Request::fullUrl())}}'><i class='fa fa-eye'></i></a>
+        <a class="btn btn-sm btn-primary btn-detail"
+           title="{{ cbLang('action_detail_data') }}"
+           href='{{ CRUDBooster::mainpath("detail/" . $row->$pk) . "?return_url=" . urlencode(Request::fullUrl()) }}'>
+            <i class="fas fa-eye"></i>
+        </a>
     @endif
 
     @if(CRUDBooster::isUpdate() && $button_edit)
-        <a class='btn btn-xs btn-success btn-edit' title='{{cbLang("action_edit_data")}}'
-           href='{{CRUDBooster::mainpath("edit/".$row->$pk)."?return_url=".urlencode(Request::fullUrl())."&parent_id=".g("parent_id")."&parent_field=".$parent_field}}'><i
-                    class='fa fa-pencil'></i></a>
+        <a class="btn btn-sm btn-success btn-edit"
+           title="{{ cbLang('action_edit_data') }}"
+           href='{{CRUDBooster::mainpath("edit/".$row->$pk)."?return_url=".urlencode(Request::fullUrl())."&parent_id=".g("parent_id")."&parent_field=".$parent_field}}'>
+            <i class="fas fa-pencil-alt"></i>
+        </a>
     @endif
 
     @if(CRUDBooster::isDelete() && $button_delete)
-        <?php $url = CRUDBooster::mainpath("delete/".$row->$pk);?>
-        <a class='btn btn-xs btn-warning btn-delete' title='{{cbLang("action_delete_data")}}' href='javascript:;'
-           onclick='{{CRUDBooster::deleteConfirm($url)}}'><i class='fa fa-trash'></i></a>
+        <?php $url = CRUDBooster::mainpath("delete/" . $row->$pk);?>
+        <a class="btn btn-sm btn-warning btn-delete"
+           title="{{ cbLang('action_delete_data') }}"
+           href="javascript:;"
+           onclick='{{ CRUDBooster::deleteConfirm($url) }}'>
+            <i class="fas fa-trash"></i>
+        </a>
     @endif
 
 @endif

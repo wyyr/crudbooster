@@ -18,8 +18,8 @@
 			
 			$("#sound_beep").remove();
 			$('body').append('<audio id="sound_beep" style="display:none" autoplay>'+
-  			+'<source src="'+ASSET_URL+'/vendor/crudbooster/assets/sound/bell_ring.ogg" type="audio/ogg">'
-  			+'<source src="'+ASSET_URL+'/vendor/crudbooster/assets/sound/bell_ring.mp3" type="audio/mpeg">'
+  			+'<source src="'+ASSET_URL+'/crudbooster/assets/sound/bell_ring.ogg" type="audio/ogg">'
+  			+'<source src="'+ASSET_URL+'/crudbooster/assets/sound/bell_ring.mp3" type="audio/mpeg">'
 			+'Your browser does not support the audio element.</audio>');
 		}
 
@@ -59,12 +59,12 @@
 				}
 			});
 			
-			$('.treeview').each(function() {
-				var active = $(this).find('.active').length;
-				if(active) {
-					$(this).addClass('active');
-				}
-			})			
+			// $('.treeview').each(function() {
+			// 	var active = $(this).find('.active').length;
+			// 	if(active) {
+			// 		$(this).addClass('active');
+			// 	}
+			// })
 			
 			
 			$('input[type=text]').first().not(".notfocus").focus();										
@@ -114,18 +114,24 @@
 
           $('.notifications-menu #notification_count').text(resp.total);
           if(resp.total>0) {
-            $('.notifications-menu #notification_count').fadeIn();            
+			  $('.notification-toggle').addClass('beep');
+              $('.notifications-menu #notification_count').fadeIn();
           }else{
-            $('.notifications-menu #notification_count').hide();
+			  $('.notification-toggle').removeClass('beep');
+              $('.notifications-menu #notification_count').hide();
           }          
 
           $('.notifications-menu #list_notifications .menu').empty();
 		  $('.notifications-menu .header').text(NOTIFICATION_YOU_HAVE +' '+resp.total+' '+ NOTIFICATION_NOTIFICATIONS);
           var htm = '';
           $.each(resp.items,function(i,obj) {
-              htm += '<li><a href="'+ADMIN_PATH+'/notifications/read/'+obj.id+'?m=0"><i class="'+obj.icon+'"></i> '+obj.content+'</a></li>';
-          })  
-          $('.notifications-menu #list_notifications .menu').html(htm);
+			  htm  += `<a href="${ADMIN_PATH}/notifications/read/${obj.id}?m=0" class="dropdown-item dropdown-item-unread">
+				  <div class="dropdown-item-desc">
+					  ${obj.content}
+				  </div>
+			  </a>`;
+          });
+          $('.notifications-menu #list_notifications').html(htm);
          
           total_notification = resp.total;
       })

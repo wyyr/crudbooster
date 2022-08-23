@@ -54,6 +54,10 @@
                 position: absolute;
                 /** Define arrowhead **/
             }
+            .select2-container .select2-selection__rendered i {
+                margin-top: 13px!important;
+                margin-right: 13px;
+            }
         </style>
     @endpush
 
@@ -65,7 +69,7 @@
                     var label = $(originalOption).text();
                     var val = $(originalOption).val();
                     if (!val) return label;
-                    var $resp = $('<span><i style="margin-top:5px" class="pull-right ' + $(originalOption).val() + '"></i> ' + $(originalOption).data('label') + '</span>');
+                    var $resp = $('<span><i style="margin-top:5px" class="float-right ' + $(originalOption).val() + '"></i> ' + $(originalOption).data('label') + '</span>');
                     return $resp;
                 }
 
@@ -129,12 +133,12 @@
     <div class='row'>
         <div class="col-sm-5">
 
-            <div class="panel panel-success">
-                <div class="panel-heading">
-                    <strong>Menu Order (Active)</strong> <span id='menu-saved-info' style="display:none" class='pull-right text-success'><i
+            <div class="card card-success">
+                <div class="card-header">
+                    <strong>Menu Order (Active)</strong> <span id='menu-saved-info' style="display:none" class='float-right text-success'><i
                                 class='fa fa-check'></i> Menu Saved !</span>
                 </div>
-                <div class="panel-body clearfix">
+                <div class="card-body clearfix">
                     <ul class='draggable-menu draggable-menu-active'>
                         @foreach($menu_active as $menu)
                             @php
@@ -145,8 +149,9 @@
                             <li data-id='{{$menu->id}}' data-name='{{$menu->name}}'>
                                 <div class='{{$menu->is_dashboard?"is-dashboard":""}}' title="{{$menu->is_dashboard?'This is setted as Dashboard':''}}">
                                     <i class='{{($menu->is_dashboard)?"icon-is-dashboard fa fa-dashboard":$menu->icon}}'></i> {{$menu->name}} <span
-                                            class='pull-right'><a class='fa fa-pencil' title='Edit'
-                                                                  href='{{route("MenusControllerGetEdit")."/".$menu->id }}?return_url={{urlencode(Request::fullUrl())}}'></a>&nbsp;&nbsp;<a
+                                            class='float-right'>
+                                                <a class='fas fa-pencil-alt' title='Edit'
+                                                   href='{{ route("MenusControllerGetEdit")."/".$menu->id }}?return_url={{ urlencode(Request::fullUrl()) }}'></a>&nbsp;&nbsp;<a
                                                 title='Delete' class='fa fa-trash'
                                                 onclick='{{CRUDBooster::deleteConfirm(route("MenusControllerGetDelete") ."/".$menu->id) }}'
                                                 href='javascript:void(0)'></a></span>
@@ -166,7 +171,7 @@
                                                 <div class='{{$child->is_dashboard?"is-dashboard":""}}'
                                                      title="{{$child->is_dashboard?'This is setted as Dashboard':''}}"><i
                                                             class='{{($child->is_dashboard)?"icon-is-dashboard fa fa-dashboard":$child->icon}}'></i> {{$child->name}}
-                                                    <span class='pull-right'><a class='fa fa-pencil' title='Edit'
+                                                    <span class='float-right'><a class='fas fa-pencil-alt' title='Edit'
                                                                                 href='{{ route("MenusControllerGetEdit") ."/".$child->id }}?return_url={{urlencode(Request::fullUrl())}}'></a>&nbsp;&nbsp;<a
                                                                 title="Delete" class='fa fa-trash'
                                                                 onclick='{{CRUDBooster::deleteConfirm(route("MenusControllerGetDelete") . "/". $child->id) }}'
@@ -188,29 +193,30 @@
                 </div>
             </div>
 
-            <div class="panel panel-danger">
-                <div class="panel-heading">
+            <div class="card card-danger">
+                <div class="card-header">
                     <strong>Menu Order (Inactive)</strong>
                 </div>
-                <div class="panel-body clearfix">
+                <div class="card-body clearfix">
                     <ul class='draggable-menu draggable-menu-inactive'>
                         @foreach($menu_inactive as $menu)
                             <li data-id='{{$menu->id}}' data-name='{{$menu->name}}'>
-                                <div><i class='{{$menu->icon}}'></i> {{$menu->name}} <span class='pull-right'><a class='fa fa-pencil' title='Edit'
-                                                                                                                 href='{{route("MenusControllerGetEdit",["id"=>$menu->id])}}?return_url={{urlencode(Request::fullUrl())}}'></a>&nbsp;&nbsp;<a
-                                                title='Delete' class='fa fa-trash'
-                                                onclick='{{CRUDBooster::deleteConfirm(route("MenusControllerGetDelete",["id"=>$menu->id]))}}'
-                                                href='javascript:void(0)'></a></span></div>
+                                <div>
+                                    <i class="{{ $menu->icon }}"></i> {{$menu->name}} <span class="float-right">
+                                    <a class="fas fa-pencil-alt" title="Edit" href='{{ route("MenusControllerGetEdit") . "/" .$menu->id }}?return_url={{ urlencode(Request::fullUrl()) }}'></a>&nbsp;&nbsp;<a
+                                        title='Delete' class='fa fa-trash'
+                                        onclick='{{CRUDBooster::deleteConfirm(route("MenusControllerGetDelete",["id"=>$menu->id]))}}'
+                                        href='javascript:void(0)'></a></span>
+                                </div>
                                 <ul>
                                     @if($menu->children)
                                         @foreach($menu->children as $child)
                                             <li data-id='{{$child->id}}' data-name='{{$child->name}}'>
-                                                <div><i class='{{$child->icon}}'></i> {{$child->name}} <span class='pull-right'><a class='fa fa-pencil'
-                                                                                                                                   title='Edit'
-                                                                                                                                   href='{{route("MenusControllerGetEdit",["id"=>$child->id])}}?return_url={{urlencode(Request::fullUrl())}}'></a>&nbsp;&nbsp;<a
-                                                                title="Delete" class='fa fa-trash'
-                                                                onclick='{{CRUDBooster::deleteConfirm(route("MenusControllerGetDelete",["id"=>$child->id]))}}'
-                                                                href='javascript:void(0)'></a></span></div>
+                                                <div><i class='{{$child->icon}}'></i> {{$child->name}} <span class='float-right'>
+                                                <a class='fas fa-pencil-alt' title='Edit' href='{{route("MenusControllerGetEdit",["id"=>$child->id])}}?return_url={{urlencode(Request::fullUrl())}}'></a>&nbsp;&nbsp;<a
+                                                    title="Delete" class='fa fa-trash'
+                                                    onclick='{{CRUDBooster::deleteConfirm(route("MenusControllerGetDelete",["id"=>$child->id]))}}'
+                                                    href='javascript:void(0)'></a></span></div>
                                             </li>
                                         @endforeach
                                     @endif
@@ -227,11 +233,11 @@
 
         </div>
         <div class="col-sm-7">
-            <div class="panel panel-primary">
-                <div class="panel-heading">
+            <div class="card card-primary">
+                <div class="card-header">
                     Add Menu
                 </div>
-                <div class="panel-body">
+                <div class="card-body">
                     <form class='form-horizontal' method='post' id="form" enctype="multipart/form-data" action='{{CRUDBooster::mainpath("add-save")}}'>
                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
                         <input type='hidden' name='return_url' value='{{Request::fullUrl()}}'/>

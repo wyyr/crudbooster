@@ -523,16 +523,19 @@ class CRUDBooster
 
     public static function deleteConfirm($redirectTo)
     {
-        echo "swal({   
-				title: \"" . cbLang('delete_title_confirm') . "\",   
-				text: \"" . cbLang('delete_description_confirm') . "\",   
-				type: \"warning\",   
-				showCancelButton: true,   
-				confirmButtonColor: \"#ff0000\",   
-				confirmButtonText: \"" . cbLang('confirmation_yes') . "\",  
-				cancelButtonText: \"" . cbLang('confirmation_no') . "\",  
-				closeOnConfirm: false }, 
-				function(){  location.href=\"$redirectTo\" });";
+        echo "Swal.fire({   
+            title: \"" . cbLang('delete_title_confirm') . "\",   
+            text: \"" . cbLang('delete_description_confirm') . "\",   
+            icon: \"warning\",   
+            showCancelButton: true,   
+            confirmButtonColor: \"#ff0000\",   
+            confirmButtonText: \"" . cbLang('confirmation_yes') . "\",  
+            cancelButtonText: \"" . cbLang('confirmation_no') . "\", 
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href=\"$redirectTo\";
+            }
+        })";
     }
 
     public static function getModulePath()

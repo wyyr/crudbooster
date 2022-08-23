@@ -93,8 +93,8 @@ return [
         // Lightbox
         'crudbooster/assets/lightbox/dist/css/lightbox.min.css',
 
-        // Sweetalert 1
-        'crudbooster/assets/sweetalert/dist/sweetalert.css',
+        // Sweetalert 2
+        'crudbooster/assets/sweetalert2/sweetalert2@11.min.css',
 
         // Datatables
         'crudbooster/assets/adminlte/plugins/datatables/dataTables.bootstrap.css',
@@ -119,7 +119,6 @@ return [
     'scripts' => [
         // Base JS
         'https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js',
-        'crudbooster/assets/adminlte/bootstrap/js/bootstrap.min.js',
         'https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js',
         'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js',
         'https://cdnjs.cloudflare.com/ajax/libs/jquery.nicescroll/3.7.6/jquery.nicescroll.min.js',
@@ -139,8 +138,8 @@ return [
         // Lightbox
         'crudbooster/assets/lightbox/dist/js/lightbox.min.js',
 
-        // Sweetalert 1
-        'crudbooster/assets/sweetalert/dist/sweetalert.min.js',
+        // Sweetalert 2
+        'crudbooster/assets/sweetalert2/sweetalert2@11.min.js',
 
         // Money format
         'crudbooster/jquery.price_format.2.0.min.js',

@@ -5,8 +5,8 @@
     <div style="width:750px;margin:0 auto ">
 
 
-        @if(CRUDBooster::getCurrentMethod() != 'getProfile')
-            <p><a href='{{CRUDBooster::mainpath()}}'>{{cbLang("form_back_to_list",['module'=>CRUDBooster::getCurrentModule()->name])}}</a></p>
+    @if(CRUDBooster::getCurrentMethod() != 'getProfile')
+        <p><a href='{{CRUDBooster::mainpath()}}'>{{cbLang("form_back_to_list",['module'=>CRUDBooster::getCurrentModule()->name])}}</a></p>
     @endif
 
 

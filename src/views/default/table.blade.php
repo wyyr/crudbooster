@@ -22,20 +22,19 @@
                 $('#form-table input[name="button_name"]').val(name);
                 var title = $(this).attr('title');
 
-                swal({
-                        title: "{{cbLang("confirmation_title")}}",
-                        text: "{{cbLang("alert_bulk_action_button")}} " + title,
-                        type: "warning",
-                        showCancelButton: true,
-                        confirmButtonColor: "#008D4C",
-                        confirmButtonText: "{{cbLang('confirmation_yes')}}",
-                        closeOnConfirm: false,
-                        showLoaderOnConfirm: true
-                    },
-                    function () {
+                Swal.fire({
+                    title: "{{ cbLang("confirmation_title") }}",
+                    text: "{{ cbLang("alert_bulk_action_button") }} " + title,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#008D4C",
+                    confirmButtonText: "{{ cbLang('confirmation_yes') }}",
+                    showLoaderOnConfirm: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
                         $('#form-table').submit();
-                    });
-
+                    }
+                });
             })
 
             $('table tbody tr .button_action a').click(function (e) {
@@ -304,9 +303,10 @@ $total = $result->total();
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
+                        <h5 class="modal-title"><i class="fa fa-filter"></i> {{ cbLang('filter_dialog_title') }}</h5>
                         <button class="close" aria-label="Close" type="button" data-dismiss="modal">
-                            <span aria-hidden="true">×</span></button>
-                        <h4 class="modal-title"><i class='fa fa-filter'></i> {{cbLang("filter_dialog_title")}}</h4>
+                            <span aria-hidden="true">×</span>
+                        </button>
                     </div>
                     <form method='get' action=''>
                         <div class="modal-body">
@@ -412,10 +412,10 @@ $total = $result->total();
 
                         </div>
                         <div class="modal-footer" align="right">
-                            <button class="btn btn-default" type="button" data-dismiss="modal">{{cbLang("button_close")}}</button>
-                            <button class="btn btn-default btn-reset" type="reset"
-                                    onclick='location.href="{{Request::get("lasturl")}}"'>{{cbLang("button_reset")}}</button>
-                            <button class="btn btn-primary btn-submit" type="submit">{{cbLang("button_submit")}}</button>
+                            <button class="btn btn-outline-secondary" type="button" data-dismiss="modal">{{ cbLang('button_close') }}</button>
+                            <button class="btn btn-default btn-reset btn-danger" type="reset"
+                                    onclick='location.href="{{Request::get("lasturl")}}"'>{{ cbLang('button_reset') }}</button>
+                            <button class="btn btn-primary btn-submit" type="submit">{{ cbLang('button_submit') }}</button>
                         </div>
                         {!! CRUDBooster::getUrlParameters(['filter_column','lasturl']) !!}
                         <input type="hidden" name="lasturl" value="{{Request::get('lasturl')?Request::get('lasturl'):Request::fullUrl()}}">
@@ -458,9 +458,10 @@ $total = $result->total();
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
+                        <h5 class="modal-title"><i class="fas fa-download"></i> {{cbLang("export_dialog_title")}}</h5>
                         <button class="close" aria-label="Close" type="button" data-dismiss="modal">
-                            <span aria-hidden="true">×</span></button>
-                        <h4 class="modal-title"><i class='fa fa-download'></i> {{cbLang("export_dialog_title")}}</h4>
+                            <span aria-hidden="true">×</span>
+                        </button>
                     </div>
 
                     <form method='post' target="_blank" action='{{ CRUDBooster::mainpath("export-data?t=".time()) }}'>
@@ -537,8 +538,8 @@ $total = $result->total();
 
                         </div>
                         <div class="modal-footer" align="right">
-                            <button class="btn btn-default" type="button" data-dismiss="modal">{{cbLang("button_close")}}</button>
-                            <button class="btn btn-primary btn-submit" type="submit">{{cbLang('button_submit')}}</button>
+                            <button class="btn btn-outline-secondary" type="button" data-dismiss="modal">{{ cbLang('button_close') }}</button>
+                            <button class="btn btn-primary btn-submit" type="submit">{{ cbLang('button_submit') }}</button>
                         </div>
                     </form>
                 </div>

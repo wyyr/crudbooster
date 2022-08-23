@@ -14,15 +14,21 @@
         </script>
     @endpush
 
-    <ul class="nav nav-tabs">
-        <li><a href="{{ CRUDBooster::mainpath() }}"><i class='fa fa-file'></i> API Documentation</a></li>
-        <li><a href="{{ CRUDBooster::mainpath('screet-key') }}"><i class='fa fa-key'></i> API Secret Key</a></li>
-        <li class='active'><a href="{{ CRUDBooster::mainpath('generator') }}"><i class='fa fa-cog'></i> API Generator</a></li>
+    <ul class="nav nav-tabs mb-1">
+        <li class="nav-item">
+            <a class="nav-link" href="{{ CRUDBooster::mainpath() }}"><i class='fa fa-file'></i> API Documentation</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ CRUDBooster::mainpath('screet-key') }}"><i class='fa fa-key'></i> API Secret Key</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active" href="{{ CRUDBooster::mainpath('generator') }}"><i class='fa fa-cog'></i> API Generator</a>
+        </li>
     </ul>
 
-    <div class='box'>
+    <div class="card card-light">
 
-        <div class='box-body'>
+        <div class="card-body">
             @push('bottom')
                 <script>
                     $(function () {
@@ -616,9 +622,11 @@
                     <div class='col-sm-8'>
                         <div class='form-group'>
                             <label>API Slug</label>
-                            <div class='input-group'>
-                                <span class="input-group-addon" id="basic-addon1" style="background:#eeeeee">{{url("api")}}/</span>
-                                <input type='text' class='form-control' value='{{$row->permalink}}' required name='permalink' id='input-permalink'/>
+                            <div class="input-group">
+                                <div class="input-group-prepend" id="basic-addon1">
+                                    <span class="input-group-text" style="background:#eeeeee">{{ url('api') }}/</span>
+                                </div>
+                                <input type="text" class="form-control" value="{{ $row->permalink }}" required name='permalink' id='input-permalink'/>
                             </div>
                         </div>
                     </div>
@@ -653,9 +661,10 @@
 
 
                 <div class='form-group'>
-                    <div class="clearfix">
-                        <label><i class='fa fa-cog'></i> Parameters</label>
-                        <a class='pull-right btn btn-xs btn-primary' href='javascript:void(0)' onclick="load_parameters()"><i class='fa fa-refresh'></i>
+                    <div class="clearfix mb-2">
+                        <label><i class="fas fa-cog"></i> Parameters</label>
+                        <a class="float-right btn btn-sm btn-primary" href='javascript:void(0)' onclick="load_parameters()">
+                            <i class="fas fa-redo"></i>
                             Reset</a>
                     </div>
 
@@ -739,9 +748,11 @@
 
                 <div id="response-wrapper" style="display: {{ isset($row)&&in_array($row->aksi,['save_edit','delete'])?"none":"block" }}">
                     <div class='form-group'>
-                        <div class='clearfix'>
-                            <label><i class='fa fa-cog'></i> Response</label>
-                            <a class='pull-right btn btn-xs btn-primary' href='javascript:void(0)' onclick='load_response()'><i class='fa fa-refresh'></i> Reset</a>
+                        <div class="clearfix mb-2">
+                            <label><i class="fa fa-cog"></i> Response</label>
+                            <a class="float-right btn btn-sm btn-primary" href='javascript:void(0)' onclick='load_response()'>
+                                <i class='fas fa-redo'></i> Reset
+                            </a>
                         </div>
                         <div id='response'>
                             <table id='table-response' class='table table-striped table-bordered'>

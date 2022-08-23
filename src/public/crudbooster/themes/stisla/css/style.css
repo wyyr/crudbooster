@@ -190,7 +190,7 @@ p, ul:not(.list-unstyled), ol {
 .custom-select:focus,
 .custom-file-label:focus {
   background-color: #fefeff;
-  border-color: #95a0f4;
+  border-color: #1e9ee0;
 }
 
 .input-group-text,
@@ -901,7 +901,7 @@ select.form-control:not([size]):not([multiple]) {
 }
 .card.card-hero .card-header {
   padding: 40px;
-  background-image: linear-gradient(to bottom, #00b2f9, #95a0f4);
+  background-image: linear-gradient(to bottom, #00b2f9, #1e9ee0);
   color: #fff;
   overflow: hidden;
   height: auto;
@@ -3562,7 +3562,7 @@ body:not(.sidebar-mini) .sidebar-style-2 .sidebar-menu > li.active > a:before {
   background-color: #00b2f9;
 }
 body:not(.sidebar-mini) .sidebar-style-2 .sidebar-menu li.active ul.dropdown-menu li a {
-  padding-left: 61px;
+  padding-left: 40px;
   background-color: #fff;
 }
 

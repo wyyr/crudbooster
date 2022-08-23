@@ -309,7 +309,7 @@
 }
 .chat-box .chat-content .chat-item.chat-right .chat-details .chat-text {
   text-align: left;
-  background-color: #6777ef;
+  background-color: #00b2f9;
   color: #fff;
 }
 .chat-box .chat-content .chat-item > img {
@@ -443,19 +443,19 @@ div.dataTables_wrapper div.dataTables_processing {
 }
 
 .ranges li {
-  color: #6777ef;
+  color: #00b2f9;
 }
 .ranges li:hover, .ranges li.active {
-  background-color: #6777ef;
+  background-color: #00b2f9;
 }
 
 .daterangepicker td.active, .daterangepicker td.active:hover {
-  background-color: #6777ef;
+  background-color: #00b2f9;
 }
 
 /* 1.10 Dropzone */
 .dropzone {
-  border: 2px dashed #6777ef;
+  border: 2px dashed #00b2f9;
   min-height: 240px;
   text-align: center;
 }
@@ -568,7 +568,7 @@ tr:first-child > td > .fc-day-grid-event {
   border-radius: 0;
 }
 .fc button.fc-state-active {
-  background-color: #6777ef;
+  background-color: #00b2f9;
   color: #fff;
 }
 
@@ -731,7 +731,7 @@ tr:first-child > td > .fc-day-grid-event {
   width: 13px;
   height: 13px;
   background-color: #fff;
-  border: 3px solid #6777ef;
+  border: 3px solid #00b2f9;
   border-radius: 50%;
 }
 
@@ -844,15 +844,15 @@ tr:first-child > td > .fc-day-grid-event {
 
 .select2-container.select2-container--open .select2-selection--multiple {
   background-color: #fefeff;
-  border-color: #95a0f4;
+  border-color: #1e9ee0;
 }
 .select2-container.select2-container--focus .select2-selection--multiple, .select2-container.select2-container--focus .select2-selection--single {
   background-color: #fefeff;
-  border-color: #95a0f4;
+  border-color: #1e9ee0;
 }
 .select2-container.select2-container--open .select2-selection--single {
   background-color: #fefeff;
-  border-color: #95a0f4;
+  border-color: #1e9ee0;
 }
 
 .select2-results__option {
@@ -892,9 +892,8 @@ tr:first-child > td > .fc-day-grid-event {
 }
 
 .select2-container--default .select2-selection--multiple .select2-selection__choice,
-.select2-container--default .select2-results__option[aria-selected=true],
 .select2-container--default .select2-results__option--highlighted[aria-selected] {
-  background-color: #6777ef;
+  background-color: #00b2f9;
   color: #fff;
 }
 
@@ -917,7 +916,7 @@ tr:first-child > td > .fc-day-grid-event {
 }
 .selectric:focus {
   background-color: #fefeff;
-  border-color: #95a0f4;
+  border-color: #1e9ee0;
 }
 .selectric .label {
   font-size: 13px;
@@ -932,7 +931,7 @@ tr:first-child > td > .fc-day-grid-event {
 }
 
 .selectric-open .selectric {
-  border-color: #6777ef;
+  border-color: #00b2f9;
 }
 
 .selectric-above .selectric-items, .selectric-below .selectric-items {
@@ -953,7 +952,7 @@ tr:first-child > td > .fc-day-grid-event {
   background-color: #f2f2f2;
 }
 .selectric-items li.selected, .selectric-items li.highlighted {
-  background-color: #6777ef;
+  background-color: #00b2f9;
   color: #fff;
 }
 
@@ -1106,7 +1105,7 @@ tr:first-child > td > .fc-day-grid-event {
 }
 .swal-button.swal-button--confirm {
   box-shadow: 0 2px 6px #acb5f6;
-  background-color: #6777ef;
+  background-color: #00b2f9;
 }
 .swal-button.swal-button--confirm:focus {
   opacity: 0.8;
@@ -1136,7 +1135,7 @@ tr:first-child > td > .fc-day-grid-event {
   padding: 0 8px;
 }
 .bootstrap-tagsinput .tag {
-  background-color: #6777ef;
+  background-color: #00b2f9;
   border-radius: 3px;
   padding: 5px 10px;
 }
@@ -1145,7 +1144,7 @@ tr:first-child > td > .fc-day-grid-event {
 }
 .bootstrap-tagsinput:focus {
   background-color: #fefeff;
-  border-color: #95a0f4;
+  border-color: #1e9ee0;
 }
 
 /* 1.27 Time Picker */
@@ -1302,10 +1301,10 @@ tr:first-child > td > .fc-day-grid-event {
   padding: 10px;
   line-height: 1;
   border-radius: 3px;
-  border: 2px solid #6777ef;
+  border: 2px solid #00b2f9;
   font-size: 10px;
   font-weight: 500;
-  color: #6777ef;
+  color: #00b2f9;
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-bottom: 10px;
@@ -1489,12 +1488,12 @@ tr:first-child > td > .fc-day-grid-event {
   background-color: rgba(63, 82, 227, 0.03);
 }
 .tickets .ticket-items .ticket-item:hover .ticket-title {
-  color: #6777ef;
+  color: #00b2f9;
 }
 .tickets .ticket-items .ticket-item.active {
   box-shadow: 0 2px 6px #acb5f6;
   border-radius: 3px;
-  background-color: #6777ef;
+  background-color: #00b2f9;
   border-bottom: none;
 }
 .tickets .ticket-items .ticket-item.active .ticket-title, .tickets .ticket-items .ticket-item.active .ticket-desc {
@@ -1620,7 +1619,7 @@ tr:first-child > td > .fc-day-grid-event {
   margin-top: 20px !important;
 }
 .owl-theme .owl-dots .owl-dot.active span {
-  background-color: #6777ef;
+  background-color: #00b2f9;
 }
 
 /* 1.36 Activities */
@@ -1640,7 +1639,7 @@ tr:first-child > td > .fc-day-grid-event {
   top: 0;
   width: 2px;
   height: 100%;
-  background-color: #6777ef;
+  background-color: #00b2f9;
 }
 .activities .activity:last-child:before {
   display: none;
@@ -1739,7 +1738,7 @@ tr:first-child > td > .fc-day-grid-event {
 }
 .empty-state .empty-state-icon {
   position: relative;
-  background-color: #6777ef;
+  background-color: #00b2f9;
   width: 80px;
   height: 80px;
   line-height: 100px;
@@ -1770,11 +1769,11 @@ tr:first-child > td > .fc-day-grid-event {
   text-align: center;
 }
 .pricing.pricing-highlight .pricing-title {
-  background-color: #6777ef;
+  background-color: #00b2f9;
   color: #fff;
 }
 .pricing.pricing-highlight .pricing-cta a {
-  background-color: #6777ef;
+  background-color: #00b2f9;
   color: #fff;
 }
 .pricing.pricing-highlight .pricing-cta a:hover {
@@ -1789,7 +1788,7 @@ tr:first-child > td > .fc-day-grid-event {
   text-transform: uppercase;
   letter-spacing: 2.5px;
   background-color: #f3f6f8;
-  color: #6777ef;
+  color: #00b2f9;
   border-radius: 0 0 3px 3px;
   display: inline-block;
   padding: 5px 15px;
@@ -1888,7 +1887,7 @@ tr:first-child > td > .fc-day-grid-event {
  * Thanks to Spectre.css
  */
 .avatar {
-  background: #6777ef;
+  background: #00b2f9;
   border-radius: 50%;
   color: #e3eaef;
   display: inline-block;
@@ -2012,11 +2011,11 @@ tr:first-child > td > .fc-day-grid-event {
 }
 .wizard-steps .wizard-step.wizard-step-active {
   box-shadow: 0 2px 6px #acb5f6;
-  background-color: #6777ef;
+  background-color: #00b2f9;
   color: #fff;
 }
 .wizard-steps .wizard-step.wizard-step-active:before {
-  background-color: #6777ef;
+  background-color: #00b2f9;
   color: #fff;
 }
 .wizard-steps .wizard-step.wizard-step-success {

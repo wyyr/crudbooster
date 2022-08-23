@@ -21,9 +21,9 @@
         <h1>API Documentation {{ get_setting("appname") }}</h1>
     </div>
 
-    <div class='box'>
+    <div class="card">
 
-        <div class='box-body'>
+        <div class="card-body">
 
             <style>
                 .table-api tbody tr td a {

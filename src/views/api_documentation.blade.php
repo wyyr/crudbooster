@@ -2,15 +2,21 @@
 
 @section('content')
 
-    <ul class="nav nav-tabs">
-        <li class="active"><a href="{{ CRUDBooster::mainpath() }}"><i class='fa fa-file'></i> API Documentation</a></li>
-        <li><a href="{{ CRUDBooster::mainpath('screet-key') }}"><i class='fa fa-key'></i> API Secret Key</a></li>
-        <li><a href="{{ CRUDBooster::mainpath('generator') }}"><i class='fa fa-cog'></i> API Generator</a></li>
+    <ul class="nav nav-tabs mb-1">
+        <li class="nav-item">
+            <a class="nav-link active" href="{{ CRUDBooster::mainpath() }}"><i class='fa fa-file'></i> API Documentation</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ CRUDBooster::mainpath('screet-key') }}"><i class='fa fa-key'></i> API Secret Key</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ CRUDBooster::mainpath('generator') }}"><i class='fa fa-cog'></i> API Generator</a>
+        </li>
     </ul>
 
-    <div class='box'>
+    <div class="card card-light">
 
-        <div class='box-body'>
+        <div class="card-body">
 
             @push('head')
                 <style>
@@ -58,20 +64,20 @@
                 </script>
             @endpush
 
-            <div class='form-group'>
+            <div class="form-group">
                 <label>API BASE URL</label>
-                <input type='text' readonly class='form-control' title='Hanya klik dan otomatis copy to clipboard (kecuali Safari)'
-                       onClick="this.setSelectionRange(0, this.value.length); document.execCommand('copy');" value='{{url('api')}}'/>
+                <input type="text" readonly class="form-control" title="Hanya klik dan otomatis copy to clipboard (kecuali Safari)"
+                       onClick="this.setSelectionRange(0, this.value.length); document.execCommand('copy');" value="{{ url('api') }}"/>
             </div>
 
-            <table class='table table-striped table-api table-bordered'>
+            <table class="table table-striped table-api table-bordered">
                 <thead>
-                <tr class='info'>
+                <tr class="info">
                     <th width='2%'>No</th>
                     <th>API Name
-                        <span class='pull-right'>
-                            <a class="btn btn-xs btn-primary" target="_blank" href="{{ url('api-documentation') }}"><i class="fa fa-globe"></i> Public Documentation</a>
-                      <a class='btn btn-xs btn-warning' target="_blank" href='{{CRUDBooster::mainpath("download-postman")}}'>Export For POSTMAN <sup>Beta</sup></a>
+                        <span class="float-right">
+                            <a class="btn btn-sm btn-primary" target="_blank" href="{{ url('api-documentation') }}"><i class="fa fa-globe"></i> Public Documentation</a>
+                      <a class='btn btn-sm btn-warning' target="_blank" href='{{CRUDBooster::mainpath("download-postman")}}'>Export For POSTMAN <sup>Beta</sup></a>
                     </span>
                     </th>
                 </tr>

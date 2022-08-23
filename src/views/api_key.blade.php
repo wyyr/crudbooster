@@ -2,16 +2,21 @@
 
 @section('content')
 
-    <ul class="nav nav-tabs">
-        <li><a href="{{ CRUDBooster::mainpath() }}"><i class='fa fa-file'></i> API Documentation</a></li>
-        <li class="active"><a href="{{ CRUDBooster::mainpath('screet-key') }}"><i class='fa fa-key'></i> API Secret Key</a></li>
-        <li><a href="{{ CRUDBooster::mainpath('generator') }}"><i class='fa fa-cog'></i> API Generator</a></li>
+    <ul class="nav nav-tabs mb-1">
+        <li class="nav-item">
+            <a class="nav-link" href="{{ CRUDBooster::mainpath() }}"><i class='fa fa-file'></i> API Documentation</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active" href="{{ CRUDBooster::mainpath('screet-key') }}"><i class='fa fa-key'></i> API Secret Key</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ CRUDBooster::mainpath('generator') }}"><i class='fa fa-cog'></i> API Generator</a>
+        </li>
     </ul>
 
-    <div class='box'>
+    <div class="card card-light">
 
-        <div class='box-body'>
-
+        <div class="card-body">
 
             <p><a title='Generate API Key' class='btn btn-primary' href='javascript:void(0)' onclick='generate_screet_key()'><i class='fa fa-key'></i> Generate
                     Secret Key</a></p>
@@ -23,7 +28,7 @@
                     <th>Screet Key</th>
                     <th width="10%">Hit</th>
                     <th width="10%">Status</th>
-                    <th width="15%">-</th>
+                    <th width="20%">Action</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -33,15 +38,15 @@
                         <td>{{ ++$no }}</td>
                         <td>{{ $row->screetkey }}</td>
                         <td>{{ $row->hit }}</td>
-                        <td>{!! ($row->status=='active')?"<span class='label label-success'>Active</span>":"<span class='label label-default'>Non Active</span>" !!}</td>
+                        <td>{!! ($row->status=='active')?"<span class='badge badge-success'>Active</span>":"<span class='badge badge-secondary'>Non Active</span>" !!}</td>
                         <td>
                             @if($row->status == 'active')
-                                <a class='btn btn-xs btn-default' href='{{ CRUDBooster::mainpath("status-apikey?id=$row->id&status=0") }}'>Non Active</a>
+                                <a class="btn btn-sm btn-secondary" href='{{ CRUDBooster::mainpath("status-apikey?id=$row->id&status=0") }}'>Disable</a>
                             @else
-                                <a class='btn btn-xs btn-default' href='{{ CRUDBooster::mainpath("status-apikey?id=$row->id&status=1") }}'>Active</a>
+                                <a class="btn btn-sm btn-success" href='{{ CRUDBooster::mainpath("status-apikey?id=$row->id&status=1") }}'>Enable</a>
                             @endif
 
-                            <a class='btn btn-xs btn-danger' href='javascript:void(0)' onclick='deleteApi({{$row->id}})'>Delete</a>
+                            <a class="btn btn-sm btn-danger" href='javascript:void(0)' onclick='deleteApi({{$row->id}})'>Delete</a>
                         </td>
                     </tr>
                 @endforeach
