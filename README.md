@@ -64,15 +64,11 @@ If there is no interaction for a long period of time, it will be assumed that it
 1. Laravel Export HTML to Excel by [Maatwebsite](https://github.com/Maatwebsite/Laravel-Excel)
 2. Laravel DOM PDF by [Barryvdh](https://github.com/barryvdh/laravel-dompdf)
 3. Laravel Widgetize [ImanGhafoori](https://github.com/imanghafoori1/laravel-widgetize)
-4. Admin Theme by [AdminLTE Almsaeed Studio](https://almsaeedstudio.com/preview)
+4. Admin Theme by [Stisla](https://github.com/stisla/stisla)
 5. Laravel Framework by [Taylor Otwell](https://github.com/laravel/laravel)
-6. Thanks To All [Developers](https://github.com/crocodic-studio/crudbooster/graphs/contributors)
+6. Thanks To All [Developers](https://github.com/wyyr/crudbooster/graphs/contributors)
 7. Thanks To All Funders
 
-## Support & Donation
-Hi thanks for using my open source project, you could support me via :
-[https://saweria.co/ferryariawan](https://saweria.co/ferryariawan)
-or via [https://buymeacoffee.com/ferryariawan](https://buymeacoffee.com/ferryariawan)
 
 ## Contact Us For Business
 Email : crudbooster@gmail.com
