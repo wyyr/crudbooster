@@ -31,17 +31,19 @@ class CBBackend
             return redirect($url);
         }
         if ($request->url() == CRUDBooster::adminPath('')) {
+            $namespace = 'App\Http\Controllers';
+
             $menus = DB::table('cms_menus')->whereRaw("cms_menus.id IN (select id_cms_menus from cms_menus_privileges where id_cms_privileges = '" . CRUDBooster::myPrivilegeId() . "')")->where('is_dashboard', 1)->where('is_active', 1)->first();
             if ($menus) {
                 if ($menus->type == 'Statistic') {
                     return redirect()->action('\crocodicstudio\crudbooster\controllers\StatisticBuilderController@getDashboard');
                 } elseif ($menus->type == 'Module') {
                     $module = CRUDBooster::first('cms_moduls', ['path' => $menus->path]);
-                    return redirect()->action($module->controller . '@getIndex');
+                    return redirect()->action($namespace . '\\' . $module->controller . '@getIndex');
                 } elseif ($menus->type == 'Route') {
                     $action = str_replace("Controller", "Controller@", $menus->path);
                     $action = str_replace(['Get', 'Post'], ['get', 'post'], $action);
-                    return redirect()->action($action);
+                    return redirect()->action($namespace . '\\' . $action);
                 } elseif ($menus->type == 'Controller & Method') {
                     return redirect()->action($menus->path);
                 } elseif ($menus->type == 'URL') {

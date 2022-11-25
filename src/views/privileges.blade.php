@@ -12,16 +12,13 @@
 
 
     <!-- Box -->
-        <div class="box box-primary">
-            <div class="box-header with-border">
-                <h3 class="box-title">{{ $page_title }}</h3>
-                <div class="box-tools">
-
-                </div>
+        <div class="card box-primary">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{{ $page_title }}</h5>
             </div>
             <form method='post' action='{{ (@$row->id)?route("PrivilegesControllerPostEditSave")."/$row->id":route("PrivilegesControllerPostAddSave") }}'>
                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                <div class="box-body">
+                <div class="card-body">
                     <div class="alert alert-info">
                         <strong>Note:</strong> To show the menu you have to create a menu at Menu Management
                     </div>
@@ -127,7 +124,7 @@
                                 })
                             </script>
                         @endpush
-                        <table class='table table-striped table-hover table-bordered'>
+                        <table class="table table-md table-striped table-hover table-bordered">
                             <thead>
                             <tr class='active'>
                                 <th width='3%'>{{cbLang('privileges_module_list_no')}}</th>
@@ -180,10 +177,10 @@
                     </div>
 
                 </div><!-- /.box-body -->
-                <div class="box-footer" align="right">
-                    <button type='button' onclick="location.href='{{CRUDBooster::mainpath()}}'"
-                            class='btn btn-default'>{{cbLang("button_cancel")}}</button>
-                    <button type='submit' class='btn btn-primary'><i class='fa fa-save'></i> {{cbLang("button_save")}}</button>
+                <div class="card-footer" align="right">
+                    <button type="button" onclick="location.href='{{CRUDBooster::mainpath()}}'"
+                            class="btn btn-outline-secondary">{{ cbLang('button_cancel') }}</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> {{ cbLang('button_save') }}</button>
                 </div><!-- /.box-footer-->
         </div><!-- /.box -->
 
