@@ -2,21 +2,20 @@
 
 namespace crocodicstudio\crudbooster\helpers;
 
-use Cache;
-use Config;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Config;
 use DateTime;
-use DB;
+use Illuminate\Support\Facades\DB;
 use Exception;
-use Image;
-use Mail;
+use Intervention\Image\ImageManagerStatic as Image;
+use Illuminate\Support\Facades\Mail;
 use ReflectionClass;
 use ReflectionMethod;
-use Request;
-use Route;
-use Schema;
-use Session;
-use Storage;
-use Validator;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class CRUDBooster
 {
@@ -33,6 +32,8 @@ class CRUDBooster
 
     public static function uploadBase64($value, $id = null)
     {
+        $prefix = config('crudbooster.prefix_upload');
+
         if (!self::myId()) {
             $userID = 0;
         } else {
@@ -49,11 +50,11 @@ class CRUDBooster
         @$mime_type = explode('/', $mime_type);
         @$mime_type = $mime_type[1];
         if ($mime_type) {
-            $filePath = 'uploads/' . $userID . '/' . date('Y-m');
-            Storage::makeDirectory($filePath);
+            $filePath = $prefix . '/uploads/' . $userID . '/' . date('Y-m');
+            Storage::disk(config('crudbooster.filesystem_driver'))->makeDirectory($filePath);
             $filename = md5(str_random(5)) . '.' . $mime_type;
-            if (Storage::put($filePath . '/' . $filename, $filedata)) {
-                self::resizeImage($filePath . '/' . $filename);
+            if (Storage::disk(config('crudbooster.filesystem_driver'))->put($filePath . '/' . $filename, $filedata)) {
+//                self::resizeImage($filePath . '/' . $filename);
 
                 return $filePath . '/' . $filename;
             }
@@ -62,7 +63,9 @@ class CRUDBooster
 
     public static function uploadFile($name, $encrypt = false, $resize_width = null, $resize_height = null, $id = null)
     {
-        if (Request::hasFile($name)) {
+        $prefix = config('crudbooster.prefix_upload');
+
+        if (request()->hasFile($name)) {
             if (!self::myId()) {
                 $userID = 0;
             } else {
@@ -73,7 +76,7 @@ class CRUDBooster
                 $userID = $id;
             }
 
-            $file = Request::file($name);
+            $file = request()->file($name);
             $ext = $file->getClientOriginalExtension();
             $filename = str_slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
             if (method_exists($file, 'getClientSize')) {
@@ -81,10 +84,11 @@ class CRUDBooster
             } else {
                 $filesize = $file->getSize() / 1024;
             }
-            $file_path = 'uploads/' . $userID . '/' . date('Y-m');
+
+            $file_path = $prefix . '/uploads/' . $userID . '/' . date('Y-m');
 
             //Create Directory Monthly
-            Storage::makeDirectory($file_path);
+            Storage::disk(config('crudbooster.filesystem_driver'))->makeDirectory($file_path);
 
             if ($encrypt == true) {
                 $filename = md5(str_random(5)) . '.' . $ext;
@@ -92,8 +96,8 @@ class CRUDBooster
                 $filename = str_slug($filename, '_') . '.' . $ext;
             }
 
-            if (Storage::putFileAs($file_path, $file, $filename)) {
-                self::resizeImage($file_path . '/' . $filename, $resize_width, $resize_height);
+            if (Storage::disk(config('crudbooster.filesystem_driver'))->putFileAs($file_path, $file, $filename)) {
+//                self::resizeImage($file, $file_path . '/' . $filename, $resize_width, $resize_height);
 
                 return $file_path . '/' . $filename;
             } else {
@@ -104,8 +108,31 @@ class CRUDBooster
         }
     }
 
-    private static function resizeImage($fullFilePath, $resize_width = null, $resize_height = null, $qty = 100, $thumbQty = 75)
+    public static function uploadRawFile(string $path, string $content): ?string
     {
+        $prefix = config('crudbooster.prefix_upload');
+
+        if ($path != '' && $content != '') {
+            $path = $prefix . '/' . $path;
+
+            $options = [];
+
+            $upload = Storage::disk(config('filesystems.default'))->put($path, $content, $options);
+
+            if ($upload) {
+                return $path;
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    private static function resizeImage($file, $fullFilePath, $resize_width = null, $resize_height = null, $qty = 100, $thumbQty = 75)
+    {
+        $prefix = config('crudbooster.prefix_upload');
+
         $images_ext = config('crudbooster.IMAGE_EXTENSIONS', 'jpg,png,gif,bmp');
         $images_ext = explode(',', $images_ext);
 
@@ -113,40 +140,35 @@ class CRUDBooster
         $ext = pathinfo($filename, PATHINFO_EXTENSION);
         $file_path = trim(str_replace($filename, '', $fullFilePath), '/');
 
-        $file_path_thumbnail = 'uploads_thumbnail/' . date('Y-m');
-        Storage::makeDirectory($file_path_thumbnail);
+        $file_path_thumbnail = $prefix . '/uploads_thumbnail/' . date('Y-m');
+        Storage::disk(config('crudbooster.filesystem_driver'))->makeDirectory($file_path_thumbnail);
 
         if (in_array(strtolower($ext), $images_ext)) {
+            $img = Image::make($file);
 
-            if ($resize_width && $resize_height) {
-                $img = Image::make(storage_path('app/' . $file_path . '/' . $filename));
-                $img->fit($resize_width, $resize_height);
-                $img->save(storage_path('app/' . $file_path . '/' . $filename), $qty);
-            } elseif ($resize_width && !$resize_height) {
-                $img = Image::make(storage_path('app/' . $file_path . '/' . $filename));
-                $img->resize($resize_width, null, function ($constraint) {
-                    $constraint->aspectRatio();
-                });
-                $img->save(storage_path('app/' . $file_path . '/' . $filename), $qty);
-            } elseif (!$resize_width && $resize_height) {
-                $img = Image::make(storage_path('app/' . $file_path . '/' . $filename));
-                $img->resize(null, $resize_height, function ($constraint) {
-                    $constraint->aspectRatio();
-                });
-                $img->save(storage_path('app/' . $file_path . '/' . $filename), $qty);
-            } else {
-                $img = Image::make(storage_path('app/' . $file_path . '/' . $filename));
-                if ($img->width() > 1300) {
-                    $img->resize(1300, null, function ($constraint) {
+            if (!in_array(strtolower($ext), ['png'])) {
+                if ($resize_width && $resize_height) {
+                    $img->fit($resize_width, $resize_height);
+                } elseif ($resize_width && !$resize_height) {
+                    $img->resize($resize_width, null, function ($constraint) {
                         $constraint->aspectRatio();
                     });
+                } elseif (!$resize_width && $resize_height) {
+                    $img->resize(null, $resize_height, function ($constraint) {
+                        $constraint->aspectRatio();
+                    });
+                } else {
+                    if ($img->width() > 1300) {
+                        $img->resize(1300, null, function ($constraint) {
+                            $constraint->aspectRatio();
+                        });
+                    }
                 }
-                $img->save(storage_path('app/' . $file_path . '/' . $filename), $qty);
+
+                return self::uploadFile($file_path, $img->encode($ext, 75));
             }
 
-            $img = Image::make(storage_path('app/' . $file_path . '/' . $filename));
-            $img->fit(350, 350);
-            $img->save(storage_path('app/' . $file_path_thumbnail . '/' . $filename), $thumbQty);
+            return self::uploadRawFile($file_path, $img->encode());
         }
     }
 
@@ -270,7 +292,7 @@ class CRUDBooster
     public static function redirectBack($message, $type = 'warning')
     {
 
-        if (Request::ajax()) {
+        if (request()->ajax()) {
             $resp = response()->json(['message' => $message, 'message_type' => $type, 'redirect_url' => $_SERVER['HTTP_REFERER']])->send();
             exit;
         } else {
@@ -284,7 +306,7 @@ class CRUDBooster
     public static function redirect($to, $message, $type = 'warning')
     {
 
-        if (Request::ajax()) {
+        if (request()->ajax()) {
             $resp = response()->json(['message' => $message, 'message_type' => $type, 'redirect_url' => $to])->send();
             exit;
         } else {
@@ -400,11 +422,11 @@ class CRUDBooster
 
     public static function getCurrentDashboardId()
     {
-        if (Request::get('d') != null) {
-            Session::put('currentDashboardId', Request::get('d'));
+        if (request()->get('d') != null) {
+            Session::put('currentDashboardId', request()->get('d'));
             Session::put('currentMenuId', 0);
 
-            return Request::get('d');
+            return request()->get('d');
         } else {
             return Session::get('currentDashboardId');
         }
@@ -412,11 +434,11 @@ class CRUDBooster
 
     public static function getCurrentMenuId()
     {
-        if (Request::get('m') != null) {
-            Session::put('currentMenuId', Request::get('m'));
+        if (request()->get('m') != null) {
+            Session::put('currentMenuId', request()->get('m'));
             Session::put('currentDashboardId', 0);
 
-            return Request::get('m');
+            return request()->get('m');
         } else {
             return Session::get('currentMenuId');
         }
@@ -542,7 +564,7 @@ class CRUDBooster
     {
         // Check to position of admin_path
         if (config("crudbooster.ADMIN_PATH")) {
-            $adminPathSegments = explode('/', Request::path());
+            $adminPathSegments = explode('/', request()->path());
             $no = 1;
             foreach ($adminPathSegments as $path) {
                 if ($path == config("crudbooster.ADMIN_PATH")) {
@@ -555,7 +577,7 @@ class CRUDBooster
             $segment = 1;
         }
 
-        return Request::segment($segment);
+        return request()->segment($segment);
     }
 
     public static function mainpath($path = null)
@@ -584,7 +606,7 @@ class CRUDBooster
     {
         $id = Session::get('current_row_id');
         $id = intval($id);
-        $id = (!$id) ? Request::segment(4) : $id;
+        $id = (!$id) ? request()->segment(4) : $id;
         $id = intval($id);
 
         return $id;
@@ -654,7 +676,7 @@ class CRUDBooster
 
     public static function getValueFilter($field)
     {
-        $filter = Request::get('filter_column');
+        $filter = request()->get('filter_column');
         if ($filter[$field]) {
             return $filter[$field]['value'];
         }
@@ -662,7 +684,7 @@ class CRUDBooster
 
     public static function getSortingFilter($field)
     {
-        $filter = Request::get('filter_column');
+        $filter = request()->get('filter_column');
         if ($filter[$field]) {
             return $filter[$field]['sorting'];
         }
@@ -670,7 +692,7 @@ class CRUDBooster
 
     public static function getTypeFilter($field)
     {
-        $filter = Request::get('filter_column');
+        $filter = request()->get('filter_column');
         if ($filter[$field]) {
             return $filter[$field]['type'];
         }
@@ -829,7 +851,7 @@ class CRUDBooster
 
     public static function valid($arr = [], $type = 'json')
     {
-        $input_arr = Request::all();
+        $input_arr = request()->all();
 
         foreach ($arr as $a => $b) {
             if (is_int($a)) {
@@ -1050,7 +1072,7 @@ class CRUDBooster
 
     public static function urlFilterColumn($key, $type, $value = '', $singleSorting = true)
     {
-        $params = Request::all();
+        $params = request()->all();
         $mainpath = trim(self::mainpath(), '/');
 
         if ($params['filter_column'] && $singleSorting) {
@@ -1079,7 +1101,7 @@ class CRUDBooster
             $a['created_at'] = date('Y-m-d H:i:s');
             $a['ipaddress'] = $_SERVER['REMOTE_ADDR'];
             $a['useragent'] = $_SERVER['HTTP_USER_AGENT'];
-            $a['url'] = Request::url();
+            $a['url'] = request()->url();
             $a['description'] = $description;
             $a['details'] = $details;
             $a['id_cms_users'] = self::myId();
@@ -1089,7 +1111,7 @@ class CRUDBooster
 
     public static function referer()
     {
-        return Request::server('HTTP_REFERER');
+        return request()->server('HTTP_REFERER');
     }
 
     public static function listTables()
@@ -1149,8 +1171,8 @@ class CRUDBooster
     public static function authAPI()
     {
         $allowedUserAgent = config('crudbooster.API_USER_AGENT_ALLOWED');
-        $user_agent = Request::header('User-Agent');
-        $authorization = Request::header('Authorization');
+        $user_agent = request()->header('User-Agent');
+        $authorization = request()->header('Authorization');
 
         if ($allowedUserAgent && count($allowedUserAgent)) {
             $userAgentValid = false;

@@ -154,4 +154,9 @@ return [
         // Jquery sortables
         'crudbooster/assets/jquery-sortable-min.js',
     ],
+
+    // filesystem for storing files
+    'filesystem_driver' => env('CB_FILESYSTEM_DRIVER', 'local'),
+
+    'prefix_upload' => env('CB_PREFIX_UPLOAD'),
 ];

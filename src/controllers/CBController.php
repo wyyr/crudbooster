@@ -554,10 +554,17 @@ class CBController extends Controller
 
                 if (isset($col['image'])) {
                     if ($value == '') {
-                        $value = "<a  data-lightbox='roadtrip' rel='group_{{$table}}' title='$label: $title' href='" . asset('crudbooster/avatar.png') . "'><img width='40px' height='40px' src='" . asset('crudbooster/avatar.png') . "'/></a>";
+                        $value = "
+                            <a  data-lightbox='roadtrip' rel='group_{{$table}}' title='$label: $title' href='" . asset('crudbooster/avatar.png') . "'>
+                                <img width='40px' height='40px' src='" . asset('crudbooster/avatar.png') . "'/>
+                            </a>";
                     } else {
-                        $pic = (strpos($value, 'http://') !== false) ? $value : asset($value);
-                        $value = "<a data-lightbox='roadtrip'  rel='group_{{$table}}' title='$label: $title' href='" . $pic . "'><img width='40px' height='40px' src='" . $pic . "'/></a>";
+                        $pic = Storage::disk(config('crudbooster.filesystem_driver'))->url($value);
+
+                        $value = "
+                            <a data-lightbox='roadtrip'  rel='group_{{$table}}' title='$label: $title' href='" . $pic . "'>
+                                <img width='40px' height='40px' src='" . $pic . "'/>
+                            </a>";
                     }
                 }
 

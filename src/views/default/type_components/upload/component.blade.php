@@ -8,17 +8,21 @@
     <div class="{{$col_width?:'col-sm-10'}}">
         @if($value)
             <?php
-            if(Storage::exists($value) || file_exists($value)):
-            $url = asset($value);
-            $ext = pathinfo($url, PATHINFO_EXTENSION);
-            $images_type = array('jpg', 'png', 'gif', 'jpeg', 'bmp', 'tiff');
-            if(in_array(strtolower($ext), $images_type)):
+                if(\Illuminate\Support\Facades\Storage::disk(config('crudbooster.filesystem_driver'))->exists($value) || file_exists($value)):
+                $url = \Illuminate\Support\Facades\Storage::disk(config('crudbooster.filesystem_driver'))->url($value);
+                $ext = pathinfo($url, PATHINFO_EXTENSION);
+                $images_type = array('jpg', 'png', 'gif', 'jpeg', 'bmp', 'tiff');
+                if(in_array(strtolower($ext), $images_type)):
             ?>
-            <p><a data-lightbox='roadtrip' href='{{$url}}'><img style='max-width:160px' title="Image For {{$form['label']}}" src='{{$url}}'/></a></p>
+            <p>
+                <a data-lightbox='roadtrip' href='{{$url}}'><img style='max-width:160px' title="Image For {{$form['label']}}" src='{{$url}}'/></a>
+            </p>
             <?php else:?>
-            <p><a href='{{$url}}'>{{cbLang("button_download_file")}}</a></p>
+            <p>
+                <a href='{{$url}}'>{{cbLang("button_download_file")}}</a>
+            </p>
             <?php endif;
-            echo "<input type='hidden' name='_$name' value='$value'/>";
+                echo "<input type='hidden' name='_$name' value='$value'/>";
             else:
                 echo "<p class='text-danger'><i class='fa fa-exclamation-triangle'></i> ".cbLang("file_broken")."</p>";
             endif;
