@@ -669,14 +669,10 @@ class CBController extends Controller
                 $pdf->setPaper($papersize, $paperorientation);
 
                 return $pdf->stream($filename . '.pdf');
-                break;
             case 'xls':
-                return Excel::download(new DefaultExportXls($response), $filename . ".xls");
-                break;
+                return Excel::download(new DefaultExportXls($response), $filename . ".xlsx");
             case 'csv':
-
                 return Excel::download(new DefaultExportXls($response), $filename . ".csv");
-                break;
         }
     }
 
