@@ -8,6 +8,7 @@ use crocodicstudio\crudbooster\commands\CrudboosterUpdateCommand;
 use crocodicstudio\crudbooster\commands\CrudboosterVersionCommand;
 use crocodicstudio\crudbooster\commands\Mailqueues;
 use Illuminate\Foundation\AliasLoader;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
@@ -37,6 +38,9 @@ class CRUDBoosterServiceProvider extends ServiceProvider
         }
 
         $this->customValidation();
+
+        // use bootstrap style pagination
+        Paginator::useBootstrap();
     }
 
     /**
