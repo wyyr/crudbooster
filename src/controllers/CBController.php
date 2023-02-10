@@ -1660,12 +1660,12 @@ class CBController extends Controller
 
             //Create Directory Monthly
             $filePath = 'uploads/' . CB::myId() . '/' . date('Y-m');
-            Storage::makeDirectory($filePath);
+            Storage::disk('local')->makeDirectory($filePath);
 
             //Move file to storage
             $filename = md5(str_random(5)) . '.' . $ext;
             $url_filename = '';
-            if (Storage::putFileAs($filePath, $file, $filename)) {
+            if (Storage::disk('local')->putFileAs($filePath, $file, $filename)) {
                 $url_filename = $filePath . '/' . $filename;
             }
             $url = CRUDBooster::mainpath('import-data') . '?file=' . base64_encode($url_filename);
