@@ -1760,7 +1760,7 @@ class CBController extends Controller
         $this->cbLoader();
         $name = 'userfile';
         if ($file = CRUDBooster::uploadFile($name, true)) {
-            echo asset($file);
+            echo Storage::disk(config('crudbooster.filesystem_driver'))->url($file);
         }
     }
 
@@ -1769,7 +1769,7 @@ class CBController extends Controller
         $this->cbLoader();
         $name = 'userfile';
         if ($file = CRUDBooster::uploadFile($name, true)) {
-            echo asset($file);
+            echo Storage::disk(config('crudbooster.filesystem_driver'))->url($file);
         }
     }
 
