@@ -522,7 +522,7 @@ class Fontawesome
             "slideshare",
             "twitch",
             "yelp",
-            "newspaper-o",
+            "newspaper",
             "wifi",
             "calculator",
             "paypal",

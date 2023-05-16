@@ -78,6 +78,13 @@
         #table_dashboard.table-bordered, #table_dashboard.table-bordered thead tr th, #table_dashboard.table-bordered tbody tr td {
             border: 1px solid #bbbbbb !important;
         }
+
+        textarea {
+            height: auto!important;
+        }
+        .datepicker.dropdown-menu {
+            width: auto;
+        }
     </style>
 
     @stack('head')
