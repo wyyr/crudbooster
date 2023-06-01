@@ -569,7 +569,7 @@ class CBController extends Controller
                 }
 
                 if (@$col['download']) {
-                    $url = (strpos($value, 'http://') !== false) ? $value : asset($value) . '?download=1';
+                    $url = Storage::disk(config('crudbooster.filesystem_driver'))->url($value);
                     if ($value) {
                         $value = "<a class='btn btn-xs btn-primary' href='$url' target='_blank' title='Download File'><i class='fa fa-download'></i> Download</a>";
                     } else {
@@ -1740,9 +1740,9 @@ class CBController extends Controller
 
         $row = DB::table($this->table)->where($this->primary_key, $id)->first();
 
-        $file = str_replace('uploads/', '', $row->{$column});
-        if (Storage::exists($file)) {
-            Storage::delete($file);
+        $file = $row->{$column};
+        if (Storage::disk(config('crudbooster.filesystem_driver'))->exists($file)) {
+            Storage::disk(config('crudbooster.filesystem_driver'))->delete($file);
         }
 
         DB::table($this->table)->where($this->primary_key, $id)->update([$column => null]);
