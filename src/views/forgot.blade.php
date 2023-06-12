@@ -34,7 +34,7 @@
                 <div class="col-12 col-sm-8 offset-sm-2 col-md-6 offset-md-3 col-lg-6 offset-lg-3 col-xl-4 offset-xl-4">
                     <div class="login-brand">
                         <img src="{{ CRUDBooster::getSetting("logo")?asset(CRUDBooster::getSetting('logo')):asset('crudbooster/assets/logo_crudbooster.png') }}"
-                             alt="logo" style="max-width: 100%;max-height: 170px;filter: invert(100%);">
+                             alt="logo" style="max-width: 100%;max-height: 170px;">
                     </div>
 
                     <div class="card card-primary">
