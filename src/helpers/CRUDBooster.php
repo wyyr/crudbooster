@@ -117,7 +117,7 @@ class CRUDBooster
 
             $options = [];
 
-            $upload = Storage::disk(config('filesystems.default'))->put($path, $content, $options);
+            $upload = Storage::disk(config('crudbooster.filesystem_driver'))->put($path, $content, $options);
 
             if ($upload) {
                 return $path;
