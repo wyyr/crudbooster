@@ -90,8 +90,8 @@ class SettingsController extends CBController
         $id = g('id');
         $row = CRUDBooster::first('cms_settings', $id);
         Cache::forget('setting_' . $row->name);
-        if (Storage::exists($row->content)) {
-            Storage::delete($row->content);
+        if (Storage::disk(config('crudbooster.filesystem_driver'))->exists($row->content)) {
+            Storage::disk(config('crudbooster.filesystem_driver'))->delete($row->content);
         }
         DB::table('cms_settings')->where('id', $id)->update(['content' => null]);
         CRUDBooster::redirect(Request::server('HTTP_REFERER'), cbLang('alert_delete_data_success'), 'success');
@@ -126,11 +126,11 @@ class SettingsController extends CBController
 
                 //Create Directory Monthly
                 $directory = 'uploads/' . date('Y-m');
-                Storage::makeDirectory($directory);
+                Storage::disk(config('crudbooster.filesystem_driver'))->makeDirectory($directory);
 
                 //Move file to storage
                 $filename = md5(str_random(5)) . '.' . $ext;
-                $storeFile = Storage::putFileAs($directory, $file, $filename);
+                $storeFile = Storage::disk(config('crudbooster.filesystem_driver'))->putFileAs($directory, $file, $filename);
                 if ($storeFile) {
                     $content = $directory . '/' . $filename;
                 }

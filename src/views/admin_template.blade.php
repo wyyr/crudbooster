@@ -7,7 +7,7 @@
     <meta name='generator' content='CRUDBooster {{ \crocodicstudio\crudbooster\commands\CrudboosterVersionCommand::$version }}'/>
     <meta name='robots' content='noindex,nofollow'/>
     <link rel="shortcut icon"
-          href="{{ CRUDBooster::getSetting('favicon')?asset(CRUDBooster::getSetting('favicon')):asset('crudbooster/assets/logo_crudbooster.png') }}">
+          href="{{ CRUDBooster::getSetting('favicon') ? \Illuminate\Support\Facades\Storage::disk(config('crudbooster.filesystem_driver'))->url(CRUDBooster::getSetting('favicon')) : asset('crudbooster/assets/logo_crudbooster.png') }}">
     <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
 
     <!-- IMPORT STYLES -->

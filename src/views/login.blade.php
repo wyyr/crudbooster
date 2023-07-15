@@ -6,7 +6,7 @@
     <title>{{ cbLang('page_title_login') }} : {{ session('appname') }}</title>
     <meta name="robots" content="noindex,nofollow">
     <link rel="shortcut icon"
-          href="{{ CRUDBooster::getSetting('favicon')?asset(CRUDBooster::getSetting('favicon')):asset('crudbooster/assets/logo_crudbooster.png') }}">
+          href="{{ CRUDBooster::getSetting('favicon') ? \Illuminate\Support\Facades\Storage::disk(config('crudbooster.filesystem_driver'))->url(CRUDBooster::getSetting('favicon')) : asset('crudbooster/assets/logo_crudbooster.png') }}">
 
     <!-- IMPORT STYLES -->
     @if (config('crudbooster.styles') && count(config('crudbooster.styles')))
