@@ -2,7 +2,6 @@
 
 namespace crocodicstudio\crudbooster\commands;
 
-use App;
 use Illuminate\Console\Command;
 use Symfony\Component\Process\Process;
 
@@ -59,9 +58,7 @@ class CrudboosterInstallationCommand extends Command
             $this->call('migrate');
             $this->call('db:seed', ['--class' => 'CBSeeder']);
             $this->call('config:clear');
-            if (app()->version() < 5.6) {
-                $this->call('optimize');
-            }
+            $this->call('optimize');
 
             $this->info('Installing CRUDBooster Is Completed ! Thank You :)');
         } else {
@@ -95,17 +92,17 @@ class CrudboosterInstallationCommand extends Command
         $this->info("Your laravel version: " . $laravel::VERSION);
         $this->info("---");
 
-        if (version_compare($laravel::VERSION, "5.8.0", ">=")) {
-            $this->info('Laravel Version (>= 5.8.*): [Good]');
+        if (version_compare($laravel::VERSION, "9.0", ">=")) {
+            $this->info('Laravel Version (>= 9.x): [Good]');
         } else {
-            $this->info('Laravel Version (>= 5.8.*): [Bad]');
+            $this->info('Laravel Version (>= 9.x): [Bad]');
             $system_failed++;
         }
 
-        if (version_compare(phpversion(), '7.3.0', '>=')) {
-            $this->info('PHP Version (>= 7.3.*): [Good]');
+        if (version_compare(phpversion(), '8.1.0', '>=')) {
+            $this->info('PHP Version (>= 8.1.x): [Good]');
         } else {
-            $this->info('PHP Version (>= 7.3.*): [Bad] Yours: ' . phpversion());
+            $this->info('PHP Version (>= 8.1.x): [Bad] Yours: ' . phpversion());
             $system_failed++;
         }
 
@@ -176,9 +173,8 @@ class CrudboosterInstallationCommand extends Command
     private function footer($success = true)
     {
         $this->info('--');
-        $this->info('Homepage : http://www.crudbooster.com');
-        $this->info('Github : https://github.com/crocodic-studio/crudbooster');
-        $this->info('Documentation : https://github.com/crocodic-studio/crudbooster/blob/master/docs/en/index.md');
+        $this->info('Github : https://github.com/wyyr/crudbooster');
+        $this->info('Documentation : https://github.com/wyyr/crudbooster/blob/3.x/docs/en/index.md');
         $this->info('====================================================================');
 
         if ($success == true) {

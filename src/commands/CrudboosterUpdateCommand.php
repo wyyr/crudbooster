@@ -2,7 +2,6 @@
 
 namespace crocodicstudio\crudbooster\commands;
 
-use App;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 use Symfony\Component\Process\Process;

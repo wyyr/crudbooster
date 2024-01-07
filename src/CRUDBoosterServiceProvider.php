@@ -30,7 +30,7 @@ class CRUDBoosterServiceProvider extends ServiceProvider
         $this->loadRoutesFrom(__DIR__ . '/routes.php');
 
         if ($this->app->runningInConsole()) {
-            $this->registerSeedsFrom(__DIR__ . '/database/seeds');
+            $this->registerSeedsFrom(__DIR__ . '/database/seeders');
             $this->publishes([__DIR__ . '/config/crudbooster.php' => config_path('crudbooster.php')], 'cb_config');
             $this->publishes([__DIR__ . '/userfiles/controllers/CBHook.php' => app_path('Http/Controllers/CBHook.php')], 'CBHook');
             $this->publishes([__DIR__ . '/userfiles/controllers/AdminCmsUsersController.php' => app_path('Http/Controllers/AdminCmsUsersController.php')], 'cb_user_controller');

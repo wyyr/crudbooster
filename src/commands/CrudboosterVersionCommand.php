@@ -26,7 +26,7 @@ class CrudboosterVersionCommand extends Command
      * @return mixed
      */
 
-    public static $version = "2.1.0";
+    public static $version = "3.0.0";
 
     public function handle()
     {
