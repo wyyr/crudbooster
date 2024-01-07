@@ -38,7 +38,7 @@ DB_PASSWORD=**password**
 
 - Run the following command at the terminal
 ```php
-php artisan crudbooster:install
+php artisan crudbooster:install && php artisan db:seed --class=CBSeeder
 ```
 
 ## Backend URL

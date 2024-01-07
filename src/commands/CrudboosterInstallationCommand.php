@@ -45,12 +45,9 @@ class CrudboosterInstallationCommand extends Command
             $this->call('vendor:publish', ['--provider' => 'crocodicstudio\crudbooster\CRUDBoosterServiceProvider']);
 
             $this->info('Dumping the autoloaded files and reloading all new files...');
+
             $composer = $this->findComposer();
-
-            $process = (app()->version() >= 7.0)
-                ? new Process([$composer . ' dumpautoload'])
-                : new Process($composer . ' dumpautoload');
-
+            $process = new Process([$composer . ' dumpautoload']);
             $process->setWorkingDirectory(base_path())->run();
 
             $this->info('Migrating database...');
@@ -58,7 +55,6 @@ class CrudboosterInstallationCommand extends Command
             $this->call('migrate');
             $this->call('db:seed', ['--class' => 'CBSeeder']);
             $this->call('config:clear');
-            $this->call('optimize');
 
             $this->info('Installing CRUDBooster Is Completed ! Thank You :)');
         } else {

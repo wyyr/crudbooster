@@ -2,14 +2,12 @@
 
 namespace crocodicstudio\crudbooster;
 
-use App;
 use crocodicstudio\crudbooster\commands\CrudboosterInstallationCommand;
 use crocodicstudio\crudbooster\commands\CrudboosterUpdateCommand;
 use crocodicstudio\crudbooster\commands\CrudboosterVersionCommand;
 use crocodicstudio\crudbooster\commands\Mailqueues;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
 
@@ -30,17 +28,27 @@ class CRUDBoosterServiceProvider extends ServiceProvider
         $this->loadRoutesFrom(__DIR__ . '/routes.php');
 
         if ($this->app->runningInConsole()) {
-            $this->registerSeedsFrom(__DIR__ . '/database/seeders');
-            $this->publishes([__DIR__ . '/config/crudbooster.php' => config_path('crudbooster.php')], 'cb_config');
-            $this->publishes([__DIR__ . '/userfiles/controllers/CBHook.php' => app_path('Http/Controllers/CBHook.php')], 'CBHook');
-            $this->publishes([__DIR__ . '/userfiles/controllers/AdminCmsUsersController.php' => app_path('Http/Controllers/AdminCmsUsersController.php')], 'cb_user_controller');
-            $this->publishes([__DIR__ . '/public' => public_path()], 'cb_asset');
+            $this->publishes([
+                __DIR__ . '/database/seeders/CBSeeder.php' => database_path('seeders/CBSeeder.php'),
+            ], 'cb-seeders');
+            $this->publishes([
+                __DIR__ . '/config/crudbooster.php' => config_path('crudbooster.php')
+            ], 'cb_config');
+            $this->publishes([
+                __DIR__ . '/userfiles/controllers/CBHook.php' => app_path('Http/Controllers/CBHook.php')
+            ], 'CBHook');
+            $this->publishes([
+                __DIR__ . '/userfiles/controllers/AdminCmsUsersController.php' => app_path('Http/Controllers/AdminCmsUsersController.php')
+            ], 'cb_user_controller');
+            $this->publishes([
+                __DIR__ . '/public' => public_path()
+            ], 'cb_asset');
         }
 
         $this->customValidation();
 
         // use bootstrap style pagination
-        Paginator::useBootstrap();
+        Paginator::useBootstrapFour();
     }
 
     /**
@@ -93,24 +101,6 @@ class CRUDBoosterServiceProvider extends ServiceProvider
         $this->app->singleton("crudboosterMailQueue", function () {
             return new Mailqueues;
         });
-    }
-
-    protected function registerSeedsFrom($path)
-    {
-        foreach (glob("$path/*.php") as $filename) {
-            include $filename;
-            $classes = get_declared_classes();
-            $class = end($classes);
-
-            $command = request()->server('argv', null);
-            if (is_array($command)) {
-                $command = implode(' ', $command);
-                if ($command == "artisan db:seed") {
-                    Artisan::call('db:seed', ['--class' => $class]);
-                }
-            }
-
-        }
     }
 
     private function customValidation()
