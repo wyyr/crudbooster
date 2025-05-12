@@ -416,7 +416,7 @@ class CRUDBooster
             $module = DB::table('cms_moduls')->where('path', self::getModulePath())->first();
 
             //supply modulpath instead of $module incase where user decides to create form and custom url that does not exist in cms_moduls table.
-            return ($module) ?: $modulepath;
+            return ($module) ?? $modulepath;
         }
     }
 
@@ -449,24 +449,23 @@ class CRUDBooster
 
         $menu = DB::table('cms_menus')->whereRaw("cms_menus.id IN (select id_cms_menus from cms_menus_privileges where id_cms_privileges = '" . self::myPrivilegeId() . "')")->where('is_dashboard', 1)->where('is_active', 1)->first();
 
-        switch ($menu->type) {
+        switch ($menu->type??null) {
             case 'Route':
                 $url = route($menu->path);
                 break;
             default:
             case 'URL':
-                $url = $menu->path;
+                $url = $menu->path??null;
                 break;
             case 'Controller & Method':
-                $url = action($menu->path);
+                $url = action($menu->path??null);
                 break;
             case 'Module':
             case 'Statistic':
-                $url = self::adminPath($menu->path);
+                $url = self::adminPath($menu->path??null);
                 break;
         }
-
-        @$menu->url = $url;
+        if(isset($url)) @$menu->url = $url;
 
         return $menu;
     }
@@ -677,7 +676,7 @@ class CRUDBooster
     public static function getValueFilter($field)
     {
         $filter = request()->get('filter_column');
-        if ($filter[$field]) {
+        if (isset($filter[$field])) {
             return $filter[$field]['value'];
         }
     }
@@ -685,7 +684,7 @@ class CRUDBooster
     public static function getSortingFilter($field)
     {
         $filter = request()->get('filter_column');
-        if ($filter[$field]) {
+        if (isset($filter[$field])) {
             return $filter[$field]['sorting'];
         }
     }
@@ -693,7 +692,7 @@ class CRUDBooster
     public static function getTypeFilter($field)
     {
         $filter = request()->get('filter_column');
-        if ($filter[$field]) {
+        if (isset($filter[$field])) {
             return $filter[$field]['type'];
         }
     }
@@ -713,7 +712,7 @@ class CRUDBooster
 
     public static function timeAgo($datetime_to, $datetime_from = null, $full = false)
     {
-        $datetime_from = ($datetime_from) ?: date('Y-m-d H:i:s');
+        $datetime_from = ($datetime_from) ?? date('Y-m-d H:i:s');
         $now = new DateTime;
         if ($datetime_from != '') {
             $now = new DateTime($datetime_from);
@@ -1075,7 +1074,7 @@ class CRUDBooster
         $params = request()->all();
         $mainpath = trim(self::mainpath(), '/');
 
-        if ($params['filter_column'] && $singleSorting) {
+        if (isset($params['filter_column']) && isset($singleSorting)) {
             foreach ($params['filter_column'] as $k => $filter) {
                 foreach ($filter as $t => $val) {
                     if ($t == 'sorting') {
@@ -1207,7 +1206,7 @@ class CRUDBooster
         $content = $config['content'];
         $to = $config['to'];
         $id_cms_users = $config['id_cms_users'];
-        $id_cms_users = ($id_cms_users) ?: [CRUDBooster::myId()];
+        $id_cms_users = ($id_cms_users) ?? [CRUDBooster::myId()];
         foreach ($id_cms_users as $id) {
             $a = [];
             $a['created_at'] = date('Y-m-d H:i:s');
@@ -1926,7 +1925,7 @@ class CRUDBooster
 
         $prefix = trim($prefix, '/') . '/';
 
-        $namespace = ($namespace) ?: 'App\Http\Controllers';
+        $namespace = ($namespace) ?? 'App\Http\Controllers';
 
         try {
             Route::get($prefix, ['uses' => $controller . '@getIndex', 'as' => $controller . 'GetIndex']);

@@ -8,7 +8,7 @@ $name = $form['name'];
 
 if (in_array($type, $asset_already)) continue;
 ?>
-@if(file_exists(base_path('/vendor/wyyr/crudbooster/src/views/default/type_components/'.$type.'/asset.blade.php')))
+@if(file_exists(base_path('/vendor/wyyr/crudbooster_php8/src/views/default/type_components/'.$type.'/asset.blade.php')))
     @include('crudbooster::default.type_components.'.$type.'.asset')
 @elseif(file_exists(resource_path('views/vendor/crudbooster/type_components/'.$type.'/asset.blade.php')))
     @include('vendor.crudbooster.type_components.'.$type.'.asset')
@@ -35,7 +35,7 @@ $validation_raw = isset($form['validation']) ? explode('|', $form['validation'])
 if ($validation_raw) {
     foreach ($validation_raw as $vr) {
         $vr_a = explode(':', $vr);
-        if ($vr_a[1]) {
+        if ($vr_a[1]??null) {
             $key = $vr_a[0];
             $validation[$key] = $vr_a[1];
         } else {
@@ -61,7 +61,7 @@ if ($join && @$row) {
     $join_query_[$join_table] = DB::table($join_table)->select($join_title)->where("id", $row->{'id_'.$join_table})->first();
     $value = @$join_query_[$join_table]->{$join_title};
 }
-$form['type'] = ($form['type']) ?: 'text';
+$form['type'] = ($form['type']) ?? 'text';
 $type = @$form['type'];
 $required = (@$form['required']) ? "required" : "";
 $required = (@strpos($form['validation'], 'required') !== FALSE) ? "required" : $required;
@@ -78,11 +78,11 @@ if ($parent_field == $name) {
 if ($type == 'header') {
     $header_group_class = "header-group-$index";
 } else {
-    $header_group_class = ($header_group_class) ?: "header-group-$index";
+    $header_group_class = ($header_group_class) ?? "header-group-$index";
 }
 
 ?>
-@if(file_exists(base_path('/vendor/wyyr/crudbooster/src/views/default/type_components/'.$type.'/component.blade.php')))
+@if(file_exists(base_path('/vendor/wyyr/crudbooster_php8/src/views/default/type_components/'.$type.'/component.blade.php')))
     @include('crudbooster::default.type_components.'.$type.'.component')
 @elseif(file_exists(resource_path('views/vendor/crudbooster/type_components/'.$type.'/component.blade.php')))
     @include('vendor.crudbooster.type_components.'.$type.'.component')

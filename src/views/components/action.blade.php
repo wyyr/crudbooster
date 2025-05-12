@@ -53,7 +53,7 @@
             $query = str_replace("[".$key."]", '"'.$val.'"', $query);
         }
 
-        @eval("if($query) {
+        @eval("if(isset($query)) {
           echo \"<a class='btn btn-sm btn-\$color' title='\$title' onclick='\$confirm_box' href='\$url' target='\$target'><i class='\$icon'></i> $label</a>&nbsp;\";
       }");
     } else {
@@ -62,7 +62,7 @@
     ?>
 @endforeach
 
-@if($button_action_style == 'button_text')
+@if(isset($button_action_style) && $button_action_style ==  'button_text')
 
     @if(CRUDBooster::isRead() && $button_detail)
         <a class="btn btn-sm btn-primary btn-detail" title="{{ cbLang('action_detail_data') }}"
@@ -79,7 +79,7 @@
         <a class='btn btn-sm btn-warning btn-delete' title='{{cbLang("action_delete_data")}}' href='javascript:;'
            onclick='{{CRUDBooster::deleteConfirm($url)}}'>{{cbLang("action_delete_data")}}</a>
     @endif
-@elseif($button_action_style == 'button_icon_text')
+@elseif(isset($button_action_style) && $button_action_style ==  'button_icon_text')
 
 
     @if(CRUDBooster::isRead() && $button_detail)
@@ -100,7 +100,7 @@
            onclick='{{CRUDBooster::deleteConfirm($url)}}'><i class='fa fa-trash'></i> {{cbLang("action_delete_data")}}</a>
     @endif
 
-@elseif($button_action_style == 'dropdown')
+@elseif(isset($button_action_style) && $button_action_style ==  'dropdown')
 
     <div class='btn-group btn-group-action'>
         <button type='button' class='btn btn-sm btn-primary btn-action'>{{cbLang("action_label")}}</button>
@@ -128,7 +128,7 @@
                         $query = str_replace("[".$key."]", '"'.$val.'"', $query);
                     }
 
-                    @eval("if($query) {
+                    @eval("if(isset($query)) {
                         echo \"<li><a title='\$label' href='\$url'><i class='\$icon'></i> \$label</a></li>\";
                     }");
                 } else {

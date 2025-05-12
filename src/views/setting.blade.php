@@ -15,7 +15,7 @@
                 path_absolute: "{{asset('/')}}",
                 selector: ".wysiwyg",
                 height: 250,
-                {{ ($disabled)?"readonly:1,":"" }}
+                {{ (isset($disabled))?"readonly:1,":"" }}
                 plugins: [
                     "advlist autolink lists link image charmap print preview hr anchor pagebreak",
                     "searchreplace wordcount visualblocks visualchars code fullscreen",

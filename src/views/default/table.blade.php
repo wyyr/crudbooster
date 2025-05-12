@@ -50,15 +50,15 @@
     <table id='table_dashboard' class="table table-hover table-striped table-bordered">
         <thead>
         <tr class="active">
-            <?php if($button_bulk_action):?>
+            <?php if(isset($button_bulk_action)):?>
             <th width='3%'><input type='checkbox' id='checkall'/></th>
             <?php endif;?>
-            <?php if($show_numbering):?>
+            <?php if(isset($show_numbering)):?>
             <th width="1%">{{ cbLang('no') }}</th>
             <?php endif;?>
             <?php
             foreach ($columns as $col) {
-                if ($col['visible'] === FALSE) continue;
+                if (isset($col['visible']) && $col['visible'] === false) continue;
 
                 $sort_column = Request::get('filter_column');
                 $colname = $col['label'];
@@ -66,7 +66,7 @@
                 $field = $col['field_with'];
                 $width = (isset($col['width'])) ?$col['width']: "auto";
 		$style = (isset($col['style'])) ?$col['style']: "";
-                $mainpath = trim(CRUDBooster::mainpath(), '/').$build_query;
+                $mainpath = trim(CRUDBooster::mainpath(), '/').($build_query??null);
                 echo "<th width='$width' $style>";
                 if (isset($sort_column[$field])) {
                     switch ($sort_column[$field]['sorting']) {
@@ -92,7 +92,7 @@
             }
             ?>
 
-            @if($button_table_action)
+            @if(isset($button_table_action))
                 @if(CRUDBooster::isUpdate() || CRUDBooster::isDelete() || CRUDBooster::isRead())
                     <th width='{{ isset($button_action_width)? $button_action_width :"auto"}}' style="text-align:right">{{cbLang("action_label")}}</th>
                 @endif
@@ -117,7 +117,7 @@
 
         @foreach($html_contents['html'] as $i=>$hc)
 
-            @if($table_row_color)
+            @if(isset($table_row_color))
                 <?php $tr_color = NULL;?>
                 @foreach($table_row_color as $trc)
                     <?php
@@ -128,7 +128,7 @@
                         $query = str_replace("[".$key."]", '"'.$val.'"', $query);
                     }
 
-                    @eval("if($query) {
+                    @eval("if(isset($query)) {
                                       \$tr_color = \$color;
                                   }");
                     ?>
@@ -139,7 +139,7 @@
                     @endif
 
                     @foreach($hc as $j=>$h)
-                        <td {{ $columns[$j]['style'] or ''}}>{!! $h !!}</td>
+                        <td {{ ($columns[$j]['style']??null) or ''}}>{!! $h !!}</td>
                     @endforeach
                 </tr>
                 @endforeach
@@ -148,17 +148,17 @@
 
         <tfoot>
         <tr>
-            <?php if($button_bulk_action):?>
+            <?php if(isset($button_bulk_action)):?>
             <th>&nbsp;</th>
             <?php endif;?>
 
-            <?php if($show_numbering):?>
+            <?php if(isset($show_numbering)):?>
             <th>&nbsp;</th>
             <?php endif;?>
 
             <?php
             foreach ($columns as $col) {
-                if ($col['visible'] === FALSE) continue;
+                if (isset($col['visible']) && $col['visible'] === false) continue;
                 $colname = $col['label'];
                 $width = (isset($col['width'])) ?$col['width']: "auto";
 		$style = (isset($col['style'])) ? $col['style']: "";
@@ -166,7 +166,7 @@
             }
             ?>
 
-            @if($button_table_action)
+            @if(isset($button_table_action))
                 @if(CRUDBooster::isUpdate() || CRUDBooster::isDelete() || CRUDBooster::isRead())
                     <th> -</th>
                 @endif
@@ -186,7 +186,7 @@ $total = $result->total();
 <div class="col-md-4"><span class="pull-right">{{ cbLang("filter_rows_total") }}
         : {{ $from }} {{ cbLang("filter_rows_to") }} {{ $to }} {{ cbLang("filter_rows_of") }} {{ $total }}</span></div>
 
-@if($columns)
+@if(isset($columns))
     @push('bottom')
         <script>
             $(function () {
@@ -311,7 +311,7 @@ $total = $result->total();
                     <form method='get' action=''>
                         <div class="modal-body">
                             <?php foreach($columns as $key => $col):?>
-                            <?php if (isset($col['image']) || isset($col['download']) || $col['visible'] === FALSE) continue;?>
+                            <?php if (isset($col['image']) || isset($col['download']) || (isset($col['visible']) && $col['visible'] === false)) continue;?>
 
                             <div class='form-group'>
 
@@ -470,7 +470,7 @@ $total = $result->total();
                         <div class="modal-body">
                             <div class="form-group">
                                 <label>{{cbLang("export_dialog_filename")}}</label>
-                                <input type='text' name='filename' class='form-control' required value='Report {{ $module_name }} - {{date("d M Y")}}'/>
+                                <input type='text' name='filename' class='form-control' required value='Report {{ $module_name??null }} - {{date("d M Y")}}'/>
                                 <div class='help-block'>
                                     {{cbLang("export_dialog_help_filename")}}
                                 </div>
@@ -507,18 +507,19 @@ $total = $result->total();
 
                                 <div class="form-group">
                                     <label>{{cbLang("export_dialog_page_size")}}</label>
+                                    @php error_reporting(E_ERROR | E_PARSE); @endphp
                                     <select class='form-control' name='page_size'>
-                                        <option <?=($setting->default_paper_size == 'Letter') ? "selected" : ""?> value='Letter'>Letter</option>
-                                        <option <?=($setting->default_paper_size == 'Legal') ? "selected" : ""?> value='Legal'>Legal</option>
-                                        <option <?=($setting->default_paper_size == 'Ledger') ? "selected" : ""?> value='Ledger'>Ledger</option>
+                                        <option <?=($setting?->default_paper_size == 'Letter') ? "selected" : ""?> value='Letter'>Letter</option>
+                                        <option <?=($setting?->default_paper_size == 'Legal') ? "selected" : ""?> value='Legal'>Legal</option>
+                                        <option <?=($setting?->default_paper_size == 'Ledger') ? "selected" : ""?> value='Ledger'>Ledger</option>
                                         <?php for($i = 0;$i <= 8;$i++):
-                                        $select = ($setting->default_paper_size == 'A'.$i) ? "selected" : "";
+                                        $select = ($setting?->default_paper_size == 'A'.$i) ? "selected" : "";
                                         ?>
                                         <option <?=$select?> value='A{{$i}}'>A{{$i}}</option>
                                         <?php endfor;?>
 
                                         <?php for($i = 0;$i <= 10;$i++):
-                                        $select = ($setting->default_paper_size == 'B'.$i) ? "selected" : "";
+                                        $select = (is_object($setting) && $setting?->default_paper_size == 'B'.$i) ? "selected" : "";
                                         ?>
                                         <option <?=$select?> value='B{{$i}}'>B{{$i}}</option>
                                         <?php endfor;?>

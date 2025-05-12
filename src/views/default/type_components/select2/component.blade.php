@@ -1,6 +1,6 @@
-@if($form['datatable'])
+@if(isset($form['datatable']))
 
-    @if($form['relationship_table'])
+    @if(isset($form['relationship_table']))
         @push('bottom')
             <script type="text/javascript">
                 $(function () {
@@ -9,12 +9,12 @@
             </script>
         @endpush
     @else
-        @if($form['datatable_ajax'] == true)
+        @if(isset($form['datatable_ajax']) && $form['datatable_ajax'] == true)
 
             <?php
             $datatable = @$form['datatable'];
             $where = @$form['datatable_where'];
-            $format = @$form['datatable_format'];
+            $format = @$form['datatable_format']??null;
 
             $raw = explode(',', $datatable);
             $url = CRUDBooster::mainpath("find-data");
@@ -65,7 +65,7 @@
                                 return markup;
                             },
                             minimumInputLength: 1,
-                            @if($value)
+                            @if(isset($value))
                             initSelection: function (element, callback) {
                                 var id = $(element).val() ? $(element).val() : "{{$value}}";
                                 if (id !== '') {
@@ -119,18 +119,18 @@
 
 <div class='form-group {{$header_group_class}} {{ ($errors->first($name))?"has-error":"" }}' id='form-group-{{$name}}' style="{{@$form['style']}}">
     <label class='control-label col-sm-2'>{{$form['label']}}
-        @if($required)
+        @if(isset($required))
             <span class='text-danger' title='{!! cbLang('this_field_is_required') !!}'>*</span>
         @endif
     </label>
 
     <div class="{{$col_width?:'col-sm-10'}}">
         <select style='width:100%' class='form-control' id="{{$name}}"
-                {{$required}} {{$readonly}} {!!$placeholder!!} {{$disabled}} name="{{$name}}{{($form['relationship_table'])?'[]':''}}" {{ ($form['relationship_table'])?'multiple="multiple"':'' }} >
-            @if($form['dataenum'])
+                {{$required}} {{$readonly}} {!!$placeholder!!} {{$disabled}} name="{{$name}}{{isset($form['relationship_table'])?'[]':''}}" {{ isset($form['relationship_table'])?'multiple="multiple"':'' }} >
+            @if(isset($form['dataenum']))
                 <option value=''>{{cbLang('text_prefix_option')}} {{$form['label']}}</option>
                 <?php
-                $dataenum = $form['dataenum'];
+                $dataenum = $form['dataenum']??null;
                 $dataenum = (is_array($dataenum)) ? $dataenum : explode(";", $dataenum);
                 ?>
                 @foreach($dataenum as $enum)
@@ -150,12 +150,12 @@
                 @endforeach
             @endif
 
-            @if($form['datatable'])
+            @if($form['datatable']??null)
                 @if($form['relationship_table'])
                     <?php
                     $select_table = explode(',', $form['datatable'])[0];
                     $select_title = explode(',', $form['datatable'])[1];
-                    $select_where = $form['datatable_where'];
+                    $select_where = $form['datatable_where']??null;
                     $pk = CRUDBooster::findPrimaryKey($select_table);
 
                     $result = DB::table($select_table)->select($pk, $select_title);
@@ -164,7 +164,7 @@
                     }
                     $result = $result->orderby($select_title, 'asc')->get();
 
-                    if($form['datatable_orig'] != ''){
+                    if(isset($form['datatable_orig'])){
                         $params = explode("|", $form['datatable_orig']);
                         if(!isset($params[2])) $params[2] = "id";
                         $value = DB::table($params[0])->where($params[2], $id)->first()->{$params[1]};
@@ -172,7 +172,7 @@
                     } else {
                         $foreignKey = CRUDBooster::getForeignKey($table, $form['relationship_table']);
                         $foreignKey2 = CRUDBooster::getForeignKey($select_table, $form['relationship_table']);
-                        $value = DB::table($form['relationship_table'])->where($foreignKey, $id);
+                        $value = DB::table($form['relationship_table'])->where($foreignKey, $id??null);
                         $value = $value->pluck($foreignKey2)->toArray();
                     }
                     
@@ -189,8 +189,8 @@
                         <?php
                         $select_table = explode(',', $form['datatable'])[0];
                         $select_title = explode(',', $form['datatable'])[1];
-                        $select_where = $form['datatable_where'];
-                        $datatable_format = $form['datatable_format'];
+                        $select_where = $form['datatable_where']??null;
+                        $datatable_format = $form['datatable_format']??null;
                         $select_table_pk = CRUDBooster::findPrimaryKey($select_table);
                         $result = DB::table($select_table)->select($select_table_pk, $select_title);
                         if ($datatable_format) {

@@ -47,7 +47,7 @@
     </form>
 @elseif($command=='showFunction')
 
-    @if($key == 'sql')
+    @if(isset($key) && $key ==  'sql')
         <?php
         $sqls = explode(';', $value);
         $dataPoints = array();

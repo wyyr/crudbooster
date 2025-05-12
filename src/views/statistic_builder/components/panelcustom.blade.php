@@ -42,7 +42,7 @@
     </form>
 @elseif($command=='showFunction')
     <?php
-    if($key == 'value') {
+    if(isset($key) && $key ==  'value') {
     if ($config->type == 'controller') {
         $url = action($value);
     } elseif ($config->type == 'route') {

@@ -525,7 +525,7 @@ class CBController extends Controller
         }
 
         $mainpath = CRUDBooster::mainpath();
-        $orig_mainpath = $this->data['mainpath'];
+        $orig_mainpath = $this->data['mainpath']??null;
         $title_field = $this->title_field;
         $html_contents = [];
         $page = (request('page')) ? request('page') : 1;
@@ -544,7 +544,7 @@ class CBController extends Controller
             }
 
             foreach ($columns_table as $col) {
-                if ($col['visible'] === false) {
+                if (isset($col['visible']) && $col['visible'] === false) {
                     continue;
                 }
 
@@ -577,16 +577,16 @@ class CBController extends Controller
                     }
                 }
 
-                if ($col['str_limit']) {
+                if ($col['str_limit']??null) {
                     $value = trim(strip_tags($value));
                     $value = str_limit($value, $col['str_limit']);
                 }
 
-                if ($col['nl2br']) {
+                if ($col['nl2br']??null) {
                     $value = nl2br($value);
                 }
 
-                if ($col['callback_php']) {
+                if ($col['callback_php']??null) {
                     foreach ($row as $k => $v) {
                         $col['callback_php'] = str_replace("[" . $k . "]", $v, $col['callback_php']);
                     }
@@ -617,7 +617,7 @@ class CBController extends Controller
             } //end foreach columns_table
 
             if ($this->button_table_action):
-
+                $parent_field = $parent_field??null;
                 $button_action_style = $this->button_action_style;
                 $html_content[] = "<div class='button_action' style='text-align:right'>" . view('crudbooster::components.action', compact('addaction', 'row', 'button_action_style', 'parent_field'))->render() . "</div>";
 
@@ -927,7 +927,7 @@ class CBController extends Controller
                             $parseUnique = explode(',', str_replace('unique:', '', $validationItem));
                             $uniqueTable = ($parseUnique[0]) ?: $this->table;
                             $uniqueColumn = ($parseUnique[1]) ?: $name;
-                            $uniqueIgnoreId = ($parseUnique[2]) ?: (($id) ?: '');
+                            $uniqueIgnoreId = ($parseUnique[2]) ?: (($id) ?? '');
 
                             //Make sure table name
                             $uniqueTable = CB::parseSqlTable($uniqueTable)['table'];

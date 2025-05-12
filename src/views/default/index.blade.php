@@ -2,7 +2,7 @@
 
 @section('content')
 
-    @if($index_statistic)
+    @if(isset($index_statistic))
         <div id='box-statistic' class='row'>
             @foreach($index_statistic as $stat)
                 <div class="{{ ($stat['width'])?:'col-sm-3' }}">
@@ -30,7 +30,7 @@
                 &nbsp; {{cbLang('form_back_to_list',['module'=>urldecode(g('label'))])}}</a></p>
     @endif
 
-    @if($parent_table)
+    @if($parent_table??null)
         <div class="card">
             <div class="card-body table-responsive no-padding">
                 <table class='table table-bordered'>
@@ -74,7 +74,7 @@
                                     </li>
                                 @endif
 
-                                @if($button_selected)
+                                @if(isset($button_selected))
                                     @foreach($button_selected as $button)
                                         <li>
                                             <a href="javascript:void(0)" data-name="{{ $button["name"] }}" title="{{ $button["label"] }}">
@@ -90,8 +90,8 @@
                 </div>
                 <div class="col-md-6">
                     <div class="float-right">
-                        @if($button_filter)
-                            <a href="javascript:void(0)" id="btn_advanced_filter" data-url-parameter='{{$build_query}}'
+                        @if(isset($button_filter))
+                            <a href="javascript:void(0)" id="btn_advanced_filter" data-url-parameter='{{ isset($build_query)?$build_query:null }}'
                                title="{{cbLang('filter_dialog_title')}}" class="btn btn-sm btn-primary {{ (Request::get('filter_column')) ? 'active' : '' }}">
                                 <i class="fa fa-filter"></i> {{ cbLang("button_filter") }}
                             </a>
@@ -108,8 +108,8 @@
                                         $parameters = Request::all();
                                         unset($parameters['q']);
                                         $build_query = urldecode(http_build_query($parameters));
-                                        $build_query = ($build_query) ? "?".$build_query : "";
-                                        $build_query = (Request::all()) ? $build_query : "";
+                                        $build_query = (isset($build_query) ? "?".$build_query : "");
+                                        $build_query = (Request::all()) ? ($build_query??null) : "";
                                         ?>
                                         <button type='button' onclick='location.href="{{ CRUDBooster::mainpath().$build_query}}"'
                                                 title="{{cbLang('button_reset')}}" class='btn btn-sm btn-warning'><i class='fa fa-ban'></i></button>

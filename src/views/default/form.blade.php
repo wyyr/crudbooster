@@ -19,19 +19,19 @@
             <div class="card-body" style="padding:20px 0px 0px 0px">
                 <?php
                 $action = (@$row) ? CRUDBooster::mainpath("edit-save/$row->id") : CRUDBooster::mainpath("add-save");
-                $return_url = ($return_url) ?: g('return_url');
+                $return_url = ($return_url) ?? g('return_url');
                 ?>
                 <form class='form-horizontal' method='post' id="form" enctype="multipart/form-data" action='{{$action}}'>
                     <input type="hidden" name="_token" value="{{ csrf_token() }}">
                     <input type='hidden' name='return_url' value='{{ @$return_url }}'/>
                     <input type='hidden' name='ref_mainpath' value='{{ CRUDBooster::mainpath() }}'/>
                     <input type='hidden' name='ref_parameter' value='{{urldecode(http_build_query(@$_GET))}}'/>
-                    @if($hide_form)
+                    @if(isset($hide_form))
                         <input type="hidden" name="hide_form" value='{!! serialize($hide_form) !!}'>
                     @endif
                     <div class="card-body" id="parent-form-area">
 
-                        @if($command == 'detail')
+                        @if(isset($command) && $command ==  'detail')
                             @include("crudbooster::default.form_detail")
                         @else
                             @include("crudbooster::default.form_body")
@@ -60,7 +60,7 @@
                                         <input type="submit" name="submit" value='{{cbLang("button_save_more")}}' class='btn btn-success'>
                                     @endif
 
-                                    @if($button_save && $command != 'detail')
+                                    @if($button_save && isset($command) && $command != 'detail')
                                         <input type="submit" name="submit" value='{{cbLang("button_save")}}' class='btn btn-success'>
                                     @endif
 

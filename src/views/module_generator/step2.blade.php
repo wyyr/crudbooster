@@ -321,7 +321,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                @if($cb_col)
+                @if(isset($cb_col))
                     @foreach($cb_col as $c)
                         <tr>
                             <td><input value='{{$c["label"]}}' type='text' name='column[]' onclick='showColumnSuggest(this)'

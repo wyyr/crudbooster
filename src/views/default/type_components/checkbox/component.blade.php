@@ -1,12 +1,12 @@
 <div class='form-group {{$header_group_class}} {{ ($errors->first($name))?"has-error":"" }}' id='form-group-{{$name}}' style="{{@$form['style']}}">
     <label class='control-label col-sm-2'>{{$form['label']}}
-        @if($required)
+        @if(isset($required))
             <span class='text-danger' title='{!! cbLang('this_field_is_required') !!}'>*</span>
         @endif
     </label>
     <div class="{{$col_width?:'col-sm-10'}}">
 
-        @if($form['dataenum']!='')
+        @if(isset($form['dataenum']))
             <?php
             @$value = explode(";", $value);
             @array_walk($value, 'trim');
@@ -93,9 +93,9 @@
             }
 
         endif;
-        if ($form['dataquery']) {
+        if ($form['dataquery']??null) {
 
-            $query = DB::select(DB::raw($form['dataquery']));
+            $query = DB::select(DB::raw($form['dataquery']??null));
             @$value = explode(';', $value);
             if ($query) {
                 foreach ($query as $q) {

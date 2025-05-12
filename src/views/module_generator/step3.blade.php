@@ -490,7 +490,7 @@
                                 $types = file_get_contents($types);
                                 $types = json_decode($types);
 
-                                if($types):
+                                if(isset($types)):
                                 ?>
 
                                 @if($types->alert)

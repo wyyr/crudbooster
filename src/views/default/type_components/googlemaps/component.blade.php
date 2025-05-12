@@ -1,6 +1,6 @@
 <div class='form-group peta {{$header_group_class}} {{ ($errors->first($name))?"has-error":"" }}'>
     <label class='control-label col-sm-2'>{{$form['label']}}
-        @if($required)
+        @if(isset($required))
             <span class='text-danger' title='{!! cbLang('this_field_is_required') !!}'>*</span>
         @endif
     </label>
@@ -9,7 +9,7 @@
 
 
         <div class="input-group">
-            <input type="text" class="form-control" id="{{$name}}" {{ ($readonly)?"readonly":"" }} {{ ($required)?"required":""}} value="{{$value}}"
+            <input type="text" class="form-control" id="{{$name}}" {{ (isset($readonly))?"readonly":"" }} {{ (isset($required))?"required":""}} value="{{$value}}"
                    name="{{$name}}">
             <input type="hidden" name="input-latitude-{{$name}}" id="input-latitude-{{$name}}" value="{{ ($form['latitude'])?$row->$form['latitude']:0 }}">
             <input type="hidden" name="input-longitude-{{$name}}" id="input-longitude-{{$name}}" value="{{ ($form['longitude'])?$row->$form['longitude']:0 }}">
@@ -48,7 +48,7 @@
                         <br/>
                         <p>
                             <span class="text-info" style="font-weight: bold">Current Location :</span><br/>
-                            <span id='current-location-span-{{$name}}'>{{ ($value)?$value:'-' }}</span>
+                            <span id='current-location-span-{{$name}}'>{{ (isset($value))?$value:'-' }}</span>
                         </p>
 
                     </div>

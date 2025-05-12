@@ -78,7 +78,7 @@ $asset_already[] = $type;
 
         @if(file_exists($file_location))
             <?php $containTR = (substr(trim(file_get_contents($file_location)), 0, 4) == '<tr>') ? TRUE : FALSE;?>
-            @if($containTR)
+            @if(isset($containTR))
                 @include('crudbooster::default.type_components.'.$type.'.component_detail')
             @else
                 <tr>
@@ -88,7 +88,7 @@ $asset_already[] = $type;
             @endif
         @elseif(file_exists($user_location))
             <?php $containTR = (substr(trim(file_get_contents($user_location)), 0, 4) == '<tr>') ? TRUE : FALSE;?>
-            @if($containTR)
+            @if(isset($containTR))
                 @include('vendor.crudbooster.type_components.'.$type.'.component_detail')
             @else
                 <tr>

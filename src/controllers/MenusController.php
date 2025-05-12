@@ -42,10 +42,10 @@ class MenusController extends CBController
 
         $id_module = $id_statistic = 0;
 
-        if ($row->type == 'Module') {
+        if (isset($row->type) && $row->type == 'Module') {
             $m = CRUDBooster::first('cms_moduls', ['path' => $row->path]);
             $id_module = $m->id;
-        } elseif ($row->type == 'Statistic') {
+        } elseif (isset($row->type) && $row->type == 'Statistic') {
             $row->path = str_replace('statistic_builder/show/', '', $row->path);
             $m = CRUDBooster::first('cms_statistics', ['slug' => $row->path]);
             $id_statistic = $m->id;
@@ -54,7 +54,7 @@ class MenusController extends CBController
         $this->script_js = "
 			$(function() {
 				var current_id = '$id';
-				var current_type = '$row->type';
+				var current_type = '$row?->type';
 				var type_menu = $('input[name=type]').val();
 				type_menu = (current_type)?current_type:type_menu;
 				if(type_menu == 'Module') {
@@ -250,7 +250,7 @@ class MenusController extends CBController
         $privileges = DB::table('cms_privileges')->get();
 
         $id_cms_privileges = Request::get('id_cms_privileges');
-        $id_cms_privileges = ($id_cms_privileges) ?: CRUDBooster::myPrivilegeId();
+        $id_cms_privileges = ($id_cms_privileges) ?? CRUDBooster::myPrivilegeId();
 
         $menu_active = DB::table('cms_menus')->where('parent_id', 0)->where('is_active', 1)->orderby('sorting', 'asc')->get();
 

@@ -9,7 +9,7 @@ if ($form['datatable'] && $form['relationship_table']) {
 
     $ids = DB::table($form['relationship_table'])->where($form['relationship_table'].'.'.$foreignKey, $id)->pluck($foreignKey2)->toArray();
     $value = DB::table($datatable_tab)->select($datatable_field)->whereIn('id', $ids)->pluck($datatable_field)->toArray();
-} elseif ($form['dataquery']) {
+} elseif ($form['dataquery']??null) {
     $dataquery = $form['dataquery'];
     $query = DB::select(DB::raw($dataquery));
     if ($query) {

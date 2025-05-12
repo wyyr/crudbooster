@@ -80,7 +80,7 @@ class FileController extends Controller
         $file_time = $handler->getMTime(); // Get the last modified time for the file (Unix timestamp)
 
         $header_content_type = $handler->getMimeType();
-        $header_content_length = ($imageFileSize) ?: $handler->getSize();
+        $header_content_length = ($imageFileSize) ?? $handler->getSize();
         $header_etag = md5($file_time . $fullFilePath);
         $header_last_modified = gmdate('r', $file_time);
         $header_expires = gmdate('r', $file_time + $lifetime);

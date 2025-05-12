@@ -55,7 +55,7 @@
     @endpush
 
     <ul class="nav nav-tabs nav-primary mb-1">
-        @if($id)
+        @if(isset($id))
             <li class="nav-item" role="presentation">
                 <a class="nav-link active" href="{{ Route('ModulsControllerGetStep1') . '/' . $id }}">
                     <i class="fa fa-info"></i> Step 1 - Module Information
@@ -120,7 +120,7 @@
                     <label for="icon">Icon</label>
                     <select name="icon" id="icon" required class="select2 form-control">
                         @foreach($fontawesome as $f)
-                            <option value="fas fa-{{ $f }}" {{($row->icon == 'fas fa-' . $f) ? "selected" : ""}} data-label='{{ $f }}'>{{ $f }}</option>
+                            <option value="fas fa-{{ $f }}" {{($row?->icon == 'fas fa-' . $f) ? "selected" : ""}} data-label='{{ $f }}'>{{ $f }}</option>
                         @endforeach
                     </select>
                 </div>

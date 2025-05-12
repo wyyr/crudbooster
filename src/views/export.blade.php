@@ -55,7 +55,7 @@
                     } else {
 
                         //limit character
-                        if ($col['str_limit']) {
+                        if ($col['str_limit']??null) {
                             $value = trim(strip_tags($value));
                             $value = str_limit($value, $col['str_limit']);
                         }

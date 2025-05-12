@@ -1,5 +1,5 @@
 <?php $default = ! empty($form['default']) ? $form['default'] : cbLang('text_prefix_option')." ".$form['label'];?>
-@if($form['parent_select'])
+@if($form['parent_select']??null)
     <?php
     $parent_select = (count(explode(",", $form['parent_select'])) > 1) ? explode(",", $form['parent_select']) : $form['parent_select'];
     $parent = is_array($parent_select) ? $parent_select[0] : $parent_select;
@@ -60,7 +60,7 @@
 @endif
 <div class='form-group {{$header_group_class}} {{ ($errors->first($name))?"has-error":"" }}' id='form-group-{{$name}}' style="{{@$form['style']}}">
     <label class='control-label col-sm-2'>{{$form['label']}}
-        @if($required)
+        @if(isset($required))
             <span class='text-danger' title='{!! cbLang('this_field_is_required') !!}'>*</span>
         @endif
     </label>
@@ -69,10 +69,10 @@
         <select class='form-control' id="{{$name}}" data-value='{{$value}}' {{$required}} {!!$placeholder!!} {{$readonly}} {{$disabled}} name="{{$name}}">
             <option value=''>{{$default}}</option>
             <?php
-            if (! $form['parent_select']) {
+            if (! isset($form['parent_select'])) {
                 if (@$form['dataquery']):
 
-                    $query = DB::select(DB::raw($form['dataquery']));
+                    $query = DB::select(DB::raw($form['dataquery']??null));
                     if ($query) {
                         foreach ($query as $q) {
                             $selected = ($value == $q->value) ? "selected" : "";
@@ -105,8 +105,8 @@
 
                 if (@$form['datatable']):
                     $raw = explode(",", $form['datatable']);
-                    $format = $form['datatable_format'];
-                    $datatable_order = explode(',', $form['datatable_order']);
+                    $format = $form['datatable_format']??null;
+                    $datatable_order = explode(',', $form['datatable_order']??'');
                     $table1 = $raw[0];
                     $column1 = $raw[1];
 

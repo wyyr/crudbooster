@@ -151,7 +151,7 @@
                             <?php $no = 1;?>
                             @foreach($moduls as $modul)
                                 <?php
-                                $roles = DB::table('cms_privileges_roles')->where('id_cms_moduls', $modul->id)->where('id_cms_privileges', $row->id)->first();
+                                $roles = DB::table('cms_privileges_roles')->where('id_cms_moduls', $modul->id)->where('id_cms_privileges', @$row->id)->first();
                                 ?>
                                 <tr>
                                     <td><?php echo $no++;?></td>

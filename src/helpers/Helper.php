@@ -121,7 +121,7 @@ if (!function_exists('get_setting')) {
     function get_setting($key, $default = null)
     {
         $setting = CB::getSetting($key);
-        $setting = ($setting) ?: $default;
+        $setting = ($setting) ?? $default;
         return $setting;
     }
 }

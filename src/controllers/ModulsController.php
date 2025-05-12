@@ -631,7 +631,7 @@ class ModulsController extends CBController
                 $value = $val;
             }
 
-            // if($key == 'orderby') {
+            // if(isset($key) && $key ==  'orderby') {
             // 	$value = ;
             // }
 

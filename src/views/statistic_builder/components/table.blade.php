@@ -38,7 +38,7 @@
     </form>
 @elseif($command=='showFunction')
     <?php
-    if($key == 'sql') {
+    if(isset($key) && $key ==  'sql') {
     try {
         $sessions = Session::all();
         foreach ($sessions as $key => $val) {
@@ -50,7 +50,7 @@
     }
     ?>
 
-    @if($sql)
+    @if(isset($sql))
         <table class='table table-striped'>
             <thead>
             <tr>

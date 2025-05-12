@@ -17,7 +17,7 @@
             <!-- Optionally, you can add icons to the links -->
 
             <?php $dashboard = CRUDBooster::sidebarDashboard();?>
-            @if($dashboard)
+            @if(isset($dashboard))
                 <li data-id="{{ $dashboard->id }}" class="{{ (request()->is(config('crudbooster.ADMIN_PATH'))) ? 'active' : '' }}">
                     <a href="{{ CRUDBooster::adminPath() }}" class="{{ ($dashboard->color) ? 'text-' . $dashboard->color : '' }}">
                         <i class="fas fa-tachometer-alt"></i> <span>{{ cbLang('text_dashboard') }}</span>
