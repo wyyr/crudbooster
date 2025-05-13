@@ -60,7 +60,7 @@
                             $value = str_limit($value, $col['str_limit']);
                         }
 
-                        if ($col['nl2br']) {
+                        if(isset($col['nl2br'])) {
                             $value = nl2br($value);
                         }
 

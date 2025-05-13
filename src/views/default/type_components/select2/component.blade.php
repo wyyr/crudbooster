@@ -151,7 +151,7 @@
             @endif
 
             @if($form['datatable']??null)
-                @if($form['relationship_table'])
+                @if(isset($form['relationship_table']))
                     <?php
                     $select_table = explode(',', $form['datatable'])[0];
                     $select_title = explode(',', $form['datatable'])[1];

@@ -211,7 +211,7 @@ class ApiController extends Controller
 
         $responses_fields = [];
         foreach ($responses as $r) {
-            if ($r['used']) {
+            if(isset($r['used'])) {
                 $responses_fields[] = $r['name'];
             }
         }

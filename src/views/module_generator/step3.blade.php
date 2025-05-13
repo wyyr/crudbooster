@@ -476,7 +476,7 @@
                         <td>
                             <select class='form-control width' name='width[]'>
                                 @for($i=10;$i>=1;$i--)
-                                    <option {{ ($form['width'] == "col-sm-$i")?"selected":"" }} value='col-sm-{{$i}}'>{{$i}}</option>
+                                    <option {{ ( ($form['width']??null) == "col-sm-$i")?"selected":"" }} value='col-sm-{{$i}}'>{{$i}}</option>
                                 @endfor
                             </select>
                         </td>
@@ -486,7 +486,7 @@
                                 <?php
 
                                 $type = $form["type"] ?: "text";
-                                $types = base_path('vendor/huynhtuson/crudbooster/src/views/default/type_components/'.$type.'/info.json');
+                                $types = base_path('vendor/huynhtuson/crudbooster_php8/src/views/default/type_components/'.$type.'/info.json');
                                 $types = file_get_contents($types);
                                 $types = json_decode($types);
 
@@ -500,7 +500,7 @@
                                 @endif
 
                                 <?php
-                                if($types->attribute->required):
+                                if($types->attribute->required??null):
                                 foreach($types->attribute->required as $key=>$val):
                                 @$value = $form[$key];
                                 if(is_object($val)):
@@ -537,7 +537,7 @@
 
 
                                 <?php
-                                if($types->attribute->requiredOne):
+                                if($types->attribute->requiredOne??null):
                                 foreach($types->attribute->requiredOne as $key=>$val):
                                 @$value = $form[$key];
                                 ?>

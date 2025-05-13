@@ -26,7 +26,7 @@ if ($datatable && $form['relationship_table']) {
     echo implode(", ", $tableData);
 }
 
-if ($form['dataenum']) {
+if(isset($form['dataenum'])) {
     echo $value;
 }
 

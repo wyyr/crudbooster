@@ -230,7 +230,7 @@ class CBController extends Controller
                 $data['parent_field'] = CB::getTableForeignKey(g('parent_table'), $this->table);
             }
 
-            if ($data['parent_field']) {
+            if(isset($data['parent_field'])) {
                 foreach ($this->columns_table as $i => $col) {
                     if ($col['name'] == $data['parent_field']) {
                         unset($this->columns_table[$i]);
@@ -383,7 +383,7 @@ class CBController extends Controller
                     if (empty($col['field_with'])) {
                         continue;
                     }
-                    if ($col['is_subquery']) {
+                    if(isset($col['is_subquery'])) {
                         continue;
                     }
                     $w->orwhere($col['field_with'], "like", "%" . request("q") . "%");
@@ -603,7 +603,7 @@ class CBController extends Controller
                     if ($datavalue) {
                         $prevalue = [];
                         foreach ($datavalue as $d) {
-                            if ($d['label']) {
+                            if(isset($d['label'])) {
                                 $prevalue[] = $d['label'];
                             }
                         }

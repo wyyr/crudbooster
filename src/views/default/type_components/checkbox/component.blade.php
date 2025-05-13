@@ -59,7 +59,7 @@
 
             $selects_data = $selects_data->orderby($datatable_field, "asc")->get();
 
-            if ($form['relationship_table']) {
+            if(isset($form['relationship_table'])) {
                 $foreignKey = CRUDBooster::getForeignKey($table, $form['relationship_table']);
                 $foreignKey2 = CRUDBooster::getForeignKey($datatable_tab, $form['relationship_table']);
 

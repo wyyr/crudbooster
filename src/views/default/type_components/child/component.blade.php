@@ -10,7 +10,7 @@ $name = str_slug($form['label'], '');
 @endpush
 <div class='form-group {{$header_group_class}}' id='form-group-{{$name}}'>
 
-    @if($form['columns'])
+    @if(isset($form['columns']))
         <div class="col-sm-12">
 
             <div id='panel-form-{{$name}}' class="panel panel-default">
@@ -42,7 +42,7 @@ $name = str_slug($form['label'], '');
                                                     />
                                                 @elseif($col['type']=='radio')
                                                     <?php
-                                                    if($col['dataenum']):
+                                                    if(isset($col['dataenum'])):
                                                     $dataenum = $col['dataenum'];
                                                     if (strpos($dataenum, ';') !== false) {
                                                         $dataenum = explode(";", $dataenum);
@@ -258,7 +258,7 @@ $name = str_slug($form['label'], '');
 
                                                 @elseif($col['type']=='select')
 
-                                                    @if($col['parent_select'])
+                                                    @if(isset($col['parent_select']))
                                                         @push('bottom')
                                                             <script type="text/javascript">
                                                                 $(function () {
@@ -308,7 +308,7 @@ $name = str_slug($form['label'], '');
                                                     >
                                                         <option value=''>{{cbLang('text_prefix_option')}} {{$col['label']}}</option>
                                                         <?php
-                                                        if ($col['datatable']) {
+                                                        if(isset($col['datatable'])) {
                                                             $tableJoin = explode(',', $col['datatable'])[0];
                                                             $titleField = explode(',', $col['datatable'])[1];
                                                             if (! $col['datatable_where']) {
@@ -339,7 +339,7 @@ $name = str_slug($form['label'], '');
                                                            value="{{$col["value"]}}">
                                                 @endif
 
-                                                @if($col['help'])
+                                                @if(isset($col['help']))
                                                     <div class='help-block'>
                                                         {{$col['help']}}
                                                     </div>
@@ -347,7 +347,7 @@ $name = str_slug($form['label'], '');
                                             </div>
                                         </div>
 
-                                        @if($col['formula'])
+                                        @if(isset($col['formula']))
                                             <?php
                                             $formula = $col['formula'];
                                             $formula_function_name = 'formula'.str_slug($name.$col['name'], '');
@@ -536,7 +536,7 @@ $name = str_slug($form['label'], '');
                                         $data_child->join($c['datamodal_table'], $c['datamodal_table'].'.id', '=', $c['name']);
                                         $data_child->addselect($c['datamodal_table'].'.'.$datamodal_title.' as '.$datamodal_table.'_'.$datamodal_title);
                                     } elseif ($c['type'] == 'select') {
-                                        if ($c['datatable']) {
+                                        if(isset($c['datatable'])) {
                                             $join_table = explode(',', $c['datatable'])[0];
                                             $join_field = explode(',', $c['datatable'])[1];
                                             $data_child->join($join_table, $join_table.'.id', '=', $c['name']);
@@ -553,7 +553,7 @@ $name = str_slug($form['label'], '');
                                         <td class="{{$col['name']}}">
                                             <?php
                                             if ($col['type'] == 'select') {
-                                                if ($col['datatable']) {
+                                                if(isset($col['datatable'])) {
                                                     $join_table = explode(',', $col['datatable'])[0];
                                                     $join_field = explode(',', $col['datatable'])[1];
                                                     echo "<span class='td-label'>";
@@ -561,7 +561,7 @@ $name = str_slug($form['label'], '');
                                                     echo "</span>";
                                                     echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{$col['name']}."'/>";
                                                 }
-                                                if ($col['dataenum']) {
+                                                if(isset($col['dataenum'])) {
                                                     echo "<span class='td-label'>";
                                                     echo $d->{$col['name']};
                                                     echo "</span>";

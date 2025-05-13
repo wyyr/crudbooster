@@ -99,13 +99,13 @@
         </div>
         <div class="card-body">
                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                <input type="hidden" name="id" value="{{ $row->id }}">
+                <input type="hidden" name="id" value="{{ (isset($row->id)?$row->id:null) }}">
                 <div class="form-group">
                     <label for="table">Table</label>
-                    <select name="table" id="table" required class="select2 form-control" value="{{ $row->table_name }}">
+                    <select name="table" id="table" required class="select2 form-control" value="{{ (isset($row->table_name)?$row->table_name:null) }}">
                         <option value="">{{ cbLang('text_prefix_option') }} Table</option>
                         @foreach($tables_list as $table)
-                            <option {{ ( $table == $row->table_name) ? "selected" : "" }} value="{{ $table }}">{{ $table }}</option>
+                            <option {{ ( $table == (isset($row->table_name)?$row->table_name:null)) ? "selected" : "" }} value="{{ $table }}">{{ $table }}</option>
                         @endforeach
                     </select>
                     <div class="help-block">
@@ -114,7 +114,7 @@
                 </div>
                 <div class="form-group">
                     <label for="name">Module Name</label>
-                    <input type="text" id="name" class="form-control" required name="name" value="{{ $row->name }}">
+                    <input type="text" id="name" class="form-control" required name="name" value="{{ (isset($row->name)?$row->name:null) }}">
                 </div>
                 <div class="form-group">
                     <label for="icon">Icon</label>
@@ -126,7 +126,7 @@
                 </div>
                 <div class="form-group">
                     <label for="slug">Module Slug</label>
-                    <input id="slug" type="text" class="form-control" required name="path" value="{{ $row->path }}">
+                    <input id="slug" type="text" class="form-control" required name="path" value="{{ (isset($row->path)?$row->path:null) }}">
                     <div class="help-block">Please alpha numeric only, without space instead _ and or special character</div>
                 </div>
         </div>

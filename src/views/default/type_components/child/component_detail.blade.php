@@ -29,7 +29,7 @@
                             $data_child->join($c['datamodal_table'], $c['datamodal_table'].'.id', '=', $c['name']);
                             $data_child->addselect($c['datamodal_table'].'.'.$datamodal_title.' as '.$datamodal_table.'_'.$datamodal_title);
                         } elseif ($c['type'] == 'select') {
-                            if ($c['datatable']) {
+                            if(isset($c['datatable'])) {
                                 $join_table = explode(',', $c['datatable'])[0];
                                 $join_field = explode(',', $c['datatable'])[1];
                                 $data_child->join($join_table, $join_table.'.id', '=', $c['name']);
@@ -46,7 +46,7 @@
                             <td class="{{$col['name']}}">
                                 <?php
                                 if ($col['type'] == 'select') {
-                                    if ($col['datatable']) {
+                                    if(isset($col['datatable'])) {
                                         $join_table = explode(',', $col['datatable'])[0];
                                         $join_field = explode(',', $col['datatable'])[1];
                                         echo "<span class='td-label'>";
@@ -54,7 +54,7 @@
                                         echo "</span>";
                                         echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{$col['name']}."'/>";
                                     }
-                                    if ($col['dataenum']) {
+                                    if(isset($col['dataenum'])) {
                                         echo "<span class='td-label'>";
                                         echo $d->{$col['name']};
                                         echo "</span>";

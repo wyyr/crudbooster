@@ -209,7 +209,7 @@
                                                 <tbody>
                                                 <?php $i = 0;?>
                                                 @foreach($parameters as $param)
-                                                    @if($param['used'])
+                                                    @if(isset($param['used']))
                                                         <?php
                                                         $param_exception = ['in', 'not_in', 'digits_between'];
                                                         if ($param['config'] && substr($param['config'], 0, 1) != '*' && ! in_array($param['type'], $param_exception)) continue;?>
@@ -282,7 +282,7 @@
                                                 @php $e = 0; @endphp
                                                 @if($api->aksi == 'list' || $api->aksi == 'detail')
                                                     @foreach($responses as $resp)
-                                                        @if($resp['used'])
+                                                        @if(isset($resp['used']))
                                                             <tr>
                                                                 <td>{{$i.".".(++$e)}}</td>
                                                                 <td width="5%"><em>{{$resp['type']}}</em></td>
