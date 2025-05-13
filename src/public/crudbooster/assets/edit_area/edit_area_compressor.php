@@ -55,7 +55,7 @@
 			header("Content-type: text/javascript; charset: UTF-8");
 			header("Vary: Accept-Encoding"); // Handle proxies
 			header(sprintf("Expires: %s GMT", gmdate("D, d M Y H:i:s", time() + $this->param['cache_duration'])) );
-			if($this->use_gzip)
+			if(isset($this->use_gzip))
 				header("Content-Encoding: ".$this->gzip_enc_header);
 		}
 		
@@ -98,7 +98,7 @@
 					}
 					closedir($dir);
 				}
-				if($this->load_all_plugins){
+				if(isset($this->load_all_plugins)){
 					$plug_path= $this->path."plugins/";
 					if (($dir = @opendir($plug_path)) !== false)
 					{
@@ -198,7 +198,7 @@
 				$sub_scripts_list[]= preg_replace("/\\|\//i", "", $value).".js";
 			}
 		
-			if($this->load_all_plugins){
+			if(isset($this->load_all_plugins)){
 				// load plugins scripts
 				$plug_path= $this->path."plugins/";
 				if (($dir = @opendir($plug_path)) !== false)
@@ -261,7 +261,7 @@
 								str_replace( array_values($last_comp), array_keys($last_comp), $sub_scripts ), 
 								$js_replace);
 			
-			if($this->load_all_plugins)
+			if(isset($this->load_all_plugins))
 				$this->datas.="editAreaLoader.all_plugins_loaded=true;\n";
 		
 			
@@ -279,7 +279,7 @@
 			if($this->param['debug']){
 				$header=sprintf("/* USE PHP COMPRESSION\n");
 				$header.=sprintf("javascript size: based files: %s => PHP COMPRESSION => %s ", $this->file_loaded_size, strlen($this->datas));
-				if($this->use_gzip){
+				if(isset($this->use_gzip)){
 					$gzip_datas=  gzencode($this->datas, 9, FORCE_GZIP);				
 					$header.=sprintf("=> GZIP COMPRESSION => %s", strlen($gzip_datas));
 					$ratio = round(100 - strlen($gzip_datas) / $this->file_loaded_size * 100.0);			
@@ -294,7 +294,7 @@
 			}
 			$mtime= time(); // ensure that the 2 disk files will have the same update time
 			// generate gzip file and cahce it if using disk cache
-			if($this->use_gzip){
+			if(isset($this->use_gzip)){
 				$this->gzip_datas= gzencode($this->datas, 9, FORCE_GZIP);
 				if($this->param['use_disk_cache'])
 					$this->file_put_contents($this->gzip_cache_file, $this->gzip_datas, $mtime);
@@ -305,7 +305,7 @@
 				$this->file_put_contents($this->full_cache_file, $this->datas, $mtime);
 			
 			// generate output
-			if($this->use_gzip)
+			if(isset($this->use_gzip))
 				echo $this->gzip_datas;
 			else
 				echo $this->datas;

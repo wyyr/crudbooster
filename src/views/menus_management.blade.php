@@ -160,7 +160,7 @@
                                     </em>
                                 </div>
                                 <ul>
-                                    @if($menu->children)
+                                    @if(isset($menu->children))
                                         @foreach($menu->children as $child)
                                             @php
                                                 $privileges = DB::table('cms_menus_privileges')
@@ -209,7 +209,7 @@
                                         href='javascript:void(0)'></a></span>
                                 </div>
                                 <ul>
-                                    @if($menu->children)
+                                    @if(isset($menu->children))
                                         @foreach($menu->children as $child)
                                             <li data-id='{{$child->id}}' data-name='{{$child->name}}'>
                                                 <div><i class='{{$child->icon}}'></i> {{$child->name}} <span class='float-right'>

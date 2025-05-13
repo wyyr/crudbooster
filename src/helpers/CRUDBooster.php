@@ -186,7 +186,7 @@ class CRUDBooster
 
     public static function insert($table, $data = [])
     {
-        if (!$data['created_at']) {
+        if (!isset($data['created_at'])) {
             if (Schema::hasColumn($table, 'created_at')) {
                 $data['created_at'] = date('Y-m-d H:i:s');
             }

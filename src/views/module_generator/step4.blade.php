@@ -112,19 +112,19 @@
                             <div class="form-group">
                                 <label>Button Action Style</label>
                                 <label class='radio-inline'>
-                                    <input {{($cb_button_action_style=='button_icon')?"checked":""}} type='radio' name='button_action_style'
+                                    <input {{(isset($cb_button_action_style) && $cb_button_action_style == 'button_icon')?"checked":""}} type='radio' name='button_action_style'
                                            value='button_icon'/> Icon
                                 </label>
                                 <label class='radio-inline'>
-                                    <input {{($cb_button_action_style=='button_icon_text')?"checked":""}} type='radio' name='button_action_style'
+                                    <input {{(isset($cb_button_action_style) && $cb_button_action_style == 'button_icon_text')?"checked":""}} type='radio' name='button_action_style'
                                            value='button_icon_text'/> Icon & Text
                                 </label>
                                 <label class='radio-inline'>
-                                    <input {{($cb_button_action_style=='button_text')?"checked":""}} type='radio' name='button_action_style'
+                                    <input {{(isset($cb_button_action_style) && $cb_button_action_style == 'button_text')?"checked":""}} type='radio' name='button_action_style'
                                            value='button_text'/> Button Text
                                 </label>
                                 <label class='radio-inline'>
-                                    <input {{($cb_button_action_style=='button_dropdown')?"checked":""}} type='radio' name='button_action_style'
+                                    <input {{(isset($cb_button_action_style) && $cb_button_action_style == 'button_dropdown')?"checked":""}} type='radio' name='button_action_style'
                                            value='button_dropdown'/> Dropdown
                                 </label>
                             </div>

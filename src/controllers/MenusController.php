@@ -279,7 +279,7 @@ class MenusController extends CBController
 
     public function hook_before_add(&$postdata)
     {
-        if (!$postdata['id_cms_privileges']) {
+        if (!isset($postdata['id_cms_privileges'])) {
             $postdata['id_cms_privileges'] = CRUDBooster::myPrivilegeId();
         }
         $postdata['parent_id'] = 0;

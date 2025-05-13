@@ -493,7 +493,7 @@
                                 if(isset($types)):
                                 ?>
 
-                                @if($types->alert)
+                                @if(isset($types->alert))
                                     <div class="alert alert-warning">
                                         {!! $types->alert !!}
                                     </div>

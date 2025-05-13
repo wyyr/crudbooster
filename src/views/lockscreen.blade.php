@@ -39,7 +39,7 @@
 <div class="lockscreen-wrapper">
     <div class="lockscreen-logo">
         <a href="{{url('/')}}">
-            <img title='{!!($appname == 'CRUDBooster')?"<b>CRUD</b>Booster":$appname!!}'
+            <img title='{!!(isset($appname) && $appname == 'CRUDBooster')?"<b>CRUD</b>Booster":$appname!!}'
                  src='{{ CRUDBooster::getSetting("logo") ? \Illuminate\Support\Facades\Storage::disk(config('crudbooster.filesystem_driver'))->url(CRUDBooster::getSetting('favicon')) : asset('crudbooster/assets/logo_crudbooster.png') }}'
                  style='max-width: 100%;max-height:170px'/>
         </a>

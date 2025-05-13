@@ -1,4 +1,4 @@
-@if($command=='layout')
+@if(isset($command) && $command == 'layout')
     <div id='{{$componentID}}' class='border-box'>
 
         <div class="small-box [color]">
@@ -18,7 +18,7 @@
             <a href='javascript:void(0)' data-componentid='{{$componentID}}' class='btn-delete-component'><i class='fa fa-trash'></i></a>
         </div>
     </div>
-@elseif($command=='configuration')
+@elseif(isset($command) && $command == 'configuration')
     <form method='post'>
         <input type='hidden' name='_token' value='{{csrf_token()}}'/>
         <input type='hidden' name='componentid' value='{{$componentID}}'/>
@@ -57,9 +57,9 @@
         </div>
 
     </form>
-@elseif($command=='showFunction')
+@elseif(isset($command) && $command == 'showFunction')
     <?php
-    if ($key == 'sql') {
+    if (isset($key) && $key == 'sql') {
         try {
             $sessions = Session::all();
             foreach ($sessions as $key => $val) {

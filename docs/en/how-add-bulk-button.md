@@ -22,7 +22,7 @@ public function actionButtonSelected($id_selected,$button_name) {
   //$id_selected is an array of id 
   //$button_name is a name that you have set at button_selected 
   
-  if($button_name == 'set_active') {
+  if(isset($button_name) && $button_name == 'set_active') {
     DB::table('products')->whereIn('id',$id_selected)->update(['status'=>'active']);
   }
 }

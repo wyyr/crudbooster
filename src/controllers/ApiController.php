@@ -133,7 +133,7 @@ class ApiController extends Controller
                     continue;
                 }
 
-                if ($used == '0') {
+                if (isset($used) && $used == '0') {
                     continue;
                 }
 
@@ -143,42 +143,42 @@ class ApiController extends Controller
 
                 $input_validator[$name] = trim($value);
 
-                if ($required == '1') {
+                if (isset($required) && $required == '1') {
                     $format_validation[] = 'required';
                 }
 
-                if ($type == 'exists') {
+                if (isset($type) && $type == 'exists') {
                     $config = explode(',', $config);
                     $table_exist = $config[0];
                     $table_exist = CRUDBooster::parseSqlTable($table_exist)['table'];
                     $field_exist = $config[1];
                     $config = ($field_exist) ? $table_exist . ',' . $field_exist : $table_exist;
                     $format_validation[] = 'exists:' . $config;
-                } elseif ($type == 'unique') {
+                } elseif (isset($type) && $type == 'unique') {
                     $config = explode(',', $config);
                     $table_exist = $config[0];
                     $table_exist = CRUDBooster::parseSqlTable($table_exist)['table'];
                     $field_exist = $config[1];
                     $config = ($field_exist) ? $table_exist . ',' . $field_exist : $table_exist;
                     $format_validation[] = 'unique:' . $config;
-                } elseif ($type == 'date_format') {
+                } elseif (isset($type) && $type == 'date_format') {
                     $format_validation[] = 'date_format:' . $config;
-                } elseif ($type == 'digits_between') {
+                } elseif (isset($type) && $type == 'digits_between') {
                     $format_validation[] = 'digits_between:' . $config;
-                } elseif ($type == 'in') {
+                } elseif (isset($type) && $type == 'in') {
                     $format_validation[] = 'in:' . $config;
-                } elseif ($type == 'mimes') {
+                } elseif (isset($type) && $type == 'mimes') {
                     $format_validation[] = 'mimes:' . $config;
-                } elseif ($type == 'min') {
+                } elseif (isset($type) && $type == 'min') {
                     $format_validation[] = 'min:' . $config;
-                } elseif ($type == 'max') {
+                } elseif (isset($type) && $type == 'max') {
                     $format_validation[] = 'max:' . $config;
-                } elseif ($type == 'not_in') {
+                } elseif (isset($type) && $type == 'not_in') {
                     $format_validation[] = 'not_in:' . $config;
-                } elseif ($type == 'image') {
+                } elseif (isset($type) && $type == 'image') {
                     $format_validation[] = 'image';
                     $input_validator[$name] = Request::file($name);
-                } elseif ($type == 'file') {
+                } elseif (isset($type) && $type == 'file') {
                     $format_validation[] = 'file';
                     $input_validator[$name] = Request::file($name);
                 } else {
@@ -187,7 +187,7 @@ class ApiController extends Controller
                     }
                 }
 
-                if ($name == 'id') {
+                if (isset($name) && $name == 'id') {
                     $table_exist = CRUDBooster::parseSqlTable($table)['table'];
                     $table_exist_pk = CRUDBooster::pk($table_exist);
                     $format_validation[] = 'exists:' . $table_exist . ',' . $table_exist_pk;
@@ -257,11 +257,11 @@ class ApiController extends Controller
                     continue;
                 }
 
-                if ($name == 'ref_id') {
+                if (isset($name) && $name == 'ref_id') {
                     continue;
                 }
 
-                if ($type == 'custom') {
+                if (isset($type) && $type == 'custom') {
                     continue;
                 }
 
@@ -299,14 +299,14 @@ class ApiController extends Controller
                 $required = $param['required'];
                 $config = $param['config'];
 
-                if ($type == 'password') {
+                if (isset($type) && $type == 'password') {
                     $data->addselect($table . '.' . $name);
                 }
 
-                if ($type == 'search') {
+                if (isset($type) && $type == 'search') {
                     $search_in = explode(',', $config);
 
-                    if ($required == '1') {
+                    if (isset($required) && $required == '1') {
                         $data->where(function ($w) use ($search_in, $value) {
                             foreach ($search_in as $k => $field) {
                                 if ($k == 0) {
@@ -350,7 +350,7 @@ class ApiController extends Controller
                         continue;
                     }
 
-                    if ($required == '1') {
+                    if (isset($required) && $required == '1') {
                         if (CRUDBooster::isColumnExists($table, $name)) {
                             $w->where($table . '.' . $name, $value);
                         } else {
@@ -404,7 +404,7 @@ class ApiController extends Controller
 
             $this->hook_query($data);
 
-            if ($action_type == 'list') {
+            if (isset($action_type) && $action_type == 'list') {
                 if ($orderby) {
                     $orderby_raw = explode(',', $orderby);
                     $orderby_col = $orderby_raw[0];
@@ -439,7 +439,7 @@ class ApiController extends Controller
                     $result['api_message'] = 'There is no data found !';
                     $result['data'] = [];
                 }
-            } elseif ($action_type == 'detail') {
+            } elseif (isset($action_type) && $action_type == 'detail') {
 
                 $rows = $data->first();
 
@@ -453,7 +453,7 @@ class ApiController extends Controller
                         $required = $param['required'];
 
                         if ($required) {
-                            if ($type == 'password') {
+                            if (isset($type) && $type == 'password') {
                                 if (!Hash::check($value, $rows->{$name})) {
                                     $result['api_status'] = 0;
                                     $result['api_message'] = 'Invalid credentials. Check your username and password.';
@@ -496,7 +496,7 @@ class ApiController extends Controller
                     $result['api_message'] = 'There is no data found !';
 
                 }
-            } elseif ($action_type == 'delete') {
+            } elseif (isset($action_type) && $action_type == 'delete') {
 
                 if (CRUDBooster::isColumnExists($table, 'deleted_at')) {
                     $delete = $data->update(['deleted_at' => date('Y-m-d H:i:s')]);
@@ -526,13 +526,13 @@ class ApiController extends Controller
                 }
             }
 
-            if ($action_type == 'save_add') {
+            if (isset($action_type) && $action_type == 'save_add') {
                 if (CRUDBooster::isColumnExists($table, 'created_at')) {
                     $row_assign['created_at'] = date('Y-m-d H:i:s');
                 }
             }
 
-            if ($action_type == 'save_edit') {
+            if (isset($action_type) && $action_type == 'save_edit') {
                 if (CRUDBooster::isColumnExists($table, 'updated_at')) {
                     $row_assign['updated_at'] = date('Y-m-d H:i:s');
                 }
@@ -555,9 +555,9 @@ class ApiController extends Controller
 
                 if ($type == 'file' || $type == 'image') {
                     $row_assign[$name] = CRUDBooster::uploadFile($name, true);
-                } elseif ($type == 'base64_file') {
+                } elseif (isset($type) && $type == 'base64_file') {
                     $row_assign[$name] = CRUDBooster::uploadBase64($value);
-                } elseif ($type == 'password') {
+                } elseif (isset($type) && $type == 'password') {
                     $row_assign[$name] = Hash::make(g($name));
                 }
             }
@@ -572,7 +572,7 @@ class ApiController extends Controller
 
             $lastId = null;
 
-            if ($action_type == 'save_add') {
+            if (isset($action_type) && $action_type == 'save_add') {
 
                 DB::beginTransaction();
                 try {
@@ -622,7 +622,7 @@ class ApiController extends Controller
                 $value = $posts[$name];
                 $config = $param['config'];
                 $type = $param['type'];
-                if ($type == 'ref') {
+                if (isset($type) && $type == 'ref') {
                     if (CRUDBooster::isColumnExists($config, 'id_' . $table)) {
                         DB::table($config)->where($name, $value)->update(['id_' . $table => $lastId]);
                     } elseif (CRUDBooster::isColumnExists($config, $table . '_id')) {
@@ -640,7 +640,7 @@ class ApiController extends Controller
         $this->hook_after($posts, $result);
         if ($this->output) return response()->json($this->output);
 
-        if ($output == 'JSON') {
+        if (isset($output) && $output == 'JSON') {
             return response()->json($result, 200);
         } else {
             return $result;

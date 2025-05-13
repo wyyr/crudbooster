@@ -1,4 +1,4 @@
-@if($command=='layout')
+@if(isset($command) && $command == 'layout')
     <div id='{{$componentID}}' class='border-box'>
 
         <div class="panel panel-default">
@@ -16,7 +16,7 @@
             <a href='javascript:void(0)' data-componentid='{{$componentID}}' class='btn-delete-component'><i class='fa fa-trash'></i></a>
         </div>
     </div>
-@elseif($command=='configuration')
+@elseif(isset($command) && $command == 'configuration')
     <form method='post'>
         <input type='hidden' name='_token' value='{{csrf_token()}}'/>
         <input type='hidden' name='componentid' value='{{$componentID}}'/>
@@ -45,7 +45,7 @@
             <input class="form-control" name='config[goals]' type='number' value='{{@$config->goals}}'/>
         </div>
     </form>
-@elseif($command=='showFunction')
+@elseif(isset($command) && $command == 'showFunction')
 
     @if(isset($key) && $key ==  'sql')
         <?php

@@ -338,13 +338,13 @@
                             <td><input value='{{$c["width"]?:0}}' type="number" name="width[]" class="form-control pr-0"/></td>
                             <td>
                                 <select class="form-control is_image pr-0" name="is_image[]">
-                                    <option {{ (!$c['image'])?"selected":""}} value='0'>N</option>
+                                    <option {{ (!isset($c['image']))?"selected":""}} value='0'>N</option>
                                     <option {{ ($c['image'])?"selected":""}} value='1'>Y</option>
                                 </select>
                             </td>
                             <td>
                                 <select class="form-control is_download" name="is_download[]">
-                                    <option {{ (!$c['download'])?"selected":""}} value='0'>N</option>
+                                    <option {{ (!isset($c['download']))?"selected":""}} value='0'>N</option>
                                     <option {{ ($c['download'])?"selected":""}} value='1'>Y</option>
                                 </select>
                             </td>
