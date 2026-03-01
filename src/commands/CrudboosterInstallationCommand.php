@@ -70,9 +70,27 @@ class CrudboosterInstallationCommand extends Command
             $this->info('Migrating database...');
             $this->call('migrate', ['--force' => true]);
 
-            if (class_exists('CBSeeder')) {
-                $this->info('Seeding database...');
-                $this->call('db:seed', ['--class' => 'CBSeeder', '--force' => true]);
+            // Ask user to run the seeder automatically
+            if ($this->confirm('Do you want to run CBSeeder now? (Highly recommended for default data)', true)) {
+
+                $seederClass = 'Database\\Seeders\\CBSeeder';
+
+                // Check if the class exists (after being published to user's directory)
+                if (class_exists($seederClass) || class_exists('CBSeeder')) {
+                    $this->info('Seeding database...');
+                    $this->call('db:seed', ['--class' => 'CBSeeder', '--force' => true]);
+                    $this->info('Database seeding completed successfully.');
+                } else {
+                    $this->error('CBSeeder class not found!');
+                    $this->warn('Please ensure you have published the seeder or created it manually.');
+                    $this->line('Command: php artisan vendor:publish --tag=cb-seeders');
+                }
+            } else {
+                $this->warn('------------------------------------------------------------');
+                $this->warn('IMPORTANT: Please run the following command manually to ');
+                $this->warn('initialize the required core data (Settings, Menus, etc.):');
+                $this->line('php artisan db:seed --class=CBSeeder');
+                $this->warn('------------------------------------------------------------');
             }
 
             $this->call('config:clear');

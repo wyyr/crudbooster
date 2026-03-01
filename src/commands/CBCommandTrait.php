@@ -22,7 +22,7 @@ trait CBCommandTrait
     {
         $this->info('--------------------------------------------------------------------');
         $this->info('Github : https://github.com/wyyr/crudbooster');
-        $this->info('Documentation : https://github.com/wyyr/crudbooster/blob/2.x/docs/en/index.md');
+        $this->info('Documentation : https://github.com/wyyr/crudbooster/blob/3.x/docs/en/index.md');
         $this->info('====================================================================');
 
         if ($success) {
