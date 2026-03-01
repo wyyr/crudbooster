@@ -31,7 +31,7 @@ class CRUDBoosterServiceProvider extends ServiceProvider
         $this->registerCustomValidation();
         $this->registerSeedsFrom(__DIR__.'/database/seeds');
 
-        Paginator::useBootstrapFive();
+        Paginator::useBootstrap();
     }
 
     /**
