@@ -3,8 +3,9 @@
 CRUDBooster is CRUD Generator for laravel, with the most important features web application development. It's easy, flexible, and powerful.
 
 ## System Requirement and Basic Technical Knowledge
+
 - Web Server as:
-  - Apache 2.4.x or higher with rewrite engine on (mod_rewrite)  
+  - Apache 2.4.x or higher with rewrite engine on (mod_rewrite)
   - Nginx 1.24.x or higher
 - Database that laravel supports, actually can be:
   - MySQL
@@ -12,7 +13,7 @@ CRUDBooster is CRUD Generator for laravel, with the most important features web 
   - SQLite
   - SQL Server
 - Composer
-- Laravel 9.* / 10.*
+- Laravel 8.x / 9.x / 10.x
 - Php 8.1 or higher and the extensions:
   - Mcrypt
   - OpenSSL
@@ -25,11 +26,13 @@ CRUDBooster is CRUD Generator for laravel, with the most important features web 
 - Please make sure you have install laravel project, please follow [https://laravel.com/docs/installation](https://laravel.com/docs/installation)
 
 - Open the terminal, navigate to your laravel project directory.
+
 ```php
 composer require wyyr/crudbooster
 ```
 
 - Setting the database configuration, open .env file at project root directory
+
 ```
 DB_DATABASE=**your_db_name**
 DB_USERNAME=**your_db_user**
@@ -37,19 +40,24 @@ DB_PASSWORD=**password**
 ```
 
 - Run the following command at the terminal
+
 ```php
-php artisan crudbooster:install && php artisan db:seed --class=CBSeeder
+php artisan crudbooster:install
 ```
 
 ## Backend URL
+
 ```php
 /admin/login
 ```
+
 - default email : admin@crudbooster.com
 - default password : 123456
 
 ## What's Next
+
 - [How To Create A Module (CRUD)](./how-to-create-module.md)
 
 ## Table Of Contents
+
 - [Back To Index](./index.md)

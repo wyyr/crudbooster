@@ -1,4 +1,5 @@
 <?php
+
 return [
     'email_footer' => 'Do not reply any email to this email address. This email sent automatically by our system. ',
     'login_message' => 'Please login to start your session',
@@ -6,10 +7,10 @@ return [
     'page_title_login' => 'Login Panel',
     'page_title_forgot' => 'Forgot Password',
     'forgot_message' => 'We will send a link to reset your password',
-    'forgot_text_try_again' => "Try login again ?",
-    'text_no_notification' => "You have 0 notifications",
+    'forgot_text_try_again' => 'Try login again ?',
+    'text_no_notification' => 'You have 0 notifications',
     'text_view_all_notification' => 'View All',
-    'label_button_profile' => "Profile",
+    'label_button_profile' => 'Profile',
     'filter_dialog_title' => 'Advanced Sort & Filter',
     'there_is_no_option' => 'There is no any options setting for this inputType',
     'no' => 'No.',
@@ -65,7 +66,7 @@ return [
     'alert_update_data_failed' => 'Failed to update the data',
     'alert_delete_data_success' => 'Delete the data success !',
     'alert_want_to_logout' => 'Do you want to logout ?',
-    'alert_warning' => "Oops",
+    'alert_warning' => 'Oops',
     'alert_danger' => 'Something went wrong ....',
     'alert_success' => 'Wow, good job...',
     'alert_info' => 'Information',
@@ -83,8 +84,8 @@ return [
 
     'default_module_description' => 'Data List',
 
-    'delete_description_confirm' => "You will not be able to recover this record data!",
-    'delete_title_confirm' => "Are you sure ?",
+    'delete_description_confirm' => 'You will not be able to recover this record data!',
+    'delete_title_confirm' => 'Are you sure ?',
 
     'action_show_data' => 'Show Data',
     'action_add_data' => 'Add Data',
@@ -113,10 +114,10 @@ return [
     'button_reset' => 'Reset',
     'button_add_to_table' => 'Add To Table',
 
-    'export_dialog_title' => "Export Data",
+    'export_dialog_title' => 'Export Data',
     'export_dialog_filename' => 'File Name',
     'export_dialog_help_filename' => 'You can rename the filename according to your whises',
-    'export_dialog_maxdata' => "Max Data",
+    'export_dialog_maxdata' => 'Max Data',
     'export_dialog_help_maxdata' => 'Minimum 1 and maximum 100,000 rows per export session',
     'export_dialog_columns' => 'Columns',
     'export_dialog_format_export' => 'Format Export',
@@ -129,10 +130,10 @@ return [
     'dashboard_default_text' => 'Welcome to the dashboard of :appname',
     'form_back_to_list' => 'Back To List Data :module',
     'not_logged_in' => 'You are not logged in !',
-    'menu_navigation' => "Navigation",
-    'table_data_not_found' => "No Data Avaliable",
-    "notice_delete_file_upload" => "* If you want to upload other file, please first delete the file.",
-    "file_broken" => "Oops looks like File was Broken !. Click Delete and Re-Upload.",
+    'menu_navigation' => 'Navigation',
+    'table_data_not_found' => 'No Data Avaliable',
+    'notice_delete_file_upload' => '* If you want to upload other file, please first delete the file.',
+    'file_broken' => 'Oops looks like File was Broken !. Click Delete and Re-Upload.',
 
     'denied_access' => 'Sorry you do not have privilege to access this area !',
     'denied_update' => 'Sorry you do not have privilege to update the data !',
@@ -171,6 +172,8 @@ return [
     'SUPERADMIN' => 'SUPERADMIN',
 
     'click_here' => 'Click here',
+    'alpha_spaces' => 'The :attribute should be letters and spaces only',
+    'alpha_num_spaces' => 'The :attribute should be alphanumeric characters and spaces only',
 
     /*
      * this is for html direction to use in html and css classes like :
@@ -226,11 +229,11 @@ return [
     'confirmation_yes' => 'Yes!',
     'confirmation_no' => 'No',
 
-    //filemanager
+    // filemanager
     'chose_an_image' => 'Choose an image ',
     'chose_an_file' => 'Choose an file ',
 
-    //action confirmation
+    // action confirmation
     'confirmation_title' => 'Confirmation',
     'confirmation_text' => 'Are you sure want to do this action?',
     'confirmButtonText' => 'Yes',
@@ -252,19 +255,19 @@ return [
     'privileges_module_list_update' => 'Update',
     'privileges_module_list_delete' => 'Delete',
 
-    //datamodal
+    // datamodal
     'datamodal_select' => 'Select',
     'datamodal_search_and_enter' => 'Search and enter...',
     'datamodal_enter_to_search' => 'Enter to search',
     'datamodal_browse_data' => 'Browse Data',
     'datamodal_browse_file' => 'Browse File',
 
-    //child
+    // child
     'table_detail' => 'Table Detail',
     'your_file_size_is_too_big' => 'Your file size is too big',
     'save_changes' => 'Save Changes',
     'please_complete_the_form' => 'Please complete the form !',
     'this_field_is_required' => 'This field is required',
     'text_form' => 'Form',
-    "your_file_extension_is_not_allowed " => "Your file extension is not allowed !",
+    'your_file_extension_is_not_allowed ' => 'Your file extension is not allowed !',
 ];

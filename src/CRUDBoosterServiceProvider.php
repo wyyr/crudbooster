@@ -8,112 +8,147 @@ use crocodicstudio\crudbooster\commands\CrudboosterVersionCommand;
 use crocodicstudio\crudbooster\commands\Mailqueues;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class CRUDBoosterServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap the application services.
-     * Call when after all packages has been loaded
-     *
-     * @return void
      */
-
-    public function boot()
+    public function boot(): void
     {
-        $this->loadViewsFrom(__DIR__ . '/views', 'crudbooster');
-        $this->loadMigrationsFrom(__DIR__ . '/database/migrations');
-        $this->loadTranslationsFrom(__DIR__ . '/localization', 'crudbooster');
-        $this->loadRoutesFrom(__DIR__ . '/routes.php');
+        $this->loadViewsFrom(__DIR__.'/views', 'crudbooster');
+        $this->loadMigrationsFrom(__DIR__.'/database/migrations');
+        $this->loadTranslationsFrom(__DIR__.'/localization', 'crudbooster');
+        $this->loadRoutesFrom(__DIR__.'/routes.php');
 
-        if ($this->app->runningInConsole()) {
-            $this->publishes([
-                __DIR__ . '/database/seeders/CBSeeder.php' => database_path('seeders/CBSeeder.php'),
-            ], 'cb-seeders');
-            $this->publishes([
-                __DIR__ . '/config/crudbooster.php' => config_path('crudbooster.php')
-            ], 'cb_config');
-            $this->publishes([
-                __DIR__ . '/userfiles/controllers/CBHook.php' => app_path('Http/Controllers/CBHook.php')
-            ], 'CBHook');
-            $this->publishes([
-                __DIR__ . '/userfiles/controllers/AdminCmsUsersController.php' => app_path('Http/Controllers/AdminCmsUsersController.php')
-            ], 'cb_user_controller');
-            $this->publishes([
-                __DIR__ . '/public' => public_path()
-            ], 'cb_asset');
-        }
+        $this->handlePublishing();
+        $this->registerViewComposers();
+        $this->registerCustomValidation();
+        $this->registerSeedsFrom(__DIR__.'/database/seeds');
 
-        $this->customValidation();
-
-        // use bootstrap style pagination
-        Paginator::useBootstrapFour();
+        Paginator::useBootstrapFive();
     }
 
     /**
      * Register the application services.
-     * Call when this package is first time loaded
-     *
-     * @return void
      */
-    public function register()
+    public function register(): void
     {
-        require __DIR__ . '/helpers/Helper.php';
-
-        $this->mergeConfigFrom(__DIR__ . '/config/crudbooster.php', 'crudbooster');
-
-        $this->registerSingleton();
-
-        if ($this->app->runningInConsole()) {
-            $this->commands('crudboosterinstall');
-            $this->commands('crudboosterupdate');
-            $this->commands('crudboosterVersionCommand');
-            $this->commands('crudboosterMailQueue');
+        if (file_exists(__DIR__.'/helpers/Helper.php')) {
+            require_once __DIR__.'/helpers/Helper.php';
         }
 
-        $loader = AliasLoader::getInstance();
-        $loader->alias('PDF', 'Barryvdh\DomPDF\Facade');
-        $loader->alias('Excel', 'Maatwebsite\Excel\Facades\Excel');
-        $loader->alias('Image', 'Intervention\Image\ImageManagerStatic');
-        $loader->alias('CRUDBooster', 'crocodicstudio\crudbooster\helpers\CRUDBooster');
-        $loader->alias('CB', 'crocodicstudio\crudbooster\helpers\CB');
-    }
+        $this->mergeConfigFrom(__DIR__.'/config/crudbooster.php', 'crudbooster');
 
-    private function registerSingleton()
-    {
+        $this->registerCommands();
+        $this->registerAliases();
+
+        // Core Singleton
         $this->app->singleton('crudbooster', function () {
-            return true;
-        });
-
-        $this->app->singleton('crudboosterinstall', function () {
-            return new CrudboosterInstallationCommand;
-        });
-
-        $this->app->singleton('crudboosterupdate', function () {
-            return new CrudboosterUpdateCommand;
-        });
-
-        $this->app->singleton("crudboosterVersionCommand", function () {
-            return new CrudboosterVersionCommand;
-        });
-
-        $this->app->singleton("crudboosterMailQueue", function () {
-            return new Mailqueues;
+            return new \crocodicstudio\crudbooster\helpers\CRUDBooster;
         });
     }
 
-    private function customValidation()
+    private function handlePublishing(): void
+    {
+        if (! $this->app->runningInConsole()) {
+            return;
+        }
+
+        $this->publishes([
+            __DIR__.'/config/crudbooster.php' => config_path('crudbooster.php'),
+        ], 'cb-config');
+        $this->publishes([
+            __DIR__.'/userfiles/controllers/CBHook.php' => app_path('Http/Controllers/CBHook.php'),
+            __DIR__.'/userfiles/controllers/AdminCmsUsersController.php' => app_path('Http/Controllers/AdminCmsUsersController.php'),
+        ], 'cb-controllers');
+        $this->publishes([
+            __DIR__.'/public' => public_path(),
+        ], 'cb-assets');
+        $this->publishes([
+            __DIR__.'/database/seeders/CBSeeder.php' => database_path('seeders/CBSeeder.php'),
+        ], 'cb-seeders');
+    }
+
+    private function registerViewComposers(): void
+    {
+        View::composer('crudbooster::admin_template', function ($view) {
+            $view->with([
+                'sidebar_mode' => $view->sidebar_mode ?? '',
+                'style_css' => $view->style_css ?? '',
+                'load_css' => $view->load_css ?? [],
+                'load_js' => $view->load_js ?? [],
+                'script_js' => $view->script_js ?? '',
+            ]);
+        });
+    }
+
+    private function registerCommands(): void
+    {
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                CrudboosterInstallationCommand::class,
+                CrudboosterUpdateCommand::class,
+                CrudboosterVersionCommand::class,
+                Mailqueues::class,
+            ]);
+        }
+    }
+
+    private function registerAliases(): void
+    {
+        $this->app->booting(function () {
+            $loader = AliasLoader::getInstance();
+
+            $aliases = [
+                'PDF' => \Barryvdh\DomPDF\Facade\Pdf::class,
+                'Excel' => \Maatwebsite\Excel\Facades\Excel::class,
+                'Image' => \Intervention\Image\Facades\Image::class,
+                'CRUDBooster' => \crocodicstudio\crudbooster\helpers\CRUDBooster::class,
+                'CB' => \crocodicstudio\crudbooster\helpers\CB::class,
+            ];
+
+            foreach ($aliases as $alias => $class) {
+                if (class_exists($class)) {
+                    $loader->alias($alias, $class);
+                }
+            }
+        });
+    }
+
+    protected function registerSeedsFrom(string $path): void
+    {
+        if (! $this->app->runningInConsole()) {
+            return;
+        }
+
+        if (! str_contains(implode(' ', request()->server('argv', [])), 'db:seed')) {
+            return;
+        }
+
+        $files = File::glob("$path/*.php");
+        foreach ($files as $filename) {
+            require_once $filename;
+            $class = basename($filename, '.php');
+            if (class_exists($class)) {
+                Artisan::call('db:seed', ['--class' => $class]);
+            }
+        }
+    }
+
+    private function registerCustomValidation(): void
     {
         Validator::extend('alpha_spaces', function ($attribute, $value) {
-            // This will only accept alpha and spaces.
-            // If you want to accept hyphens use: /^[\pL\s-]+$/u.
             return preg_match('/^[\pL\s]+$/u', $value);
-        }, 'The :attribute should be letters and spaces only');
+        }, trans('crudbooster::crudbooster.alpha_spaces'));
 
         Validator::extend('alpha_num_spaces', function ($attribute, $value) {
-            // This will only accept alphanumeric and spaces.
             return preg_match('/^[a-zA-Z0-9\s]+$/', $value);
-        }, 'The :attribute should be alphanumeric characters and spaces only');
+        }, trans('crudbooster::crudbooster.alpha_num_spaces'));
     }
 }
