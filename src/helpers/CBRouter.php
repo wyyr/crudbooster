@@ -13,11 +13,12 @@ class CBRouter
 
     public static function getCBControllerFiles()
     {
-        $controllers = glob(__DIR__ . '/../controllers/*.php');
+        $controllers = glob(__DIR__.'/../controllers/*.php');
         $result = [];
         foreach ($controllers as $file) {
             $result[] = str_replace('.php', '', basename($file));
         }
+
         return $result;
     }
 
@@ -25,12 +26,12 @@ class CBRouter
     {
         // API Authentication
         Route::group(['middleware' => ['api'], 'namespace' => static::$cb_namespace], function () {
-            Route::post("api/get-token", "ApiAuthorizationController@postGetToken");
+            Route::post('api/get-token', 'ApiAuthorizationController@postGetToken');
         });
 
         Route::group(['middleware' => ['api', CBAuthAPI::class], 'namespace' => 'App\Http\Controllers'], function () {
 
-            $dir = scandir(base_path("app/Http/Controllers"));
+            $dir = scandir(base_path('app/Http/Controllers'));
             foreach ($dir as $v) {
                 $v = str_replace('.php', '', $v);
                 $names = array_filter(preg_split('/(?=[A-Z])/', str_replace('Controller', '', $v)));
@@ -38,7 +39,7 @@ class CBRouter
 
                 if (substr($names, 0, 4) == 'api_') {
                     $names = str_replace('api_', '', $names);
-                    Route::any('api/' . $names, $v . '@execute_api');
+                    Route::any('api/'.$names, $v.'@execute_api');
                 }
             }
 
@@ -84,13 +85,14 @@ class CBRouter
                 $modules = db('cms_moduls')
                     ->where('path', '!=', '')
                     ->where('controller', '!=', '')
-                    ->whereNotNull("path")
-                    ->whereNotNull("controller")
+                    ->whereNotNull('path')
+                    ->whereNotNull('controller')
                     ->where('is_protected', 0)
                     ->where('deleted_at', null)
                     ->get();
+
             } catch (Exception $e) {
-                Log::error("Load cms moduls is failed. Caused = " . $e->getMessage());
+                Log::error('Load cms moduls is failed. Caused = '.$e->getMessage());
             }
 
             foreach ($modules as $v) {
@@ -98,7 +100,7 @@ class CBRouter
                     try {
                         CRUDBooster::routeController($v->path, $v->controller);
                     } catch (Exception $e) {
-                        Log::error("Path = " . $v->path . "\nController = " . $v->controller . "\nError = " . $e->getMessage());
+                        Log::error('Path = '.$v->path."\nController = ".$v->controller."\nError = ".$e->getMessage());
                     }
                 }
             }
@@ -123,7 +125,6 @@ class CBRouter
                 }
             }
 
-
             CRUDBooster::routeController('api_generator', 'ApiCustomController', static::$cb_namespace);
 
             // Todo: change table
@@ -131,7 +132,7 @@ class CBRouter
             try {
                 $modules = db('cms_moduls')->whereIn('controller', CBRouter::getCBControllerFiles())->get();
             } catch (Exception $e) {
-                Log::error("Load cms moduls is failed. Caused = " . $e->getMessage());
+                Log::error('Load cms moduls is failed. Caused = '.$e->getMessage());
             }
 
             foreach ($modules as $v) {
@@ -139,7 +140,7 @@ class CBRouter
                     try {
                         CRUDBooster::routeController($v->path, $v->controller, static::$cb_namespace);
                     } catch (Exception $e) {
-                        Log::error("Path = " . $v->path . "\nController = " . $v->controller . "\nError = " . $e->getMessage());
+                        Log::error('Path = '.$v->path."\nController = ".$v->controller."\nError = ".$e->getMessage());
                     }
                 }
             }
@@ -148,12 +149,10 @@ class CBRouter
 
     public static function route()
     {
-
         static::apiRoute();
         static::uploadRoute();
         static::authRoute();
         static::userControllerRoute();
         static::cbRoute();
     }
-
 }

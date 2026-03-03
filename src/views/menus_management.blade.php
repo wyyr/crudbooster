@@ -1,9 +1,9 @@
 @extends('crudbooster::admin_template')
 @section('content')
-
     @push('head')
         <style type="text/css">
-            body.dragging, body.dragging * {
+            body.dragging,
+            body.dragging * {
                 cursor: move !important;
             }
 
@@ -54,8 +54,9 @@
                 position: absolute;
                 /** Define arrowhead **/
             }
+
             .select2-container .select2-selection__rendered i {
-                margin-top: 13px!important;
+                margin-top: 13px !important;
                 margin-right: 13px;
             }
         </style>
@@ -63,13 +64,14 @@
 
     @push('bottom')
         <script type="text/javascript">
-            $(function () {
+            $(function() {
                 function format(icon) {
                     var originalOption = icon.element;
                     var label = $(originalOption).text();
                     var val = $(originalOption).val();
                     if (!val) return label;
-                    var $resp = $('<span><i style="margin-top:5px" class="float-right ' + $(originalOption).val() + '"></i> ' + $(originalOption).data('label') + '</span>');
+                    var $resp = $('<span><i style="margin-top:5px" class="float-right ' + $(originalOption).val() +
+                        '"></i> ' + $(originalOption).data('label') + '</span>');
                     return $resp;
                 }
 
@@ -83,12 +85,12 @@
     @endpush
     @push('bottom')
         <script type="text/javascript">
-            $(function () {
-                var id_cms_privileges = '{{$id_cms_privileges}}';
+            $(function() {
+                var id_cms_privileges = '{{ $id_cms_privileges }}';
                 var sortactive = $(".draggable-menu").sortable({
                     group: '.draggable-menu',
                     delay: 200,
-                    isValidTarget: function ($item, container) {
+                    isValidTarget: function($item, container) {
                         var depth = 1, // Start with a depth of one (the element itself)
                             maxDepth = 2,
                             children = $item.find('ul').first().find('li');
@@ -104,7 +106,7 @@
 
                         return depth <= maxDepth;
                     },
-                    onDrop: function ($item, container, _super) {
+                    onDrop: function($item, container, _super) {
 
                         if ($item.parents('ul').hasClass('draggable-menu-active')) {
                             var isActive = 1;
@@ -117,7 +119,10 @@
                             $('#inactive_text').remove();
                         }
 
-                        $.post("{{route('MenusControllerPostSaveMenu')}}", {menus: jsonString, isActive: isActive}, function (resp) {
+                        $.post("{{ route('MenusControllerPostSaveMenu') }}", {
+                            menus: jsonString,
+                            isActive: isActive
+                        }, function(resp) {
                             $('#menu-saved-info').fadeIn('fast').delay(1000).fadeOut('fast');
                         });
 
@@ -135,49 +140,68 @@
 
             <div class="card card-success">
                 <div class="card-header">
-                    <strong>Menu Order (Active)</strong> <span id='menu-saved-info' style="display:none" class='float-right text-success'><i
-                                class='fa fa-check'></i> Menu Saved !</span>
+                    <strong>Menu Order (Active)</strong> <span id='menu-saved-info' style="display:none"
+                        class='float-right text-success'><i class='fa fa-check'></i> Menu Saved !</span>
                 </div>
                 <div class="card-body clearfix">
                     <ul class='draggable-menu draggable-menu-active'>
-                        @foreach($menu_active as $menu)
+                        @foreach ($menu_active as $menu)
                             @php
                                 $privileges = DB::table('cms_menus_privileges')
-                                ->join('cms_privileges','cms_privileges.id','=','cms_menus_privileges.id_cms_privileges')
-                                ->where('id_cms_menus',$menu->id)->pluck('cms_privileges.name')->toArray();
+                                    ->join(
+                                        'cms_privileges',
+                                        'cms_privileges.id',
+                                        '=',
+                                        'cms_menus_privileges.id_cms_privileges',
+                                    )
+                                    ->where('id_cms_menus', $menu->id)
+                                    ->pluck('cms_privileges.name')
+                                    ->toArray();
                             @endphp
-                            <li data-id='{{$menu->id}}' data-name='{{$menu->name}}'>
-                                <div class='{{$menu->is_dashboard?"is-dashboard":""}}' title="{{$menu->is_dashboard?'This is setted as Dashboard':''}}">
-                                    <i class='{{($menu->is_dashboard)?"icon-is-dashboard fa fa-dashboard":$menu->icon}}'></i> {{$menu->name}} <span
-                                            class='float-right'>
-                                                <a class='fas fa-pencil-alt' title='Edit'
-                                                   href='{{ route("MenusControllerGetEdit")."/".$menu->id }}?return_url={{ urlencode(Request::fullUrl()) }}'></a>&nbsp;&nbsp;<a
-                                                title='Delete' class='fa fa-trash'
-                                                onclick='{{CRUDBooster::deleteConfirm(route("MenusControllerGetDelete") ."/".$menu->id) }}'
-                                                href='javascript:void(0)'></a></span>
-                                    <br/><em class="text-muted">
-                                        <small><i class="fa fa-users"></i> &nbsp; {{implode(', ',$privileges)}}</small>
+                            <li data-id='{{ $menu->id }}' data-name='{{ $menu->name }}'>
+                                <div class='{{ $menu->is_dashboard ? 'is-dashboard' : '' }}'
+                                    title="{{ $menu->is_dashboard ? 'This is setted as Dashboard' : '' }}">
+                                    <i
+                                        class='{{ $menu->is_dashboard ? 'icon-is-dashboard fa fa-dashboard' : $menu->icon }}'></i>
+                                    {{ $menu->name }} <span class='float-right'>
+                                        <a class='fas fa-pencil-alt' title='Edit'
+                                            href='{{ route('MenusControllerGetEdit') . '/' . $menu->id }}?return_url={{ urlencode(Request::fullUrl()) }}'></a>&nbsp;&nbsp;<a
+                                            title='Delete' class='fa fa-trash'
+                                            onclick='{{ CRUDBooster::deleteConfirm(route('MenusControllerGetDelete') . '/' . $menu->id) }}'
+                                            href='javascript:void(0)'></a></span>
+                                    <br /><em class="text-muted">
+                                        <small><i class="fa fa-users"></i> &nbsp; {{ implode(', ', $privileges) }}</small>
                                     </em>
                                 </div>
                                 <ul>
-                                    @if($menu->children)
-                                        @foreach($menu->children as $child)
+                                    @if (count($menu->children))
+                                        @foreach ($menu->children as $child)
                                             @php
                                                 $privileges = DB::table('cms_menus_privileges')
-                                                ->join('cms_privileges','cms_privileges.id','=','cms_menus_privileges.id_cms_privileges')
-                                                ->where('id_cms_menus',$child->id)->pluck('cms_privileges.name')->toArray();
+                                                    ->join(
+                                                        'cms_privileges',
+                                                        'cms_privileges.id',
+                                                        '=',
+                                                        'cms_menus_privileges.id_cms_privileges',
+                                                    )
+                                                    ->where('id_cms_menus', $child->id)
+                                                    ->pluck('cms_privileges.name')
+                                                    ->toArray();
                                             @endphp
-                                            <li data-id='{{$child->id}}' data-name='{{$child->name}}'>
-                                                <div class='{{$child->is_dashboard?"is-dashboard":""}}'
-                                                     title="{{$child->is_dashboard?'This is setted as Dashboard':''}}"><i
-                                                            class='{{($child->is_dashboard)?"icon-is-dashboard fa fa-dashboard":$child->icon}}'></i> {{$child->name}}
+                                            <li data-id='{{ $child->id }}' data-name='{{ $child->name }}'>
+                                                <div class='{{ $child->is_dashboard ? 'is-dashboard' : '' }}'
+                                                    title="{{ $child->is_dashboard ? 'This is setted as Dashboard' : '' }}">
+                                                    <i
+                                                        class='{{ $child->is_dashboard ? 'icon-is-dashboard fa fa-dashboard' : $child->icon }}'></i>
+                                                    {{ $child->name }}
                                                     <span class='float-right'><a class='fas fa-pencil-alt' title='Edit'
-                                                                                href='{{ route("MenusControllerGetEdit") ."/".$child->id }}?return_url={{urlencode(Request::fullUrl())}}'></a>&nbsp;&nbsp;<a
-                                                                title="Delete" class='fa fa-trash'
-                                                                onclick='{{CRUDBooster::deleteConfirm(route("MenusControllerGetDelete") . "/". $child->id) }}'
-                                                                href='javascript:void(0)'></a></span>
-                                                    <br/><em class="text-muted">
-                                                        <small><i class="fa fa-users"></i> &nbsp; {{implode(', ',$privileges)}}</small>
+                                                            href='{{ route('MenusControllerGetEdit') . '/' . $child->id }}?return_url={{ urlencode(Request::fullUrl()) }}'></a>&nbsp;&nbsp;<a
+                                                            title="Delete" class='fa fa-trash'
+                                                            onclick='{{ CRUDBooster::deleteConfirm(route('MenusControllerGetDelete') . '/' . $child->id) }}'
+                                                            href='javascript:void(0)'></a></span>
+                                                    <br /><em class="text-muted">
+                                                        <small><i class="fa fa-users"></i> &nbsp;
+                                                            {{ implode(', ', $privileges) }}</small>
                                                     </em>
                                                 </div>
                                             </li>
@@ -187,7 +211,7 @@
                             </li>
                         @endforeach
                     </ul>
-                    @if(count($menu_active)==0)
+                    @if (count($menu_active) == 0)
                         <div align="center">Active menu is empty, please add new menu</div>
                     @endif
                 </div>
@@ -199,24 +223,27 @@
                 </div>
                 <div class="card-body clearfix">
                     <ul class='draggable-menu draggable-menu-inactive'>
-                        @foreach($menu_inactive as $menu)
-                            <li data-id='{{$menu->id}}' data-name='{{$menu->name}}'>
+                        @foreach ($menu_inactive as $menu)
+                            <li data-id='{{ $menu->id }}' data-name='{{ $menu->name }}'>
                                 <div>
-                                    <i class="{{ $menu->icon }}"></i> {{$menu->name}} <span class="float-right">
-                                    <a class="fas fa-pencil-alt" title="Edit" href='{{ route("MenusControllerGetEdit") . "/" .$menu->id }}?return_url={{ urlencode(Request::fullUrl()) }}'></a>&nbsp;&nbsp;<a
-                                        title='Delete' class='fa fa-trash'
-                                        onclick='{{CRUDBooster::deleteConfirm(route("MenusControllerGetDelete",["id"=>$menu->id]))}}'
-                                        href='javascript:void(0)'></a></span>
+                                    <i class="{{ $menu->icon }}"></i> {{ $menu->name }} <span class="float-right">
+                                        <a class="fas fa-pencil-alt" title="Edit"
+                                            href='{{ route('MenusControllerGetEdit') . '/' . $menu->id }}?return_url={{ urlencode(Request::fullUrl()) }}'></a>&nbsp;&nbsp;<a
+                                            title='Delete' class='fa fa-trash'
+                                            onclick='{{ CRUDBooster::deleteConfirm(route('MenusControllerGetDelete', ['id' => $menu->id])) }}'
+                                            href='javascript:void(0)'></a></span>
                                 </div>
                                 <ul>
-                                    @if($menu->children)
-                                        @foreach($menu->children as $child)
-                                            <li data-id='{{$child->id}}' data-name='{{$child->name}}'>
-                                                <div><i class='{{$child->icon}}'></i> {{$child->name}} <span class='float-right'>
-                                                <a class='fas fa-pencil-alt' title='Edit' href='{{route("MenusControllerGetEdit",["id"=>$child->id])}}?return_url={{urlencode(Request::fullUrl())}}'></a>&nbsp;&nbsp;<a
-                                                    title="Delete" class='fa fa-trash'
-                                                    onclick='{{CRUDBooster::deleteConfirm(route("MenusControllerGetDelete",["id"=>$child->id]))}}'
-                                                    href='javascript:void(0)'></a></span></div>
+                                    @if ($menu->children)
+                                        @foreach ($menu->children as $child)
+                                            <li data-id='{{ $child->id }}' data-name='{{ $child->name }}'>
+                                                <div><i class='{{ $child->icon }}'></i> {{ $child->name }} <span
+                                                        class='float-right'>
+                                                        <a class='fas fa-pencil-alt' title='Edit'
+                                                            href='{{ route('MenusControllerGetEdit', ['id' => $child->id]) }}?return_url={{ urlencode(Request::fullUrl()) }}'></a>&nbsp;&nbsp;<a
+                                                            title="Delete" class='fa fa-trash'
+                                                            onclick='{{ CRUDBooster::deleteConfirm(route('MenusControllerGetDelete', ['id' => $child->id])) }}'
+                                                            href='javascript:void(0)'></a></span></div>
                                             </li>
                                         @endforeach
                                     @endif
@@ -224,7 +251,7 @@
                             </li>
                         @endforeach
                     </ul>
-                    @if(count($menu_inactive)==0)
+                    @if (count($menu_inactive) == 0)
                         <div align="center" id='inactive_text' class='text-muted'>Inactive menu is empty</div>
                     @endif
                 </div>
@@ -238,16 +265,15 @@
                     Add Menu
                 </div>
                 <div class="card-body">
-                    <form class='form-horizontal' method='post' id="form" enctype="multipart/form-data" action='{{CRUDBooster::mainpath("add-save")}}'>
+                    <form class='form-horizontal' method='post' id="form" enctype="multipart/form-data"
+                        action='{{ CRUDBooster::mainpath('add-save') }}'>
                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                        <input type='hidden' name='return_url' value='{{Request::fullUrl()}}'/>
-                        @include("crudbooster::default.form_body")
-                        <p align="right"><input type='submit' class='btn btn-primary' value='Add Menu'/></p>
+                        <input type='hidden' name='return_url' value='{{ Request::fullUrl() }}' />
+                        @include('crudbooster::default.form_body')
+                        <p align="right"><input type='submit' class='btn btn-primary' value='Add Menu' /></p>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-
-
 @endsection

@@ -1,21 +1,25 @@
-<?php
-//Loading Assets
-$asset_already = [];
-foreach($forms as $form) {
-$type = @$form['type'] ?: 'text';
+{{-- 1. Loading Assets --}}
+@php $asset_already = []; @endphp
+@foreach ($forms as $form)
+    @php $type = $form['type'] ?? 'text'; @endphp
 
-if (in_array($type, $asset_already)) continue;
+    @if (in_array($type, $asset_already))
+        @continue
+    @endif
 
-?>
-@if(file_exists(base_path('/vendor/crocodicstudio/crudbooster/src/views/default/type_components/'.$type.'/asset.blade.php')))
-    @include('crudbooster::default.type_components.'.$type.'.asset')
-@elseif(file_exists(resource_path('views/vendor/crudbooster/type_components/'.$type.'/asset.blade.php')))
-    @include('vendor.crudbooster.type_components.'.$type.'.asset')
-@endif
-<?php
-$asset_already[] = $type;
-} //end forms
-?>
+    @php
+        $asset_vendor = "vendor/wyyr/crudbooster/src/views/default/type_components/$type/asset.blade.php";
+        $asset_resource = "views/vendor/crudbooster/type_components/$type/asset.blade.php";
+    @endphp
+
+    @if (file_exists(base_path($asset_vendor)))
+        @include('crudbooster::default.type_components.' . $type . '.asset')
+    @elseif (file_exists(resource_path($asset_resource)))
+        @include('vendor.crudbooster.type_components.' . $type . '.asset')
+    @endif
+
+    @php $asset_already[] = $type; @endphp
+@endforeach
 
 @push('head')
     <style type="text/css">
@@ -26,82 +30,102 @@ $asset_already[] = $type;
     </style>
 @endpush
 
+{{-- 2. Detail Table --}}
 <div class='table-responsive'>
     <table id='table-detail' class='table table-striped'>
+        @foreach ($forms as $index => $form)
+            @php
+                $name = $form['name'] ?? null;
+                $showInDetail = $form['showInDetail'] ?? true;
 
-        <?php
-        foreach($forms as $index=>$form):
+                if (!$name || $showInDetail == false) {
+                    continue;
+                }
 
-        $name = $form['name'];
-        @$join = $form['join'];
-        @$value = (isset($form['value'])) ? $form['value'] : '';
-        @$value = (isset($row->{$name})) ? $row->{$name} : $value;
-        @$showInDetail = (isset($form['showInDetail'])) ? $form['showInDetail'] : true;
+                $type = $form['type'] ?? 'text';
+                $value = $form['value'] ?? '';
+                $value = isset($row) && isset($row->{$name}) ? $row->{$name} : $value;
+                $join = $form['join'] ?? null;
 
-        if ($showInDetail == FALSE) {
-            continue;
-        }
+                // Form Attributes
+                $required = $form['required'] ?? false ? 'required' : '';
+                $readonly = $form['readonly'] ?? false ? 'readonly' : '';
+                $disabled = $form['disabled'] ?? false ? 'disabled' : '';
+                $jquery = $form['jquery'] ?? null;
+                $placeholder = $form['placeholder'] ?? false ? "placeholder='{$form['placeholder']}'" : '';
 
-        if (isset($form['callback_php'])) {
-            @eval("\$value = ".$form['callback_php'].";");
-        }
+                // Handle Callbacks
+                if (isset($form['callback_php'])) {
+                    try {
+                        @eval("\$value = " . $form['callback_php'] . ';');
+                    } catch (\Throwable $e) {
+                        $value = 'Error in callback_php';
+                    }
+                }
 
-        if (isset($form['callback'])) {
-            $value = call_user_func($form['callback'], $row);
-        }
+                if (isset($form['callback']) && is_callable($form['callback'])) {
+                    $value = call_user_func($form['callback'], $row);
+                }
 
-        if (isset($form['default_value'])) {
-            @$value = $form['default_value'];
-        }
+                if (isset($form['default_value'])) {
+                    $value = $form['default_value'];
+                }
 
-        if ($join && @$row) {
-            $join_arr = explode(',', $join);
-            array_walk($join_arr, 'trim');
-            $join_table = $join_arr[0];
-            $join_title = $join_arr[1];
-            $join_table_pk = CB::pk($join_table);
-            $join_fk = CB::getForeignKey($table, $join_table);
-            $join_query_[$join_table] = DB::table($join_table)->select($join_title)->where($join_table_pk, $row->{$join_fk})->first();
-            $value = @$join_query_[$join_table]->{$join_title};
-        }
+                // Handle Joins
+                if ($join && isset($row)) {
+                    $join_arr = array_map('trim', explode(',', $join));
+                    $join_table = $join_arr[0] ?? null;
+                    $join_title = $join_arr[1] ?? null;
 
-        $type = @$form['type'] ?: 'text';
-        $required = (@$form['required']) ? "required" : "";
-        $readonly = (@$form['readonly']) ? "readonly" : "";
-        $disabled = (@$form['disabled']) ? "disabled" : "";
-        $jquery = @$form['jquery'];
-        $placeholder = (@$form['placeholder']) ? "placeholder='".$form['placeholder']."'" : "";
-        $file_location = base_path('vendor/crocodicstudio/crudbooster/src/views/default/type_components/'.$type.'/component_detail.blade.php');
-        $user_location = resource_path('views/vendor/crudbooster/type_components/'.$type.'/component_detail.blade.php');
+                    if ($join_table && $join_title) {
+                        $join_fk = CB::getForeignKey($table, $join_table);
+                        $fk_value = $row->{$join_fk} ?? null;
 
-        ?>
+                        if ($fk_value) {
+                            $join_data = DB::table($join_table)
+                                ->select($join_title)
+                                ->where(CB::pk($join_table), $fk_value)
+                                ->first();
+                            $value = $join_data->{$join_title} ?? null;
+                        }
+                    }
+                }
 
-        @if(file_exists($file_location))
-            <?php $containTR = (substr(trim(file_get_contents($file_location)), 0, 4) == '<tr>') ? TRUE : FALSE;?>
-            @if($containTR)
-                @include('crudbooster::default.type_components.'.$type.'.component_detail')
-            @else
-                <tr>
-                    <td>{{$form['label']}}</td>
-                    <td>@include('crudbooster::default.type_components.'.$type.'.component_detail')</td>
-                </tr>
+                $file_loc = base_path(
+                    "vendor/wyyr/crudbooster/src/views/default/type_components/$type/component_detail.blade.php",
+                );
+                $user_loc = resource_path("views/vendor/crudbooster/type_components/$type/component_detail.blade.php");
+
+                $final_view = null;
+                $actual_path = null;
+
+                if (file_exists($file_loc)) {
+                    $final_view = "crudbooster::default.type_components.$type.component_detail";
+                    $actual_path = $file_loc;
+                } elseif (file_exists($user_loc)) {
+                    $final_view = "vendor.crudbooster.type_components.$type.component_detail";
+                    $actual_path = $user_loc;
+                }
+            @endphp
+
+            @if ($final_view)
+                @php
+                    $is_table_row = false;
+                    if (is_readable($actual_path)) {
+                        $content = file_get_contents($actual_path);
+                        $is_table_row = substr(trim($content), 0, 4) === '<tr>';
+                    }
+                @endphp
+
+                @if ($is_table_row)
+                    @include($final_view)
+                @else
+                    <tr>
+                        <td>{{ $form['label'] }}</td>
+                        <td>@include($final_view)</td>
+                    </tr>
+                @endif
             @endif
-        @elseif(file_exists($user_location))
-            <?php $containTR = (substr(trim(file_get_contents($user_location)), 0, 4) == '<tr>') ? TRUE : FALSE;?>
-            @if($containTR)
-                @include('vendor.crudbooster.type_components.'.$type.'.component_detail')
-            @else
-                <tr>
-                    <td>{{$form['label']}}</td>
-                    <td>@include('vendor.crudbooster.type_components.'.$type.'.component_detail')</td>
-                </tr>
-            @endif
-        @else
-        <!-- <tr><td colspan='2'>NO COMPONENT {{$type}}</td></tr> -->
-        @endif
-
-
-        <?php endforeach;?>
-
+        @endforeach
     </table>
 </div>

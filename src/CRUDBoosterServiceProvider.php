@@ -79,6 +79,7 @@ class CRUDBoosterServiceProvider extends ServiceProvider
     {
         View::composer('crudbooster::admin_template', function ($view) {
             $view->with([
+                'page_icon' => $view->page_icon ?? '',
                 'sidebar_mode' => $view->sidebar_mode ?? '',
                 'style_css' => $view->style_css ?? '',
                 'load_css' => $view->load_css ?? [],
