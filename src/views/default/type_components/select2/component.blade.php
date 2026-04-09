@@ -1,3 +1,7 @@
+@php
+    $isAjax = $form['datatable_ajax'] ?? false;
+@endphp
+
 @if (isset($form['datatable']) && $form['datatable'])
 
     @if (isset($form['relationship_table']) && $form['relationship_table'])
@@ -9,7 +13,7 @@
             </script>
         @endpush
     @else
-        @if (isset($form['datatable_ajax']) && $form['datatable_ajax'] == true)
+        @if ($isAjax == true)
             <?php
             $datatable = $form['datatable'] ?? '';
             $where = $form['datatable_where'] ?? '';
@@ -197,13 +201,13 @@
                     }
                     ?>
                 @else
-                    @if (isset($form['datatable_ajax']) && $form['datatable_ajax'] == false)
+                    @if ($isAjax == false)
                         <option value=''>{{ cbLang('text_prefix_option') }} {{ $form['label'] }}</option>
                         <?php
                         $select_table = explode(',', $form['datatable'])[0];
                         $select_title = explode(',', $form['datatable'])[1];
-                        $select_where = $form['datatable_where'];
-                        $datatable_format = $form['datatable_format'];
+                        $select_where = $form['datatable_where'] ?? null;
+                        $datatable_format = $form['datatable_format'] ?? null;
                         $select_table_pk = CRUDBooster::findPrimaryKey($select_table);
                         $result = DB::table($select_table)->select($select_table_pk, $select_title);
                         if ($datatable_format) {
