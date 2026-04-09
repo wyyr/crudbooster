@@ -21,22 +21,22 @@
 
     <ul class="nav nav-tabs nav-primary mb-1">
         <li class="nav-item" role="presentation">
-            <a class="nav-link" href="{{ Route('ModulsControllerGetStep1') . '/' . $id }}">
+            <a class="nav-link" href="{{ Route('ModulControllerGetStep1') . '/' . $id }}">
                 <i class="fa fa-info"></i> Step 1 - Module Information
             </a>
         </li>
         <li class="nav-item" role="presentation">
-            <a class="nav-link active" href="{{ Route('ModulsControllerGetStep2') . '/' . $id }}">
+            <a class="nav-link active" href="{{ Route('ModulControllerGetStep2') . '/' . $id }}">
                 <i class="fa fa-table"></i> Step 2 - Table Display
             </a>
         </li>
         <li class="nav-item" role="presentation">
-            <a class="nav-link" href="{{ Route('ModulsControllerGetStep3') . '/' . $id }}">
+            <a class="nav-link" href="{{ Route('ModulControllerGetStep3') . '/' . $id }}">
                 <i class="fa fa-plus-square"></i> Step 3 - Form Display
             </a>
         </li>
         <li class="nav-item" role="presentation">
-            <a class="nav-link" href="{{ Route('ModulsControllerGetStep4') . '/' . $id }}">
+            <a class="nav-link" href="{{ Route('ModulControllerGetStep4') . '/' . $id }}">
                 <i class="fa fa-wrench"></i> Step 4 - Configuration
             </a>
         </li>
@@ -293,7 +293,7 @@
         </script>
     @endpush
 
-    <form method="post" action="{{ Route('ModulsControllerPostStep3') }}">
+    <form method="post" action="{{ Route('ModulControllerPostStep3') }}">
         <div class="card card-light">
             <div class="card-header">
                 <h6 class="card-title">Table Display</h6>

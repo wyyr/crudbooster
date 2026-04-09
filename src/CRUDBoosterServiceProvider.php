@@ -65,7 +65,7 @@ class CRUDBoosterServiceProvider extends ServiceProvider
         ], 'cb-config');
         $this->publishes([
             __DIR__.'/userfiles/controllers/CBHook.php' => app_path('Http/Controllers/CRUDBooster/CBHook.php'),
-            __DIR__.'/userfiles/controllers/AdminCmsUsersController.php' => app_path('Http/Controllers/CRUDBooster/AdminCmsUsersController.php'),
+            __DIR__.'/userfiles/controllers/CmsUserController.php' => app_path('Http/Controllers/CRUDBooster/CmsUserController.php'),
         ], 'cb-controllers');
         $this->publishes([
             __DIR__.'/public' => public_path(),

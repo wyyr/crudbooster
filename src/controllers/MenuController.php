@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Session;
 
-class MenusController extends CBController
+class MenuController extends CBController
 {
     public function cbInit()
     {

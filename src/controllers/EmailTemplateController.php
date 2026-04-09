@@ -5,7 +5,7 @@ namespace crocodicstudio\crudbooster\controllers;
 use Illuminate\Support\Facades\Excel;
 use Illuminate\Support\Facades\PDF;
 
-class EmailTemplatesController extends CBController
+class EmailTemplateController extends CBController
 {
     public function cbInit()
     {

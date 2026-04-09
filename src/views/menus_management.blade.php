@@ -119,7 +119,7 @@
                             $('#inactive_text').remove();
                         }
 
-                        $.post("{{ route('MenusControllerPostSaveMenu') }}", {
+                        $.post("{{ route('MenuControllerPostSaveMenu') }}", {
                             menus: jsonString,
                             isActive: isActive
                         }, function(resp) {
@@ -165,9 +165,9 @@
                                         class='{{ $menu->is_dashboard ? 'icon-is-dashboard fa fa-dashboard' : $menu->icon }}'></i>
                                     {{ $menu->name }} <span class='float-right'>
                                         <a class='fas fa-pencil-alt' title='Edit'
-                                            href='{{ route('MenusControllerGetEdit') . '/' . $menu->id }}?return_url={{ urlencode(Request::fullUrl()) }}'></a>&nbsp;&nbsp;<a
+                                            href='{{ route('MenuControllerGetEdit') . '/' . $menu->id }}?return_url={{ urlencode(Request::fullUrl()) }}'></a>&nbsp;&nbsp;<a
                                             title='Delete' class='fa fa-trash'
-                                            onclick='{{ CRUDBooster::deleteConfirm(route('MenusControllerGetDelete') . '/' . $menu->id) }}'
+                                            onclick='{{ CRUDBooster::deleteConfirm(route('MenuControllerGetDelete') . '/' . $menu->id) }}'
                                             href='javascript:void(0)'></a></span>
                                     <br /><em class="text-muted">
                                         <small><i class="fa fa-users"></i> &nbsp; {{ implode(', ', $privileges) }}</small>
@@ -195,9 +195,9 @@
                                                         class='{{ $child->is_dashboard ? 'icon-is-dashboard fa fa-dashboard' : $child->icon }}'></i>
                                                     {{ $child->name }}
                                                     <span class='float-right'><a class='fas fa-pencil-alt' title='Edit'
-                                                            href='{{ route('MenusControllerGetEdit') . '/' . $child->id }}?return_url={{ urlencode(Request::fullUrl()) }}'></a>&nbsp;&nbsp;<a
+                                                            href='{{ route('MenuControllerGetEdit') . '/' . $child->id }}?return_url={{ urlencode(Request::fullUrl()) }}'></a>&nbsp;&nbsp;<a
                                                             title="Delete" class='fa fa-trash'
-                                                            onclick='{{ CRUDBooster::deleteConfirm(route('MenusControllerGetDelete') . '/' . $child->id) }}'
+                                                            onclick='{{ CRUDBooster::deleteConfirm(route('MenuControllerGetDelete') . '/' . $child->id) }}'
                                                             href='javascript:void(0)'></a></span>
                                                     <br /><em class="text-muted">
                                                         <small><i class="fa fa-users"></i> &nbsp;
@@ -228,9 +228,9 @@
                                 <div>
                                     <i class="{{ $menu->icon }}"></i> {{ $menu->name }} <span class="float-right">
                                         <a class="fas fa-pencil-alt" title="Edit"
-                                            href='{{ route('MenusControllerGetEdit') . '/' . $menu->id }}?return_url={{ urlencode(Request::fullUrl()) }}'></a>&nbsp;&nbsp;<a
+                                            href='{{ route('MenuControllerGetEdit') . '/' . $menu->id }}?return_url={{ urlencode(Request::fullUrl()) }}'></a>&nbsp;&nbsp;<a
                                             title='Delete' class='fa fa-trash'
-                                            onclick='{{ CRUDBooster::deleteConfirm(route('MenusControllerGetDelete', ['id' => $menu->id])) }}'
+                                            onclick='{{ CRUDBooster::deleteConfirm(route('MenuControllerGetDelete', ['id' => $menu->id])) }}'
                                             href='javascript:void(0)'></a></span>
                                 </div>
                                 <ul>
@@ -240,9 +240,9 @@
                                                 <div><i class='{{ $child->icon }}'></i> {{ $child->name }} <span
                                                         class='float-right'>
                                                         <a class='fas fa-pencil-alt' title='Edit'
-                                                            href='{{ route('MenusControllerGetEdit', ['id' => $child->id]) }}?return_url={{ urlencode(Request::fullUrl()) }}'></a>&nbsp;&nbsp;<a
+                                                            href='{{ route('MenuControllerGetEdit', ['id' => $child->id]) }}?return_url={{ urlencode(Request::fullUrl()) }}'></a>&nbsp;&nbsp;<a
                                                             title="Delete" class='fa fa-trash'
-                                                            onclick='{{ CRUDBooster::deleteConfirm(route('MenusControllerGetDelete', ['id' => $child->id])) }}'
+                                                            onclick='{{ CRUDBooster::deleteConfirm(route('MenuControllerGetDelete', ['id' => $child->id])) }}'
                                                             href='javascript:void(0)'></a></span></div>
                                             </li>
                                         @endforeach

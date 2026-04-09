@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\PDF;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Storage;
 
-class SettingsController extends CBController
+class SettingController extends CBController
 {
     public function cbInit()
     {

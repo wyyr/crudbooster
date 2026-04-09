@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Intervention\Image\ImageManagerStatic as Image;
 use ReflectionClass;
 use ReflectionMethod;
@@ -613,8 +614,8 @@ class CRUDBooster
     public static function mainpath($path = null)
     {
 
-        $controllername = str_replace(["\crocodicstudio\crudbooster\controllers\\", "App\Http\Controllers\CRUDBooster\\"], '', strtok(Route::currentRouteAction(), '@'));
-        $route_url = route($controllername.'GetIndex');
+        $controllerName = str_replace(["\crocodicstudio\crudbooster\controllers\\", "App\Http\Controllers\CRUDBooster\\"], '', strtok(Route::currentRouteAction(), '@'));
+        $route_url = route($controllerName.'GetIndex');
 
         if ($path) {
             if (substr($path, 0, 1) == '?') {
@@ -1333,15 +1334,33 @@ class CRUDBooster
 
     public static function isExistsController($table)
     {
-        $controllername = ucwords(str_replace('_', ' ', $table));
-        $controllername = str_replace(' ', '', $controllername).'Controller';
+        $controllerName = CRUDBooster::generateControllerName($table);
+        
         $path = base_path('app/Http/Controllers/CRUDBooster');
         $path2 = base_path('app/Http/Controllers/ControllerMaster/');
-        if (file_exists($path.$controllername.'.php') || file_exists($path2.$controllername.'.php') || file_exists($path2.$controllername.'.php')) {
+        if (file_exists($path.$controllerName.'.php') || file_exists($path2.$controllerName.'.php') || file_exists($path2.$controllerName.'.php')) {
             return true;
         } else {
             return false;
         }
+    }
+
+    public static function generateControllerName($table, $name = null)
+    {
+        $baseName = $name ?: $table;
+
+        $modelName = Str::studly(Str::singular($baseName));
+        $controllerName = $modelName . 'Controller';
+
+        $path = base_path('app/Http/Controllers/CRUDBooster/');
+
+        $suffix = 1;
+        while (file_exists($path . $controllerName . '.php')) {
+            $controllerName = $modelName . $suffix . 'Controller';
+            $suffix++;
+        }
+
+        return $controllerName;
     }
 
     public static function generateAPI($controller_name, $table_name, $permalink, $method_type = 'post')
@@ -1401,21 +1420,8 @@ class CRUDBooster
         $name_candidate = explode(',', config('crudbooster.NAME_FIELDS_CANDIDATE'));
         $url_candidate = explode(',', config('crudbooster.URL_FIELDS_CANDIDATE'));
 
-        $controllername = ucwords(str_replace('_', ' ', $table));
-        $controllername = str_replace(' ', '', $controllername).'Controller';
-        if ($name) {
-            $controllername = ucwords(str_replace(['_', '-'], ' ', $name));
-            $controllername = str_replace(' ', '', $controllername).'Controller';
-        }
-
+        $controllerName = CRUDBooster::generateControllerName($table);
         $path = base_path('app/Http/Controllers/CRUDBooster/');
-        $countSameFile = count(glob($path.$controllername.'.php'));
-
-        if ($countSameFile != 0) {
-            $suffix = $countSameFile;
-            $controllername = ucwords(str_replace(['_', '-'], ' ', $name)).$suffix;
-            $controllername = str_replace(' ', '', $controllername).'Controller';
-        }
 
         $coloms = CRUDBooster::getTableColumns($table);
         $name_col = CRUDBooster::getNameTable($coloms);
@@ -1442,7 +1448,7 @@ class CRUDBooster
 	use DB;
 	use CRUDBooster;
 
-	class '.$controllername.' extends \crocodicstudio\crudbooster\controllers\CBController {
+	class '.$controllerName.' extends \crocodicstudio\crudbooster\controllers\CBController {
 
 	    public function cbInit() {
 	    	# START CONFIGURATION DO NOT REMOVE THIS LINE
@@ -1934,9 +1940,9 @@ class CRUDBooster
         $php = trim($php);
 
         // create file controller
-        file_put_contents($path.$controllername.'.php', $php);
+        file_put_contents($path.$controllerName.'.php', $php);
 
-        return $controllername;
+        return $controllerName;
     }
 
     /*

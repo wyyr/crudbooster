@@ -58,22 +58,22 @@
     <ul class="nav nav-tabs nav-primary mb-1">
         @if ($id)
             <li class="nav-item" role="presentation">
-                <a class="nav-link active" href="{{ Route('ModulsControllerGetStep1') . '/' . $id }}">
+                <a class="nav-link active" href="{{ Route('ModulControllerGetStep1') . '/' . $id }}">
                     <i class="fa fa-info"></i> Step 1 - Module Information
                 </a>
             </li>
             <li class="nav-item" role="presentation">
-                <a class="nav-link" href="{{ Route('ModulsControllerGetStep2') . '/' . $id }}">
+                <a class="nav-link" href="{{ Route('ModulControllerGetStep2') . '/' . $id }}">
                     <i class="fa fa-table"></i> Step 2 - Table Display
                 </a>
             </li>
             <li class="nav-item" role="presentation">
-                <a class="nav-link" href="{{ Route('ModulsControllerGetStep3') . '/' . $id }}">
+                <a class="nav-link" href="{{ Route('ModulControllerGetStep3') . '/' . $id }}">
                     <i class="fa fa-plus-square"></i> Step 3 - Form Display
                 </a>
             </li>
             <li class="nav-item" role="presentation">
-                <a class="nav-link" href="{{ Route('ModulsControllerGetStep4') . '/' . $id }}">
+                <a class="nav-link" href="{{ Route('ModulControllerGetStep4') . '/' . $id }}">
                     <i class="fa fa-wrench"></i> Step 4 - Configuration
                 </a>
             </li>
@@ -93,7 +93,7 @@
         @endif
     </ul>
 
-    <form method="post" action="{{ Route('ModulsControllerPostStep2') }}">
+    <form method="post" action="{{ Route('ModulControllerPostStep2') }}">
         <div class="card card-light">
             <div class="card-header">
                 <h6 class="card-title">Module Information</h6>
@@ -147,7 +147,7 @@
 
                 <div class="float-right">
                     <a class="btn btn-outline-secondary mr-2"
-                        href="{{ Route('ModulsControllerGetIndex') }}">{{ cbLang('button_back') }}</a>
+                        href="{{ Route('ModulControllerGetIndex') }}">{{ cbLang('button_back') }}</a>
                     <input type="submit" class="btn btn-primary" value="Step 2 &raquo;">
                 </div>
             </div>

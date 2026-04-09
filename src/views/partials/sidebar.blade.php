@@ -60,13 +60,13 @@
                     <ul class="dropdown-menu">
                         <li
                             class="{{ request()->is(config('crudbooster.ADMIN_PATH') . '/privileges/add*') ? 'active' : '' }}">
-                            <a class="nav-link" href="{{ Route('PrivilegesControllerGetAdd') }}">
+                            <a class="nav-link" href="{{ Route('PrivilegeControllerGetAdd') }}">
                                 <i class="fas fa-plus"></i> <span>{{ cbLang('Add_New_Privilege') }}</span>
                             </a>
                         </li>
                         <li
                             class="{{ request()->is(config('crudbooster.ADMIN_PATH') . '/privileges') ? 'active' : '' }}">
-                            <a class="nav-link" href="{{ Route('PrivilegesControllerGetIndex') }}">
+                            <a class="nav-link" href="{{ Route('PrivilegeControllerGetIndex') }}">
                                 <i class="fas fa-bars"></i> <span>{{ cbLang('List_Privilege') }}</span>
                             </a>
                         </li>
@@ -79,12 +79,12 @@
                     <ul class="dropdown-menu">
                         <li
                             class="{{ request()->is(config('crudbooster.ADMIN_PATH') . '/users/add*') ? 'active' : '' }}">
-                            <a href="{{ Route('AdminCmsUsersControllerGetAdd') }}">
+                            <a href="{{ Route('CmsUserControllerGetAdd') }}">
                                 <i class="fas fa-plus"></i> <span>{{ cbLang('add_user') }}</span>
                             </a>
                         </li>
                         <li class="{{ request()->is(config('crudbooster.ADMIN_PATH') . '/users') ? 'active' : '' }}">
-                            <a href="{{ Route('AdminCmsUsersControllerGetIndex') }}">
+                            <a href="{{ Route('CmsUserControllerGetIndex') }}">
                                 <i class="fas fa-bars"></i> <span>{{ cbLang('List_users') }}</span>
                             </a>
                         </li>
@@ -92,7 +92,7 @@
                 </li>
                 <li
                     class="{{ request()->is(config('crudbooster.ADMIN_PATH') . '/menu_management*') ? 'active' : '' }}">
-                    <a href="{{ Route('MenusControllerGetIndex') }}">
+                    <a href="{{ Route('MenuControllerGetIndex') }}">
                         <i class="fas fa-bars"></i> <span>{{ cbLang('Menu_Management') }}</span>
                     </a>
                 </li>
@@ -103,7 +103,7 @@
                     <ul class="dropdown-menu">
                         <li
                             class="{{ request()->is(config('crudbooster.ADMIN_PATH') . '/settings/add*') ? 'active' : '' }}">
-                            <a href="{{ route('SettingsControllerGetAdd') }}">
+                            <a href="{{ route('SettingControllerGetAdd') }}">
                                 <i class="fas fa-plus"></i> <span>{{ cbLang('Add_New_Setting') }}</span>
                             </a>
                         </li>
@@ -113,7 +113,7 @@
                         foreach($groupSetting as $gs):
                         ?>
                         <li class="<?= $gs == Request::get('group') ? 'active' : '' ?>"><a
-                                href='{{ route('SettingsControllerGetShow') }}?group={{ urlencode($gs) }}&m=0'><i
+                                href='{{ route('SettingControllerGetShow') }}?group={{ urlencode($gs) }}&m=0'><i
                                     class='fa fa-wrench'></i>
                                 <span>{{ $gs }}</span></a></li>
                         <?php endforeach;?>
@@ -126,13 +126,13 @@
                     <ul class="dropdown-menu">
                         <li
                             class="{{ request()->is(config('crudbooster.ADMIN_PATH') . '/module_generator/step1') ? 'active' : '' }}">
-                            <a href="{{ Route('ModulsControllerGetStep1') }}">
+                            <a href="{{ Route('ModulControllerGetStep1') }}">
                                 <i class="fas fa-plus"></i> <span>{{ cbLang('Add_New_Module') }}</span>
                             </a>
                         </li>
                         <li
                             class="{{ request()->is(config('crudbooster.ADMIN_PATH') . '/module_generator') ? 'active' : '' }}">
-                            <a href="{{ Route('ModulsControllerGetIndex') }}">
+                            <a href="{{ Route('ModulControllerGetIndex') }}">
                                 <i class="fas fa-bars"></i> <span>{{ cbLang('List_Module') }}</span>
                             </a>
                         </li>
@@ -189,20 +189,20 @@
                     <ul class="dropdown-menu">
                         <li
                             class="{{ request()->is(config('crudbooster.ADMIN_PATH') . '/email_templates/add*') ? 'active' : '' }}">
-                            <a href="{{ Route('EmailTemplatesControllerGetAdd') }}">
+                            <a href="{{ Route('EmailTemplateControllerGetAdd') }}">
                                 <i class="fas fa-plus"></i> <span>{{ cbLang('Add_New_Email') }}</span>
                             </a>
                         </li>
                         <li
                             class="{{ request()->is(config('crudbooster.ADMIN_PATH') . '/email_templates') ? 'active' : '' }}">
-                            <a href="{{ Route('EmailTemplatesControllerGetIndex') }}">
+                            <a href="{{ Route('EmailTemplateControllerGetIndex') }}">
                                 <i class="fas fa-bars"></i> <span>{{ cbLang('List_Email_Template') }}</span>
                             </a>
                         </li>
                     </ul>
                 </li>
                 <li class="{{ request()->is(config('crudbooster.ADMIN_PATH') . '/logs*') ? 'active' : '' }}">
-                    <a href="{{ Route('LogsControllerGetIndex') }}">
+                    <a href="{{ Route('LogControllerGetIndex') }}">
                         <i class="fas fa-flag"></i> <span>{{ cbLang('Log_User_Access') }}</span>
                     </a>
                 </li>

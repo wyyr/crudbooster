@@ -2,28 +2,28 @@
 @section('content')
     <ul class="nav nav-tabs nav-primary mb-1">
         <li class="nav-item" role="presentation">
-            <a class="nav-link" href="{{ Route('ModulsControllerGetStep1') . '/' . $id }}">
+            <a class="nav-link" href="{{ Route('ModulControllerGetStep1') . '/' . $id }}">
                 <i class="fa fa-info"></i> Step 1 - Module Information
             </a>
         </li>
         <li class="nav-item" role="presentation">
-            <a class="nav-link" href="{{ Route('ModulsControllerGetStep2') . '/' . $id }}">
+            <a class="nav-link" href="{{ Route('ModulControllerGetStep2') . '/' . $id }}">
                 <i class="fa fa-table"></i> Step 2 - Table Display
             </a>
         </li>
         <li class="nav-item" role="presentation">
-            <a class="nav-link" href="{{ Route('ModulsControllerGetStep3') . '/' . $id }}">
+            <a class="nav-link" href="{{ Route('ModulControllerGetStep3') . '/' . $id }}">
                 <i class="fa fa-plus-square"></i> Step 3 - Form Display
             </a>
         </li>
         <li class="nav-item" role="presentation">
-            <a class="nav-link active" href="{{ Route('ModulsControllerGetStep4') . '/' . $id }}">
+            <a class="nav-link active" href="{{ Route('ModulControllerGetStep4') . '/' . $id }}">
                 <i class="fa fa-wrench"></i> Step 4 - Configuration
             </a>
         </li>
     </ul>
 
-    <form method="post" action="{{ Route('ModulsControllerPostStepFinish') }}">
+    <form method="post" action="{{ Route('ModulControllerPostStepFinish') }}">
         <div class="card card-light">
             <div class="card-header">
                 <h6 class="card-title">Configuration</h6>
@@ -117,8 +117,8 @@
                                 <div class="form-group">
                                     <label>Button Action Style</label>
                                     <label class='radio-inline'>
-                                        <input {{ $cb_button_action_style == 'button_icon' ? 'checked' : '' }} type='radio'
-                                            name='button_action_style' value='button_icon' /> Icon
+                                        <input {{ $cb_button_action_style == 'button_icon' ? 'checked' : '' }}
+                                            type='radio' name='button_action_style' value='button_icon' /> Icon
                                     </label>
                                     <label class='radio-inline'>
                                         <input {{ $cb_button_action_style == 'button_icon_text' ? 'checked' : '' }}
@@ -126,8 +126,8 @@
                                         Text
                                     </label>
                                     <label class='radio-inline'>
-                                        <input {{ $cb_button_action_style == 'button_text' ? 'checked' : '' }} type='radio'
-                                            name='button_action_style' value='button_text' /> Button Text
+                                        <input {{ $cb_button_action_style == 'button_text' ? 'checked' : '' }}
+                                            type='radio' name='button_action_style' value='button_text' /> Button Text
                                     </label>
                                     <label class='radio-inline'>
                                         <input {{ $cb_button_action_style == 'button_dropdown' ? 'checked' : '' }}
@@ -175,8 +175,8 @@
                                 <div class="form-group">
                                     <label>Show Button Delete</label>
                                     <label class='radio-inline'>
-                                        <input {{ $cb_button_delete ? 'checked' : '' }} type='radio' name='button_delete'
-                                            value='true' /> TRUE
+                                        <input {{ $cb_button_delete ? 'checked' : '' }} type='radio'
+                                            name='button_delete' value='true' /> TRUE
                                     </label>
                                     <label class='radio-inline'>
                                         <input {{ !$cb_button_delete ? 'checked' : '' }} type='radio'
@@ -190,8 +190,8 @@
                                 <div class="form-group">
                                     <label>Show Button Detail</label>
                                     <label class='radio-inline'>
-                                        <input {{ $cb_button_detail ? 'checked' : '' }} type='radio' name='button_detail'
-                                            value='true' /> TRUE
+                                        <input {{ $cb_button_detail ? 'checked' : '' }} type='radio'
+                                            name='button_detail' value='true' /> TRUE
                                     </label>
                                     <label class='radio-inline'>
                                         <input {{ !$cb_button_detail ? 'checked' : '' }} type='radio'
@@ -227,8 +227,8 @@
                                 <div class="form-group">
                                     <label>Show Button Filter & Sorting</label>
                                     <label class='radio-inline'>
-                                        <input {{ $cb_button_filter ? 'checked' : '' }} type='radio' name='button_filter'
-                                            value='true' /> TRUE
+                                        <input {{ $cb_button_filter ? 'checked' : '' }} type='radio'
+                                            name='button_filter' value='true' /> TRUE
                                     </label>
                                     <label class='radio-inline'>
                                         <input {{ !$cb_button_filter ? 'checked' : '' }} type='radio'
@@ -241,8 +241,8 @@
                                 <div class="form-group">
                                     <label>Show Button Import</label>
                                     <label class='radio-inline'>
-                                        <input {{ $cb_button_import ? 'checked' : '' }} type='radio' name='button_import'
-                                            value='true' /> TRUE
+                                        <input {{ $cb_button_import ? 'checked' : '' }} type='radio'
+                                            name='button_import' value='true' /> TRUE
                                     </label>
                                     <label class='radio-inline'>
                                         <input {{ !$cb_button_import ? 'checked' : '' }} type='radio'
@@ -255,8 +255,8 @@
                                 <div class="form-group">
                                     <label>Show Button Export</label>
                                     <label class='radio-inline'>
-                                        <input {{ $cb_button_export ? 'checked' : '' }} type='radio' name='button_export'
-                                            value='true' /> TRUE
+                                        <input {{ $cb_button_export ? 'checked' : '' }} type='radio'
+                                            name='button_export' value='true' /> TRUE
                                     </label>
                                     <label class='radio-inline'>
                                         <input {{ !$cb_button_export ? 'checked' : '' }} type='radio'

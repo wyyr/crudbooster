@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 
-class PrivilegesController extends CBController
+class PrivilegeController extends CBController
 {
     public function cbInit()
     {

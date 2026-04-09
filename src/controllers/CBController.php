@@ -1433,7 +1433,7 @@ class CBController extends Controller
         CRUDBooster::insertLog(cbLang('log_update', [
             'name' => $title_field_value,
             'module' => CRUDBooster::getCurrentModule()->name,
-        ]), LogsController::displayDiff($old_values, $this->arr));
+        ]), LogController::displayDiff($old_values, $this->arr));
 
         if ($this->return_url) {
             CRUDBooster::redirect($this->return_url, cbLang('alert_update_data_success'), 'success');

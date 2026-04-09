@@ -2,7 +2,7 @@
 
 namespace crocodicstudio\crudbooster\controllers;
 
-class LogsController extends CBController
+class LogController extends CBController
 {
     public function cbInit()
     {

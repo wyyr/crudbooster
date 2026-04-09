@@ -18,7 +18,7 @@
                 <h5 class="card-title mb-0">{{ $page_title }}</h5>
             </div>
             <form method='post'
-                action='{{ $row?->id ? route('PrivilegesControllerPostEditSave') . "/$row->id" : route('PrivilegesControllerPostAddSave') }}'>
+                action='{{ $row?->id ? route('PrivilegeControllerPostEditSave') . "/$row->id" : route('PrivilegeControllerPostAddSave') }}'>
                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
                 <div class="card-body">
                     <div class="alert alert-info">

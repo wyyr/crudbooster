@@ -5,7 +5,7 @@ namespace App\Http\Controllers\CRUDBooster;
 use crocodicstudio\crudbooster\controllers\CBController;
 use crocodicstudio\crudbooster\helpers\CRUDBooster;
 
-class AdminCmsUsersController extends CBController
+class CmsUserController extends CBController
 {
     public function cbInit()
     {

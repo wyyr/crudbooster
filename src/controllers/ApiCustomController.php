@@ -338,9 +338,7 @@ class ApiCustomController extends CBController
         if (Request::get('id')) {
             DB::table('cms_apicustom')->where('id', g('id'))->update($a);
         } else {
-
-            $controllerName = ucwords(str_replace('_', ' ', $a['permalink']));
-            $controllerName = str_replace(' ', '', $controllerName);
+            $controllerName = CRUDBooster::generateControllerName($a['permalink']);
             CRUDBooster::generateAPI($controllerName, $a['tabel'], $a['permalink'], $a['method_type']);
 
             DB::table('cms_apicustom')->insert($a);
@@ -355,9 +353,8 @@ class ApiCustomController extends CBController
         $row = DB::table('cms_apicustom')->where('id', $id)->first();
         DB::table('cms_apicustom')->where('id', $id)->delete();
 
-        $controllername = ucwords(str_replace('_', ' ', $row->permalink));
-        $controllername = str_replace(' ', '', $controllername);
-        @unlink(base_path("app/Http/Controllers/Api" . $controllername . "Controller.php"));
+        $controllerName = CRUDBooster::generateControllerName($row->permalink);
+        @unlink(base_path("app/Http/Controllers/Api" . $controllerName . "Controller.php"));
 
         return response()->json(['status' => 1]);
     }

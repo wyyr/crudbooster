@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Session;
 
-class ModulsController extends CBController
+class ModulController extends CBController
 {
     public function cbInit()
     {
@@ -184,7 +184,7 @@ class ModulsController extends CBController
     public function hook_query_index(&$query)
     {
         $query->where('is_protected', 0);
-        $query->whereNotIn('cms_moduls.controller', ['AdminCmsUsersController']);
+        $query->whereNotIn('cms_moduls.controller', ['CmsUserController']);
     }
 
     public function hook_before_delete($id)
@@ -220,7 +220,7 @@ class ModulsController extends CBController
             CRUDBooster::redirect(CRUDBooster::adminPath(), cbLang('denied_access'));
         }
 
-        return redirect()->route('ModulsControllerGetStep1');
+        return redirect()->route('ModulControllerGetStep1');
     }
 
     public function getStep1($id = 0)
@@ -359,7 +359,7 @@ class ModulsController extends CBController
             $roles = DB::table('cms_privileges_roles')->where('id_cms_privileges', CRUDBooster::myPrivilegeId())->join('cms_moduls', 'cms_moduls.id', '=', 'id_cms_moduls')->select('cms_moduls.name', 'cms_moduls.path', 'is_visible', 'is_create', 'is_read', 'is_edit', 'is_delete')->get();
             Session::put('admin_privileges_roles', $roles);
 
-            return redirect(Route('ModulsControllerGetStep2').'/'.$id);
+            return redirect(Route('ModulControllerGetStep2').'/'.$id);
         } else {
             $id = Request::get('id');
             DB::table($this->table)->where('id', $id)->update(compact('name', 'table_name', 'icon', 'path'));
@@ -372,7 +372,7 @@ class ModulsController extends CBController
                 $response = file_get_contents(__DIR__.'/'.str_replace('.', '', $row->controller).'.php');
             }
 
-            return redirect(Route('ModulsControllerGetStep2').'/'.$id);
+            return redirect(Route('ModulControllerGetStep2').'/'.$id);
         }
     }
 
@@ -450,7 +450,7 @@ class ModulsController extends CBController
 
         file_put_contents(app_path('Http/Controllers/CRUDBooster/'.$row->controller.'.php'), $file_controller);
 
-        return redirect(Route('ModulsControllerGetStep3').'/'.$id);
+        return redirect(Route('ModulControllerGetStep3').'/'.$id);
     }
 
     public function getStep3($id)
@@ -577,7 +577,7 @@ class ModulsController extends CBController
         // CREATE FILE CONTROLLER
         file_put_contents(app_path('Http/Controllers/CRUDBooster/'.$row->controller.'.php'), $file_controller);
 
-        return redirect(Route('ModulsControllerGetStep4').'/'.$id);
+        return redirect(Route('ModulControllerGetStep4').'/'.$id);
     }
 
     public function getStep4($id)
@@ -652,7 +652,7 @@ class ModulsController extends CBController
 
         file_put_contents(app_path('Http/Controllers/CRUDBooster/'.$row->controller.'.php'), $file_controller);
 
-        return redirect()->route('ModulsControllerGetIndex')->with(['message' => cbLang('alert_update_data_success'), 'message_type' => 'success']);
+        return redirect()->route('ModulControllerGetIndex')->with(['message' => cbLang('alert_update_data_success'), 'message_type' => 'success']);
     }
 
     public function postAddSave()

@@ -116,8 +116,8 @@
         var ASSET_URL = "{{ asset('/') }}";
         var APP_NAME = "{{ Session::get('appname') }}";
         var ADMIN_PATH = '{{ url(config('crudbooster.ADMIN_PATH')) }}';
-        var NOTIFICATION_JSON = "{{ route('NotificationsControllerGetLatestJson') }}";
-        var NOTIFICATION_INDEX = "{{ route('NotificationsControllerGetIndex') }}";
+        var NOTIFICATION_JSON = "{{ route('NotificationControllerGetLatestJson') }}";
+        var NOTIFICATION_INDEX = "{{ route('NotificationControllerGetIndex') }}";
 
         var NOTIFICATION_YOU_HAVE = "{{ cbLang('notification_you_have') }}";
         var NOTIFICATION_NOTIFICATIONS = "{{ cbLang('notification_notification') }}";

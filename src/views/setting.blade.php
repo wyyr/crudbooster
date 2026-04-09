@@ -55,7 +55,7 @@
     <div style="width:750px;margin:0 auto ">
 
         <p align="right"><a title='Add Field Setting' class='btn btn-sm btn-primary'
-                href='{{ route('SettingsControllerGetAdd') . '?group_setting=' . $page_title }}'><i class='fa fa-plus'></i>
+                href='{{ route('SettingControllerGetAdd') . '?group_setting=' . $page_title }}'><i class='fa fa-plus'></i>
                 Add
                 Field Setting</a></p>
 

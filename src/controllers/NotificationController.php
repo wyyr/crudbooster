@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Excel;
 use Illuminate\Support\Facades\PDF;
 use Illuminate\Support\Facades\Schema;
 
-class NotificationsController extends CBController
+class NotificationController extends CBController
 {
     public function cbInit()
     {
