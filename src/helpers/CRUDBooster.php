@@ -613,7 +613,7 @@ class CRUDBooster
     public static function mainpath($path = null)
     {
 
-        $controllername = str_replace(["\crocodicstudio\crudbooster\controllers\\", "App\Http\Controllers\\"], '', strtok(Route::currentRouteAction(), '@'));
+        $controllername = str_replace(["\crocodicstudio\crudbooster\controllers\\", "App\Http\Controllers\CRUDBooster\\"], '', strtok(Route::currentRouteAction(), '@'));
         $route_url = route($controllername.'GetIndex');
 
         if ($path) {
@@ -644,7 +644,7 @@ class CRUDBooster
 
     public static function getCurrentMethod()
     {
-        $action = str_replace("App\Http\Controllers", '', Route::currentRouteAction());
+        $action = str_replace("App\Http\Controllers\CRUDBooster", '', Route::currentRouteAction());
         $atloc = strpos($action, '@') + 1;
         $method = substr($action, $atloc);
 
@@ -1335,9 +1335,9 @@ class CRUDBooster
     {
         $controllername = ucwords(str_replace('_', ' ', $table));
         $controllername = str_replace(' ', '', $controllername).'Controller';
-        $path = base_path('app/Http/Controllers/');
+        $path = base_path('app/Http/Controllers/CRUDBooster');
         $path2 = base_path('app/Http/Controllers/ControllerMaster/');
-        if (file_exists($path.'Admin'.$controllername.'.php') || file_exists($path2.'Admin'.$controllername.'.php') || file_exists($path2.$controllername.'.php')) {
+        if (file_exists($path.$controllername.'.php') || file_exists($path2.$controllername.'.php') || file_exists($path2.$controllername.'.php')) {
             return true;
         } else {
             return false;
@@ -1347,14 +1347,14 @@ class CRUDBooster
     public static function generateAPI($controller_name, $table_name, $permalink, $method_type = 'post')
     {
         $php = '
-		<?php namespace App\Http\Controllers;
+		<?php namespace App\Http\Controllers\CRUDBooster\Api;
 
 		use Session;
 		use Request;
 		use DB;
 		use CRUDBooster;
 
-		class Api'.$controller_name.'Controller extends \crocodicstudio\crudbooster\controllers\ApiController {
+		class '.$controller_name.'Controller extends \crocodicstudio\crudbooster\controllers\ApiController {
 
 		    function __construct() {    
 				$this->table       = "'.$table_name.'";        
@@ -1386,7 +1386,7 @@ class CRUDBooster
 		';
 
         $php = trim($php);
-        $path = base_path('app/Http/Controllers/');
+        $path = base_path('app/Http/Controllers/CRUDBooster/');
         file_put_contents($path.'Api'.$controller_name.'Controller.php', $php);
     }
 
@@ -1408,8 +1408,8 @@ class CRUDBooster
             $controllername = str_replace(' ', '', $controllername).'Controller';
         }
 
-        $path = base_path('app/Http/Controllers/');
-        $countSameFile = count(glob($path.'Admin'.$controllername.'.php'));
+        $path = base_path('app/Http/Controllers/CRUDBooster/');
+        $countSameFile = count(glob($path.$controllername.'.php'));
 
         if ($countSameFile != 0) {
             $suffix = $countSameFile;
@@ -1435,14 +1435,14 @@ class CRUDBooster
         $global_privilege = 'FALSE';
 
         $php = '
-<?php namespace App\Http\Controllers;
+<?php namespace App\Http\Controllers\CRUDBooster;
 
 	use Session;
 	use Request;
 	use DB;
 	use CRUDBooster;
 
-	class Admin'.$controllername.' extends \crocodicstudio\crudbooster\controllers\CBController {
+	class '.$controllername.' extends \crocodicstudio\crudbooster\controllers\CBController {
 
 	    public function cbInit() {
 	    	# START CONFIGURATION DO NOT REMOVE THIS LINE
@@ -1934,9 +1934,9 @@ class CRUDBooster
         $php = trim($php);
 
         // create file controller
-        file_put_contents($path.'Admin'.$controllername.'.php', $php);
+        file_put_contents($path.$controllername.'.php', $php);
 
-        return 'Admin'.$controllername;
+        return $controllername;
     }
 
     /*
@@ -1953,7 +1953,7 @@ class CRUDBooster
 
         $prefix = trim($prefix, '/').'/';
 
-        $namespace = ($namespace) ?: 'App\Http\Controllers';
+        $namespace = ($namespace) ?: 'App\Http\Controllers\CRUDBooster';
 
         try {
             Route::get($prefix, ['uses' => $controller.'@getIndex', 'as' => $controller.'GetIndex']);

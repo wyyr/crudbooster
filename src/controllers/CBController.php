@@ -1613,7 +1613,7 @@ class CBController extends Controller
 
                             $relation_class = __NAMESPACE__.'\\'.$relation_moduls->controller;
                             if (! class_exists($relation_class)) {
-                                $relation_class = '\App\Http\Controllers\\'.$relation_moduls->controller;
+                                $relation_class = '\App\Http\Controllers\CRUDBooster\\'.$relation_moduls->controller;
                             }
                             $relation_class = new $relation_class;
                             $relation_class->cbLoader();

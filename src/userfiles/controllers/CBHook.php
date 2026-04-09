@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\CRUDBooster;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;

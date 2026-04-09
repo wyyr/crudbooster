@@ -2,7 +2,7 @@
 
 namespace crocodicstudio\crudbooster\controllers;
 
-use App\Http\Controllers\CBHook;
+use App\Http\Controllers\CRUDBooster\CBHook;
 use crocodicstudio\crudbooster\helpers\CRUDBooster;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;

@@ -29,17 +29,22 @@ class CBRouter
             Route::post('api/get-token', 'ApiAuthorizationController@postGetToken');
         });
 
-        Route::group(['middleware' => ['api', CBAuthAPI::class], 'namespace' => 'App\Http\Controllers'], function () {
+        Route::group(['middleware' => ['api', CBAuthAPI::class], 'namespace' => 'App\Http\Controllers\CRUDBooster'], function () {
 
-            $dir = scandir(base_path('app/Http/Controllers'));
-            foreach ($dir as $v) {
-                $v = str_replace('.php', '', $v);
-                $names = array_filter(preg_split('/(?=[A-Z])/', str_replace('Controller', '', $v)));
-                $names = strtolower(implode('_', $names));
+            $dirPath = base_path('app/Http/Controllers/CRUDBooster');
 
-                if (substr($names, 0, 4) == 'api_') {
-                    $names = str_replace('api_', '', $names);
-                    Route::any('api/'.$names, $v.'@execute_api');
+            if (is_dir($dirPath)) {
+
+                $dir = scandir($dirPath);
+                foreach ($dir as $v) {
+                    $v = str_replace('.php', '', $v);
+                    $names = array_filter(preg_split('/(?=[A-Z])/', str_replace('Controller', '', $v)));
+                    $names = strtolower(implode('_', $names));
+
+                    if (substr($names, 0, 4) == 'api_') {
+                        $names = str_replace('api_', '', $names);
+                        Route::any('api/'.$names, $v.'@execute_api');
+                    }
                 }
             }
 
@@ -76,7 +81,7 @@ class CBRouter
         Route::group([
             'middleware' => ['web', '\crocodicstudio\crudbooster\middlewares\CBBackend'],
             'prefix' => config('crudbooster.ADMIN_PATH'),
-            'namespace' => 'App\Http\Controllers',
+            'namespace' => 'App\Http\Controllers\CRUDBooster',
         ], function () {
 
             $modules = [];
