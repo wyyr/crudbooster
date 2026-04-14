@@ -98,7 +98,7 @@ class CRUDBoosterServiceProvider extends ServiceProvider
     protected function registerSeedsFrom($path)
     {
         foreach (glob("$path/*.php") as $filename) {
-            include $filename;
+            include_once $filename;
             $classes = get_declared_classes();
             $class = end($classes);
 
