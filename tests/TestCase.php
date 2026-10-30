@@ -1,0 +1,62 @@
+<?php
+
+namespace Tests;
+
+use crocodicstudio\crudbooster\CRUDBoosterServiceProvider;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+use Orchestra\Testbench\TestCase as OrchestraTestCase;
+
+abstract class TestCase extends OrchestraTestCase
+{
+    protected function getPackageProviders($app): array
+    {
+        return [
+            CRUDBoosterServiceProvider::class,
+        ];
+    }
+
+    protected function defineEnvironment($app): void
+    {
+        $app['config']->set('database.default', 'testing');
+        $app['config']->set('database.connections.testing', [
+            'driver' => 'sqlite',
+            'database' => ':memory:',
+            'prefix' => '',
+            'foreign_key_constraints' => true,
+        ]);
+        $app['config']->set('cache.default', 'array');
+        $app['config']->set('mail.default', 'smtp');
+        $app['config']->set('mail.mailers.smtp', [
+            'transport' => 'array',
+        ]);
+
+        Schema::connection('testing')->create('cms_users', function (Blueprint $table): void {
+            $table->id();
+            $table->string('name');
+            $table->string('email');
+            $table->string('password');
+            $table->unsignedBigInteger('id_cms_privileges');
+            $table->string('status');
+            $table->timestamps();
+        });
+        Schema::connection('testing')->create('cms_settings', function (Blueprint $table): void {
+            $table->id();
+            $table->string('name');
+            $table->text('content')->nullable();
+        });
+        Schema::connection('testing')->create('cms_email_templates', function (Blueprint $table): void {
+            $table->id();
+            $table->string('slug');
+            $table->string('subject');
+            $table->text('content');
+            $table->string('from_email')->nullable();
+            $table->string('from_name')->nullable();
+            $table->string('cc_email')->nullable();
+        });
+        Schema::connection('testing')->create('test_seed_markers', function (Blueprint $table): void {
+            $table->id();
+            $table->boolean('seeded');
+        });
+    }
+}

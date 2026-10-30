@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Interactive installation seeding prompt and improved seeder detection.
 - A title field for admin log entries.
+- A Pest integration-test baseline for provider boot, routes, mail settings, and explicit seeding.
 
 ### Changed
 
@@ -24,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Prevent ambiguous class resolution by excluding template files from Composer's classmap.
+- Align 404 and data-modal asset URLs with the published `public/crudbooster` directory.
 - Fix the Select2 form component and the published `CBHook` controller.
 - Use parameterized SQL strings for column metadata queries to avoid PDO type errors.
 - Provide a default form command so the profile page can render when older published controllers omit it.
