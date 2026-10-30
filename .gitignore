@@ -4,3 +4,14 @@
 out
 gen
 composer.lock
+/.codex
+/.cursor/
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/.codegraph
+AGENTS.md
+.mcp.json
+mcp_config.json
