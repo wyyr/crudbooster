@@ -1,4 +1,5 @@
 <?php
+
 return [
     'email_footer' => 'هذه رسالة تلقائية ، الرجاء عدم الرد مباشرة على هذا البريد الإلكتروني .',
     'login_message' => 'الرجاء تسجيل الدخول',
@@ -6,10 +7,10 @@ return [
     'page_title_login' => 'تسجيل الدخول',
     'page_title_forgot' => 'نسيت كلمة المرور',
     'forgot_message' => 'سنرسل رابطًا لإعادة تعيين كلمة المرور الخاصة بك',
-    'forgot_text_try_again' => " حاول تسجيل الدخول مرة اخرى ?",
-    'text_no_notification' => "لا توجد لديك تنبيهات",
+    'forgot_text_try_again' => ' حاول تسجيل الدخول مرة اخرى ?',
+    'text_no_notification' => 'لا توجد لديك تنبيهات',
     'text_view_all_notification' => 'عرض الكل',
-    'label_button_profile' => "الملف الشخصي",
+    'label_button_profile' => 'الملف الشخصي',
     'filter_dialog_title' => 'فرز متقدم',
 
     'text_enter_the_password' => 'فضلا ادخل كلمة المرور لاستعادة جلسة العمل',
@@ -61,7 +62,7 @@ return [
     'alert_update_data_failed' => 'فشل تحديث البيانات',
     'alert_delete_data_success' => 'تم حذف البيانات !',
     'alert_want_to_logout' => 'هل أنت متأكد من تسجيل الخروج ?',
-    'alert_warning' => "عفوا ..",
+    'alert_warning' => 'عفوا ..',
     'alert_danger' => 'حدث خطأ ما  ....',
     'alert_success' => 'تم بنجاح ...',
     'alert_info' => 'معلومات',
@@ -78,8 +79,8 @@ return [
 
     'default_module_description' => 'جدول البيانات',
 
-    'delete_description_confirm' => "لا يمكنك التراجع عن عملية الحذف !",
-    'delete_title_confirm' => "هل آنت متأكد ؟",
+    'delete_description_confirm' => 'لا يمكنك التراجع عن عملية الحذف !',
+    'delete_title_confirm' => 'هل آنت متأكد ؟',
 
     'action_show_data' => 'عرض البيانات',
     'action_add_data' => 'اضافة بيانات',
@@ -108,10 +109,10 @@ return [
     'button_reset' => 'اعادة تعيين',
     'button_add_to_table' => 'Add To Table',
 
-    'export_dialog_title' => "تصدير البيانات",
+    'export_dialog_title' => 'تصدير البيانات',
     'export_dialog_filename' => 'اسم الملف',
     'export_dialog_help_filename' => 'يمكنك تغيير اسم الملف لما تراه مناسبا',
-    'export_dialog_maxdata' => "اكبر قيمة",
+    'export_dialog_maxdata' => 'اكبر قيمة',
     'export_dialog_help_maxdata' => 'اقصى حد لعمليات التصدير في الجسة : 100,000 عملية',
     'export_dialog_columns' => 'اعمدة',
     'export_dialog_format_export' => 'تنسيق التصدير',
@@ -124,10 +125,10 @@ return [
     'dashboard_default_text' => 'مرحبا بك في شاشة :appname',
     'form_back_to_list' => 'العودة إلى قائمة البيانات :module',
     'not_logged_in' => 'لم تقم بتسجيل الدخول !',
-    'menu_navigation' => "التنقل",
-    'table_data_not_found' => "لا توجد بيانات متوفرة",
-    "notice_delete_file_upload" => "* يجب حذف الملف الموجود قبل تحميل ملف آخر.",
-    "file_broken" => "الملف معطوب ، فضلا احذف الملف واعد المحاولة .",
+    'menu_navigation' => 'التنقل',
+    'table_data_not_found' => 'لا توجد بيانات متوفرة',
+    'notice_delete_file_upload' => '* يجب حذف الملف الموجود قبل تحميل ملف آخر.',
+    'file_broken' => 'الملف معطوب ، فضلا احذف الملف واعد المحاولة .',
 
     'denied_access' => 'عفوا لاتملك الصلاحيات اللازمة للوصول لهذه الصفحة !',
     'denied_update' => 'عفوا لاتملك الصلاحيات اللازمة لتحديث البيانات !',
@@ -217,7 +218,7 @@ return [
     'confirmation_yes' => 'نعم!',
     'confirmation_no' => 'لا',
 
-    //filemanager
+    // filemanager
     'chose_an_image' => 'اختر صورة ',
     'chose_an_file' => 'اختر ملف ',
 
@@ -238,19 +239,19 @@ return [
     'privileges_module_list_update' => 'تحديث',
     'privileges_module_list_delete' => 'حذف',
 
-    //datamodal
+    // datamodal
     'datamodal_select' => 'اختيار',
     'datamodal_search_and_enter' => 'البحث ...',
     'datamodal_enter_to_search' => 'اضفط ادخال للبحث',
     'datamodal_browse_data' => 'استعراض البيانات',
     'datamodal_browse_file' => 'استعراض الملف',
 
-    //child
+    // child
     'table_detail' => 'تفاصيل الجدول',
     'your_file_size_is_too_big' => 'حجم الملف كبير جدا',
     'save_changes' => 'حفظ التغييرات',
     'please_complete_the_form' => 'فضلا اكمل كافة حقول النموذج !',
     'this_field_is_required' => 'الحقل اجباري',
     'text_form' => 'نموذح',
-    "your_file_extension_is_not_allowed " => "امتداد الملف غير مسموح به !",
+    'your_file_extension_is_not_allowed ' => 'امتداد الملف غير مسموح به !',
 ];

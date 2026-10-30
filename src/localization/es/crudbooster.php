@@ -1,4 +1,5 @@
 <?php
+
 return [
     'emaill_footer' => 'No respondas a este mensaje, es un mensaje generado automáticamente.',
     'login_message' => 'Por favor, inicia sesión para comenzar',
@@ -6,10 +7,10 @@ return [
     'page_title_login' => 'Inicio de sesión',
     'page_title_forgot' => 'Recuperar contraseña',
     'forgot_message' => 'Le enviaremos un enlace para restablecer su contraseña',
-    'forgot_text_try_again' => "¿Volver a iniciar sesión?",
-    'text_no_notification' => "No tienes notificaciones",
+    'forgot_text_try_again' => '¿Volver a iniciar sesión?',
+    'text_no_notification' => 'No tienes notificaciones',
     'text_view_all_notification' => 'Ver todas',
-    'label_button_profile' => "Perfil",
+    'label_button_profile' => 'Perfil',
     'filter_dialog_title' => 'Filtros y búsquedas avanzadas',
     'text_enter_the_password' => 'Introduce la contraseña para volver a la sesión',
     'text_or_sign_in' => 'O inicia sesión con otro usuario',
@@ -59,7 +60,7 @@ return [
     'alert_update_data_failed' => 'Algo ha fallado al actualizar los datos',
     'alert_delete_data_success' => '¡Borrado de datos con éxito!',
     'alert_want_to_logout' => '¿Quieres finalizar la sesión?',
-    'alert_warning' => "¡Upss!",
+    'alert_warning' => '¡Upss!',
     'alert_danger' => 'Parece que algo no funciona...',
     'alert_success' => 'Hecho, buen trabajo...',
     'alert_info' => 'Información',
@@ -79,8 +80,8 @@ return [
 
     'default_module_description' => 'Listado',
 
-    'delete_description_confirm' => "No podrás recuperar estos datos!",
-    'delete_title_confirm' => "Estás Seguro?",
+    'delete_description_confirm' => 'No podrás recuperar estos datos!',
+    'delete_title_confirm' => 'Estás Seguro?',
 
     'action_show_data' => 'Mostrar',
     'action_add_data' => 'Añadir',
@@ -109,10 +110,10 @@ return [
     'button_reset' => 'Resetear',
     'button_add_to_table' => 'Agregar a la Tabla',
 
-    'export_dialog_title' => "Exportar Datos",
+    'export_dialog_title' => 'Exportar Datos',
     'export_dialog_filename' => 'Nombre Fichero',
     'export_dialog_help_filename' => 'Puedes renombrar el fichero como desees',
-    'export_dialog_maxdata' => "Max Data",
+    'export_dialog_maxdata' => 'Max Data',
     'export_dialog_help_maxdata' => 'Mínimo 1 y máximo 100,000 registros por sesión',
     'export_dialog_columns' => 'Columnas',
     'export_dialog_format_export' => 'Formato Exportación',
@@ -125,10 +126,10 @@ return [
     'dashboard_default_text' => 'Bienvenido a  :appname',
     'form_back_to_list' => 'Volver al listado :module',
     'not_logged_in' => 'No has iniciado sesión !',
-    'menu_navigation' => "Navegación",
-    'table_data_not_found' => "No tenemos datos disponibles",
-    "notice_delete_file_upload" => "* Si quieres subir otro fichero, antes elimina el fichero origen.",
-    "file_broken" => "Parece que no se ha subido bien el fichero. Elimínalo y vuelve a intentarlo.",
+    'menu_navigation' => 'Navegación',
+    'table_data_not_found' => 'No tenemos datos disponibles',
+    'notice_delete_file_upload' => '* Si quieres subir otro fichero, antes elimina el fichero origen.',
+    'file_broken' => 'Parece que no se ha subido bien el fichero. Elimínalo y vuelve a intentarlo.',
     'denied_access' => '¡Vaya, no tienes permisos para acceder a este area!',
     'denied_update' => '¡Vaya, no tienes permisos para actualizar datos!',
     'denied_create' => '¡Vaya, no tienes permisos para añadir datos!',
@@ -212,7 +213,7 @@ return [
     // confirmation
     'confirmation_yes' => '¡Sí!',
     'confirmation_no' => 'No',
-    //filemanager
+    // filemanager
     'chose_an_image' => 'Elige una imagen ',
     'chose_an_file' => 'Elige un fichero ',
 
@@ -233,25 +234,25 @@ return [
     'privileges_module_list_update' => 'Actualizar',
     'privileges_module_list_delete' => 'Eliminar',
 
-    //datamodal
+    // datamodal
 
     'datamodal_select' => 'Seleccionar',
     'datamodal_search_and_enter' => 'Buscar y enter...',
     'datamodal_enter_to_search' => 'Enter para buscar',
     'datamodal_browse_data' => 'Escoger Dato',
 
-    //action confirmation
+    // action confirmation
     'confirmation_title' => 'Confirmación',
     'confirmation_text' => '¿Está seguro que desea realizar esta acción?',
 
     'datamodal_browse_file' => 'Escoger Archivo',
 
-    //child
+    // child
     'table_detail' => 'Tabla de Detalles',
     'your_file_size_is_too_big' => 'El tamaño del archivo es demasiado grande',
     'save_changes' => 'Guardar Cambios',
     'please_complete_the_form' => 'Por favor, complete el formulario!',
     'this_field_is_required' => 'Este campo es requerido',
     'text_form' => 'Formulario',
-    "your_file_extension_is_not_allowed " => "La extensión del archivo no es permitida!",
+    'your_file_extension_is_not_allowed ' => 'La extensión del archivo no es permitida!',
 ];

@@ -1,4 +1,5 @@
 <?php
+
 return [
     'email_footer' => 'Não responda a esse e-mail. Esta é uma mensagem gerada automaticamente. ',
     'login_message' => 'Faça o login para iniciar a sessão',
@@ -7,9 +8,9 @@ return [
     'page_title_forgot' => 'Esqueceu a senha',
     'forgot_message' => 'Enviaremos um link para redefinir sua senha',
     'forgot_text_try_again' => 'Tentar login novamente ?',
-    'text_no_notification' => "Você tem 0 notificação",
+    'text_no_notification' => 'Você tem 0 notificação',
     'text_view_all_notification' => 'Visualizar tudo',
-    'label_button_profile' => "Perfil",
+    'label_button_profile' => 'Perfil',
     'filter_dialog_title' => 'Filtro e ordernação avançados',
     'text_enter_the_password' => 'Digite sua senha para recuperar sua sessão',
     'text_or_sign_in' => 'Ou entre como um usuário diferente',
@@ -56,7 +57,7 @@ return [
     'alert_update_data_failed' => 'Falha ao atualizar os dados',
     'alert_delete_data_success' => 'Dados excluidos com sucesso!',
     'alert_want_to_logout' => 'Deseja sair?',
-    'alert_warning' => "Oops",
+    'alert_warning' => 'Oops',
     'alert_danger' => 'Algo deu errado...',
     'alert_success' => 'Uau, bom trabalho...',
     'alert_info' => 'Informação',
@@ -70,8 +71,8 @@ return [
     'edit_data_page_title' => 'Editar :module',
     'detail_data_page_title' => 'Detalhar :module',
     'default_module_description' => 'Lista de dados',
-    'delete_description_confirm' => "Você não será capaz de recuperar esses dados de registro! You will not be able to recover this record data!",
-    'delete_title_confirm' => "Você tem certeza?",
+    'delete_description_confirm' => 'Você não será capaz de recuperar esses dados de registro! You will not be able to recover this record data!',
+    'delete_title_confirm' => 'Você tem certeza?',
     'action_show_data' => 'Mostrar dados',
     'action_add_data' => 'Adicionar dados',
     'action_delete_selected' => 'Excluir selecionado',
@@ -97,10 +98,10 @@ return [
     'button_reset' => 'Reset',
     'button_add_to_table' => 'Add To Table',
 
-    'export_dialog_title' => "Exportar dados",
+    'export_dialog_title' => 'Exportar dados',
     'export_dialog_filename' => 'Nome do arquivo',
     'export_dialog_help_filename' => 'VocẼ pode renomear o arquivo de acordo com sua vontade',
-    'export_dialog_maxdata' => "Dados máximos",
+    'export_dialog_maxdata' => 'Dados máximos',
     'export_dialog_help_maxdata' => 'Mínimo entre 1 e o máximo de 100,000 linhas por exportação',
     'export_dialog_columns' => 'Colunas',
     'export_dialog_format_export' => 'Formato de exportação',
@@ -112,10 +113,10 @@ return [
     'dashboard_default_text' => 'Bem-vindo ao Painel de Controle de :appname',
     'form_back_to_list' => 'Voltar para a lista de dados de :module',
     'not_logged_in' => 'Você não está logado!',
-    'menu_navigation' => "Navegação",
-    'table_data_not_found' => "Não há dados disponiveis",
-    "notice_delete_file_upload" => "* Se você quiser carregar outro arquivo, primeiro excluia o arquivo.",
-    "file_broken" => "Oops, parece que o arquivo estava quebrado. Clique em excluir e tente novamente.",
+    'menu_navigation' => 'Navegação',
+    'table_data_not_found' => 'Não há dados disponiveis',
+    'notice_delete_file_upload' => '* Se você quiser carregar outro arquivo, primeiro excluia o arquivo.',
+    'file_broken' => 'Oops, parece que o arquivo estava quebrado. Clique em excluir e tente novamente.',
     'denied_access' => 'Desculpe, você não tem privilégios para acessar esta área!',
     'denied_update' => 'Desculpe, você não tem privilégio para atualizar os dados!',
     'denied_create' => 'Desculpe, você não tem privilégio para criar os dados!',
@@ -204,11 +205,11 @@ return [
     'confirmation_yes' => 'Sim!',
     'confirmation_no' => 'Não',
 
-    //filemanager
+    // filemanager
     'chose_an_image' => 'Escolha uma imagem ',
     'chose_an_file' => 'Escolha um arquivo ',
 
-    //action confirmation
+    // action confirmation
     'confirmation_title' => 'Confirmação',
     'confirmation_text' => 'Tem certeza de que quer fazer isso?',
     'confirmButtonText' => 'Sim',
@@ -231,19 +232,19 @@ return [
     'privileges_module_list_update' => 'Atualizar',
     'privileges_module_list_delete' => 'Excluir',
 
-    //datamodal
+    // datamodal
     'datamodal_select' => 'Select',
     'datamodal_search_and_enter' => 'Search and enter...',
     'datamodal_enter_to_search' => 'Enter to search',
     'datamodal_browse_data' => 'Browse Data',
     'datamodal_browse_file' => 'Browse File',
 
-    //child
+    // child
     'table_detail' => 'Table Detail',
     'your_file_size_is_too_big' => 'Your file size is too big',
     'save_changes' => 'Save Changes',
     'please_complete_the_form' => 'Please complete the form !',
     'this_field_is_required' => 'This field is required',
     'text_form' => 'Form',
-    "your_file_extension_is_not_allowed " => "Your file extension is not allowed !",
+    'your_file_extension_is_not_allowed ' => 'Your file extension is not allowed !',
 ];

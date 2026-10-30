@@ -11,6 +11,7 @@ use Maatwebsite\Excel\Events\BeforeSheet;
 class DefaultImportExcel implements ToArray, WithChunkReading, WithEvents, WithHeadingRow
 {
     public $sheetNames;
+
     public $sheetData;
 
     public function __construct()
@@ -29,7 +30,7 @@ class DefaultImportExcel implements ToArray, WithChunkReading, WithEvents, WithH
         return [
             BeforeSheet::class => function (BeforeSheet $event) {
                 $this->sheetNames[] = $event->getSheet()->getTitle();
-            }
+            },
         ];
     }
 

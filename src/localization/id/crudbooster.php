@@ -1,4 +1,5 @@
 <?php
+
 return [
     'email_footer' => 'Jangan membalas email ke alamat email ini. Email ini dikirim secara otomatis oleh sistem kami.',
     'login_message' => 'Silahkan login untuk masuk',
@@ -63,7 +64,7 @@ return [
     'alert_update_data_failed' => 'Gagal memperbaharui data',
     'alert_delete_data_success' => 'Menghapus data berhasil !',
     'alert_want_to_logout' => 'Apakah anda ingin keluar ?',
-    'alert_warning' => "Aduh",
+    'alert_warning' => 'Aduh',
     'alert_danger' => 'Sesuai yang tidak beres terjadi ....',
     'alert_success' => 'Berhasil !',
     'alert_info' => 'Informasi',
@@ -80,8 +81,8 @@ return [
 
     'default_module_description' => 'Daftar',
 
-    'delete_description_confirm' => "Anda tidak akan dapat mengembalikan data anda!",
-    'delete_title_confirm' => "Apakah anda yakin ?",
+    'delete_description_confirm' => 'Anda tidak akan dapat mengembalikan data anda!',
+    'delete_title_confirm' => 'Apakah anda yakin ?',
 
     'action_show_data' => 'Tampilkan Data',
     'action_add_data' => 'Tambah Data',
@@ -110,10 +111,10 @@ return [
     'button_reset' => 'Ulangi',
     'button_add_to_table' => 'Add To Table',
 
-    'export_dialog_title' => "Ekspor Data",
+    'export_dialog_title' => 'Ekspor Data',
     'export_dialog_filename' => 'Nama File',
     'export_dialog_help_filename' => 'Anda dapat memberikan nama sesuai keinginan anda',
-    'export_dialog_maxdata' => "Maksimal Data",
+    'export_dialog_maxdata' => 'Maksimal Data',
     'export_dialog_help_maxdata' => 'Minimal 1 dan maksimal 100,000 data per sesi',
     'export_dialog_columns' => 'Kolom',
     'export_dialog_format_export' => 'Format Ekspor',
@@ -126,10 +127,10 @@ return [
     'dashboard_default_text' => 'Selamat datang di halaman awal :appname',
     'form_back_to_list' => 'Kembali ke halaman :module',
     'not_logged_in' => 'Anda belum login !',
-    'menu_navigation' => "Navigasi",
-    'table_data_not_found' => "Tidak ada data tersedia",
-    "notice_delete_file_upload" => "* Jika anda ingin mengunggah file lain, silahkan hapus file ini terlebih dahulu",
-    "file_broken" => "Aduh sepertinya file rusak, silahkan unggah ulang !",
+    'menu_navigation' => 'Navigasi',
+    'table_data_not_found' => 'Tidak ada data tersedia',
+    'notice_delete_file_upload' => '* Jika anda ingin mengunggah file lain, silahkan hapus file ini terlebih dahulu',
+    'file_broken' => 'Aduh sepertinya file rusak, silahkan unggah ulang !',
 
     'denied_access' => 'Maaf anda tidak memiliki hak akses masuk ke area ini !',
     'denied_update' => 'Maaf anda tidak memiliki hak akses mengubah data!',
@@ -219,11 +220,11 @@ return [
     'confirmation_yes' => 'Ya',
     'confirmation_no' => 'Tidak',
 
-    //filemanager
+    // filemanager
     'chose_an_image' => 'Pilih gambar',
     'chose_an_file' => 'Pilih file ',
 
-    //action confirmation
+    // action confirmation
     'confirmation_title' => 'Konfirmasi',
     'confirmation_text' => 'Apakah anda yakin akan melakukan aksi ini?',
     'confirmButtonText' => 'Ya',
@@ -245,19 +246,19 @@ return [
     'privileges_module_list_update' => 'Update',
     'privileges_module_list_delete' => 'Delete',
 
-    //datamodal
+    // datamodal
     'datamodal_select' => 'Select',
     'datamodal_search_and_enter' => 'Search and enter...',
     'datamodal_enter_to_search' => 'Enter to search',
     'datamodal_browse_data' => 'Browse Data',
     'datamodal_browse_file' => 'Browse File',
 
-    //child
+    // child
     'table_detail' => 'Table Detail',
     'your_file_size_is_too_big' => 'Your file size is too big',
     'save_changes' => 'Save Changes',
     'please_complete_the_form' => 'Please complete the form !',
     'this_field_is_required' => 'This field is required',
     'text_form' => 'Form',
-    "your_file_extension_is_not_allowed " => "Your file extension is not allowed !",
+    'your_file_extension_is_not_allowed ' => 'Your file extension is not allowed !',
 ];

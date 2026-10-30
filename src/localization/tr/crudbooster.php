@@ -1,4 +1,5 @@
 <?php
+
 return [
     'email_footer' => 'Bu e-posta adresine herhangi bir e-posta cevap vermeyin. Bu e-posta sistemimiz tarafından otomatik olarak gönderilir. ',
     'login_message' => 'Oturumu başlatmak için giriş yapın',
@@ -7,9 +8,9 @@ return [
     'page_title_forgot' => 'Şifremi Unuttum',
     'forgot_message' => 'Şifrenizi sıfırlamak için bir bağlantı göndereceğiz',
     'forgot_text_try_again' => 'Tekrar giriş yapınız ?',
-    'text_no_notification' => "Bildiriminiz yok",
+    'text_no_notification' => 'Bildiriminiz yok',
     'text_view_all_notification' => 'Tümünü Göster',
-    'label_button_profile' => "Profil",
+    'label_button_profile' => 'Profil',
     'filter_dialog_title' => 'Gelişmiş Filtreleme & Sıralama',
     'there_is_no_option' => 'Bu girdi türü için herhangi bir seçenek ayarı yok',
     'no' => 'Hayır.',
@@ -65,7 +66,7 @@ return [
     'alert_update_data_failed' => 'Veri güncelleme başarısız',
     'alert_delete_data_success' => 'Veri silme başarılı !',
     'alert_want_to_logout' => 'Çıkış yapmak istiyor musunuz ?',
-    'alert_warning' => "Uyarı ! ",
+    'alert_warning' => 'Uyarı ! ',
     'alert_danger' => 'Bir şeyler ters gitti ....',
     'alert_success' => 'Harika , iyi iş...',
     'alert_info' => 'Bilgi',
@@ -82,8 +83,8 @@ return [
 
     'default_module_description' => 'Kayıt listesi',
 
-    'delete_description_confirm' => "Bu veriyi kurtarmak mümkün olmayacak!",
-    'delete_title_confirm' => "Silmek istediğinizden emin misiniz ?",
+    'delete_description_confirm' => 'Bu veriyi kurtarmak mümkün olmayacak!',
+    'delete_title_confirm' => 'Silmek istediğinizden emin misiniz ?',
 
     'action_show_data' => 'Veriler',
     'action_add_data' => 'Ekle',
@@ -112,10 +113,10 @@ return [
     'button_reset' => 'Sıfırla',
     'button_add_to_table' => 'Ekle',
 
-    'export_dialog_title' => "Dışa Aktar",
+    'export_dialog_title' => 'Dışa Aktar',
     'export_dialog_filename' => 'Dosya Adı',
     'export_dialog_help_filename' => 'İsteğinize göre dosya adını yeniden adlandırabilirsiniz',
-    'export_dialog_maxdata' => "Maksimum",
+    'export_dialog_maxdata' => 'Maksimum',
     'export_dialog_help_maxdata' => 'En az 1 ve en fazla 100.000 satır ',
     'export_dialog_columns' => 'Sutün',
     'export_dialog_format_export' => 'Dışa Aktarma Sıfırla',
@@ -128,10 +129,10 @@ return [
     'dashboard_default_text' => ':appname panosuna hoş geldiniz',
     'form_back_to_list' => 'Veri Listesi (:module)',
     'not_logged_in' => 'Giriş yapmadınız !',
-    'menu_navigation' => "Menü",
-    'table_data_not_found' => "Veri yok",
-    "notice_delete_file_upload" => "* Eğer başka bir dosya yüklemek istiyorsanız, lütfen  önce  var olan dosyayı siliniz.",
-    "file_broken" => "Hata! Dosya bozulmuş gibi görünüyor! Sil ve Yeniden Yükle'yi tıklayın.",
+    'menu_navigation' => 'Menü',
+    'table_data_not_found' => 'Veri yok',
+    'notice_delete_file_upload' => '* Eğer başka bir dosya yüklemek istiyorsanız, lütfen  önce  var olan dosyayı siliniz.',
+    'file_broken' => "Hata! Dosya bozulmuş gibi görünüyor! Sil ve Yeniden Yükle'yi tıklayın.",
 
     'denied_access' => 'Üzgünüm bu bölgeye erişmek için yetkiniz yok!',
     'denied_update' => 'Maalesef verileri güncellemek için yetkiniz yok!',
@@ -221,11 +222,11 @@ return [
     'confirmation_yes' => 'Evet',
     'confirmation_no' => 'Hayır',
 
-    //filemanager
+    // filemanager
     'chose_an_image' => 'Resim Seçiniz',
     'chose_an_file' => 'Dosya Seçiniz',
 
-    //action confirmation
+    // action confirmation
     'confirmation_title' => 'Onaylama',
     'confirmation_text' => 'Bu işlemi yapmak istediğinizden emin misiniz?',
     'confirmButtonText' => 'Evet',
@@ -247,20 +248,20 @@ return [
     'privileges_module_list_update' => 'Güncelleme',
     'privileges_module_list_delete' => 'Silme',
 
-    //datamodal
+    // datamodal
     'datamodal_select' => 'Seç',
     'datamodal_search_and_enter' => 'Aramak için yazın ve enter tuşuna basın..',
     'datamodal_enter_to_search' => 'Aramak için Enter tuşuna basınız',
     'datamodal_browse_data' => 'Gözat',
     'datamodal_browse_file' => 'Dosyaya Gözat',
 
-    //child
+    // child
     'table_detail' => 'Tablo ',
     'your_file_size_is_too_big' => 'Dosya boyutu büyük.',
     'save_changes' => 'Değişikleri Kaydet',
     'please_complete_the_form' => 'Lütfen formu doldurun !',
     'this_field_is_required' => 'Bu alan zorunludur',
     'text_form' => 'Form',
-    "your_file_extension_is_not_allowed " => "izin verilmeyen dosya türü !",
+    'your_file_extension_is_not_allowed ' => 'izin verilmeyen dosya türü !',
 
 ];

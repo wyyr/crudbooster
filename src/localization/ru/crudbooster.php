@@ -1,4 +1,5 @@
-﻿<?php
+<?php
+
 return [
     'email_footer' => 'Пожалуйста, не отвечайте на это письмо. Письмо отправлено нашей системой автоматически. ',
     'login_message' => 'Пожалуйста, авторизируйтесь',
@@ -9,7 +10,7 @@ return [
     'forgot_text_try_again' => 'Вернуться назад?',
     'text_no_notification' => 'У вас нет сообщений',
     'text_view_all_notification' => 'Показать все',
-    'label_button_profile' => "Профиль",
+    'label_button_profile' => 'Профиль',
     'filter_dialog_title' => 'Расширенная Сортировка & Отбор',
     'there_is_no_option' => 'Для этого типа входных данных нет никаких настроек',
     'no' => 'Нет.',
@@ -65,7 +66,7 @@ return [
     'alert_update_data_failed' => 'Ощибка обновления данных',
     'alert_delete_data_success' => 'Успешное удаление данных!',
     'alert_want_to_logout' => 'Вы действительно хотите выйти?',
-    'alert_warning' => "Упс!",
+    'alert_warning' => 'Упс!',
     'alert_danger' => 'Что-то пошло не так (( ....',
     'alert_success' => 'Супер!...',
     'alert_info' => 'Информация',
@@ -82,9 +83,8 @@ return [
 
     'default_module_description' => 'Список',
 
-    'delete_description_confirm' => "Вы не сможете восстановить эти данные!",
-    'delete_title_confirm' => "Вы уверены?",
-
+    'delete_description_confirm' => 'Вы не сможете восстановить эти данные!',
+    'delete_title_confirm' => 'Вы уверены?',
 
     'action_show_data' => 'Показать',
     'action_add_data' => 'Добавить',
@@ -94,7 +94,6 @@ return [
     'action_detail_data' => 'Детально',
     'action_edit_data' => 'Редактир.',
     'action_delete_data' => 'Удалить',
-
 
     'button_cancel' => 'Отмена',
     'button_add' => 'Добавить',
@@ -114,10 +113,10 @@ return [
     'button_reset' => 'Сбросить',
     'button_add_to_table' => 'Добавить в таблицу',
 
-    'export_dialog_title' => "Экспорт данных",
+    'export_dialog_title' => 'Экспорт данных',
     'export_dialog_filename' => 'Имя файла',
     'export_dialog_help_filename' => 'Вы можете переименовать имя файла в соответствии с вашими пожеланиями',
-    'export_dialog_maxdata' => "Максимальные данные",
+    'export_dialog_maxdata' => 'Максимальные данные',
     'export_dialog_help_maxdata' => 'Возможно экспортировать от 1 до 100,000 строк за сессию',
     'export_dialog_columns' => 'Колонки',
     'export_dialog_format_export' => 'Форматы экспорта',
@@ -130,11 +129,10 @@ return [
     'dashboard_default_text' => 'Добро пожаловать за рабочий стол :appname',
     'form_back_to_list' => 'Возврат к :module',
     'not_logged_in' => 'Вы не авторизованы!',
-    'menu_navigation' => "Панель управления",
-    'table_data_not_found' => "Нет данных",
-    "notice_delete_file_upload" => "* Если вы хотите загрузить другой файл, сначала удалить этот файл.",
-    "file_broken" => "Упс! Искомый файл поврежден! Нажмите Удалить и Перезагрузить.",
-
+    'menu_navigation' => 'Панель управления',
+    'table_data_not_found' => 'Нет данных',
+    'notice_delete_file_upload' => '* Если вы хотите загрузить другой файл, сначала удалить этот файл.',
+    'file_broken' => 'Упс! Искомый файл поврежден! Нажмите Удалить и Перезагрузить.',
 
     'denied_access' => 'К сожалению, у вас нет прав доступа к этой области!',
     'denied_update' => 'К сожалению, у вас нет прав на обновление данных!',
@@ -210,7 +208,7 @@ return [
     'filter_in' => 'В',
     'filter_not_in' => 'НЕ В',
     'filter_between' => 'В ДИАПАЗОНЕ',
-    'filter_empty_or_null' => '<Пусто> (или NULL)',  //SVV
+    'filter_empty_or_null' => '<Пусто> (или NULL)',  // SVV
 
     'filter_sort_ascending' => 'Сорт. по возр.',
     'filter_sort_descending' => 'Сорт. по убыв.',
@@ -226,15 +224,14 @@ return [
     'confirmation_yes' => 'Да!',
     'confirmation_no' => 'Нет',
 
-    //filemanager
+    // filemanager
     'chose_an_image' => 'Выберите картинку ',
     'chose_an_file' => 'Выберите файл ',
 
-    //action confirmation
+    // action confirmation
     'confirmation_title' => 'Предупреждение',
     'confirmation_text' => 'Вы действительно хотите выполнить это действие?',
     'confirmButtonText' => 'Да',
-
 
     // privilege
     'privileges_name' => 'Роль',
@@ -253,20 +250,19 @@ return [
     'privileges_module_list_update' => 'Обновление',
     'privileges_module_list_delete' => 'Удаление',
 
-    //datamodal
+    // datamodal
     'datamodal_select' => 'Выбрать',
     'datamodal_search_and_enter' => 'Найти и войти...',
     'datamodal_enter_to_search' => 'Нажмите Enter для поиска',
     'datamodal_browse_data' => 'Выбрать данные',
     'datamodal_browse_file' => 'Выбрать файл',
 
-
-    //child
+    // child
     'table_detail' => 'Детальная Таблица',
     'your_file_size_is_too_big' => 'Ваш файл очень большой',
     'save_changes' => 'Сохранить изменения',
     'please_complete_the_form' => 'Пожалуйста заполните форму !',
     'this_field_is_required' => 'Это поле обязательное',
     'text_form' => 'Форма',
-    "your_file_extension_is_not_allowed " => "Тип фашего файла не поддерживается !",
+    'your_file_extension_is_not_allowed ' => 'Тип фашего файла не поддерживается !',
 ];

@@ -16,6 +16,6 @@ class DefaultExportXls implements FromView
 
     public function view(): View
     {
-        return view("crudbooster::export", $this->data);
+        return view('crudbooster::export', $this->data);
     }
 }

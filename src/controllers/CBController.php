@@ -1247,7 +1247,7 @@ class CBController extends Controller
         $this->return_url = $this->return_url ?: request('return_url');
 
         // insert log
-        $logName = $this->arr[$this->title_field] ?? 'Data Id ' . $id;
+        $logName = $this->arr[$this->title_field] ?? 'Data Id '.$id;
         CRUDBooster::insertLog(cbLang('log_add', ['name' => $logName, 'module' => CRUDBooster::getCurrentModule()->name]));
 
         $message = cbLang('alert_add_data_success');

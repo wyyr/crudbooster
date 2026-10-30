@@ -1,4 +1,5 @@
 <?php
+
 return [
     'email_footer' => '此邮件为系统自动发送，请勿回复。',
     'login_message' => '请用邮箱登录',
@@ -7,9 +8,9 @@ return [
     'page_title_forgot' => '忘记密码',
     'forgot_message' => '我们将发送一个链接以重置您的密码',
     'forgot_text_try_again' => '再次登录?',
-    'text_no_notification' => "你没有收到任何通知",
+    'text_no_notification' => '你没有收到任何通知',
     'text_view_all_notification' => '查看全部',
-    'label_button_profile' => "个人中心",
+    'label_button_profile' => '个人中心',
     'filter_dialog_title' => '筛选',
     'there_is_no_option' => '该输入类型没有选择配置',
     'no' => 'No.',
@@ -65,7 +66,7 @@ return [
     'alert_update_data_failed' => '更新失败',
     'alert_delete_data_success' => '删除成功 !',
     'alert_want_to_logout' => '退出登录?',
-    'alert_warning' => "哎呀",
+    'alert_warning' => '哎呀',
     'alert_danger' => '不妙 ....',
     'alert_success' => '哇, 干的不错...',
     'alert_info' => '通知',
@@ -82,8 +83,8 @@ return [
 
     'default_module_description' => '列表',
 
-    'delete_description_confirm' => "删除之后将无法恢复!",
-    'delete_title_confirm' => "确认删除吗 ?",
+    'delete_description_confirm' => '删除之后将无法恢复!',
+    'delete_title_confirm' => '确认删除吗 ?',
 
     'action_show_data' => '查看',
     'action_add_data' => '新增',
@@ -111,10 +112,10 @@ return [
     'button_download_file' => '下载',
     'button_reset' => '重置',
 
-    'export_dialog_title' => "导出",
+    'export_dialog_title' => '导出',
     'export_dialog_filename' => '文件名',
     'export_dialog_help_filename' => '支持自定义文件名',
-    'export_dialog_maxdata' => "最大行数",
+    'export_dialog_maxdata' => '最大行数',
     'export_dialog_help_maxdata' => '每次只允许导出1~10万行数据',
     'export_dialog_columns' => '标题字段',
     'export_dialog_format_export' => '导出文件格式',
@@ -127,10 +128,10 @@ return [
     'dashboard_default_text' => '欢迎来到:appname的控制面板',
     'form_back_to_list' => '返回:module列表',
     'not_logged_in' => '你还没有登录!',
-    'menu_navigation' => "导航",
-    'table_data_not_found' => "没有有效数据",
-    "notice_delete_file_upload" => "* 如果你想上传新的文件，请先删除已上传文件！",
-    "file_broken" => "文件好像已经被损坏 !. 点击删除并重新上传.",
+    'menu_navigation' => '导航',
+    'table_data_not_found' => '没有有效数据',
+    'notice_delete_file_upload' => '* 如果你想上传新的文件，请先删除已上传文件！',
+    'file_broken' => '文件好像已经被损坏 !. 点击删除并重新上传.',
 
     'denied_access' => '对不起，你没有访问权限!',
     'denied_update' => '对不起，你没有更新权限!',
@@ -220,11 +221,11 @@ return [
     'confirmation_yes' => '是!',
     'confirmation_no' => '否',
 
-    //filemanager
+    // filemanager
     'chose_an_image' => '选择一张图片 ',
     'chose_an_file' => '选择一个文件 ',
 
-    //action confirmation
+    // action confirmation
     'confirmation_title' => '确认',
     'confirmation_text' => '你确认执行此操作吗?',
     'confirmButtonText' => '是',
@@ -246,7 +247,7 @@ return [
     'privileges_module_list_update' => '更新',
     'privileges_module_list_delete' => '删除',
 
-    //datamodal
+    // datamodal
     'datamodal_select' => '选择',
     'datamodal_search_and_enter' => '查询并进入...',
     'datamodal_enter_to_search' => '进入查询',
