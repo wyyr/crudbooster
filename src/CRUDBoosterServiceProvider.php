@@ -11,8 +11,6 @@ use crocodicstudio\crudbooster\helpers\CB;
 use crocodicstudio\crudbooster\helpers\CRUDBooster;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -34,7 +32,6 @@ class CRUDBoosterServiceProvider extends ServiceProvider
         $this->handlePublishing();
         $this->registerViewComposers();
         $this->registerCustomValidation();
-        $this->registerSeedsFrom(__DIR__ . '/database/seeds');
 
         Paginator::useBootstrap();
     }
@@ -125,26 +122,6 @@ class CRUDBoosterServiceProvider extends ServiceProvider
                 }
             }
         });
-    }
-
-    protected function registerSeedsFrom(string $path): void
-    {
-        if (!$this->app->runningInConsole()) {
-            return;
-        }
-
-        if (!str_contains(implode(' ', request()->server('argv', [])), 'db:seed')) {
-            return;
-        }
-
-        $files = File::glob("$path/*.php");
-        foreach ($files as $filename) {
-            require_once $filename;
-            $class = basename($filename, '.php');
-            if (class_exists($class)) {
-                Artisan::call('db:seed', ['--class' => $class]);
-            }
-        }
     }
 
     private function registerCustomValidation(): void

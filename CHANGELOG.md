@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix the Select2 form component and the published `CBHook` controller.
 - Use parameterized SQL strings for column metadata queries to avoid PDO type errors.
 - Provide a default form command so the profile page can render when older published controllers omit it.
+- Configure CRUDBooster email settings through Laravel's named mailer configuration.
+- Avoid running package seeders automatically during unrelated Artisan `db:seed` commands.
 
 ### Security
 

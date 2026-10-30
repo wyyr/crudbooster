@@ -773,11 +773,7 @@ class CRUDBooster
 
     public static function sendEmailQueue($queue)
     {
-        Config::set('mail.driver', self::getSetting('smtp_driver'));
-        Config::set('mail.host', self::getSetting('smtp_host'));
-        Config::set('mail.port', self::getSetting('smtp_port'));
-        Config::set('mail.username', self::getSetting('smtp_username'));
-        Config::set('mail.password', self::getSetting('smtp_password'));
+        self::configureMailerFromSettings();
 
         $html = $queue->email_content;
         $to = $queue->email_recipient;
@@ -813,12 +809,7 @@ class CRUDBooster
 
     public static function sendEmail($config = [])
     {
-
-        Config::set('mail.driver', self::getSetting('smtp_driver'));
-        Config::set('mail.host', self::getSetting('smtp_host'));
-        Config::set('mail.port', self::getSetting('smtp_port'));
-        Config::set('mail.username', self::getSetting('smtp_username'));
-        Config::set('mail.password', self::getSetting('smtp_password'));
+        self::configureMailerFromSettings();
 
         $to = $config['to'];
         $data = $config['data'];
@@ -870,6 +861,41 @@ class CRUDBooster
 
             $message->subject($subject);
         });
+    }
+
+    private static function configureMailerFromSettings(): void
+    {
+        $transport = self::getSetting('smtp_driver');
+
+        if (! is_string($transport) || trim($transport) === '') {
+            return;
+        }
+
+        if (! in_array($transport, ['smtp', 'mail', 'sendmail'], true)) {
+            throw new \InvalidArgumentException("Unsupported CRUDBooster mail transport [{$transport}].");
+        }
+
+        $mailerName = Config::get('mail.default');
+        if (! is_string($mailerName) || $mailerName === '') {
+            throw new \InvalidArgumentException('The default Laravel mailer is not configured.');
+        }
+
+        $mailerConfig = Config::get("mail.mailers.{$mailerName}", []);
+        if (! is_array($mailerConfig)) {
+            $mailerConfig = [];
+        }
+
+        $mailerConfig['transport'] = $transport;
+
+        if ($transport === 'smtp') {
+            $mailerConfig['host'] = self::getSetting('smtp_host');
+            $mailerConfig['port'] = self::getSetting('smtp_port');
+            $mailerConfig['username'] = self::getSetting('smtp_username');
+            $mailerConfig['password'] = self::getSetting('smtp_password');
+        }
+
+        Config::set("mail.mailers.{$mailerName}", $mailerConfig);
+        Mail::purge($mailerName);
     }
 
     public static function valid($arr = [], $type = 'json')
