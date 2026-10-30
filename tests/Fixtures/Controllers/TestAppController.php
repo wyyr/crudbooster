@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers\CRUDBooster;
 
-class DynamicController
+class TestAppController
 {
     public function getIndex(): string
     {
         return 'ok';
+    }
+
+    public function getExportReport(): string
+    {
+        return 'export';
     }
 }

@@ -2,6 +2,8 @@
 
 use crocodicstudio\crudbooster\CRUDBoosterServiceProvider;
 use crocodicstudio\crudbooster\helpers\CRUDBooster;
+use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
@@ -9,11 +11,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport;
-use App\Http\Controllers\CRUDBooster\DynamicController as AppDynamicController;
-use Tests\Fixtures\DynamicController;
+use Tests\Fixtures;
 use Tests\Fixtures\ExplicitSeeder;
+use Tests\Fixtures\TestRouteController;
 
 it('boots the provider and registers package routes', function (): void {
     expect(app()->providerIsLoaded(CRUDBoosterServiceProvider::class))->toBeTrue()
@@ -54,22 +55,51 @@ it('renders package views with asset urls matching the public publish path', fun
 });
 
 it('registers dynamic controller routes with expected names and slugs', function (): void {
-    CRUDBooster::routeController('reports', 'DynamicController', Tests\Fixtures::class);
+    $controllerName = class_basename(TestRouteController::class);
 
-    expect(Route::getRoutes()->getByName('DynamicControllerGetIndex')->uri())->toBe('reports')
-        ->and(Route::getRoutes()->getByName('DynamicControllerGetExportReport')->uri())
+    CRUDBooster::routeController('reports', $controllerName, Fixtures::class);
+
+    expect(Route::getRoutes()->getByName($controllerName.'GetIndex')->uri())->toBe('reports')
+        ->and(Route::getRoutes()->getByName($controllerName.'GetExportReport')->uri())
         ->toStartWith('reports/export-report/')
-        ->and(Route::getRoutes()->getByName('DynamicControllerPostSaveRecord')->uri())
+        ->and(Route::getRoutes()->getByName($controllerName.'PostSaveRecord')->uri())
         ->toStartWith('reports/save-record/');
 });
 
-it('parses the current package route action and main path', function (): void {
-    Route::get('/helper-route', [AppDynamicController::class, 'getIndex'])->name('DynamicControllerGetIndex');
+it('lists package routes through the Artisan route command', function (): void {
+    $loginUri = Route::getRoutes()->getByName('getLogin')->uri();
 
-    $this->withoutMiddleware()->get('/helper-route')->assertOk();
+    expect(Artisan::call('route:list', ['--path' => 'login']))->toBe(0)
+        ->and(Artisan::output())->toContain($loginUri)
+        ->toContain('getLogin');
+});
 
-    expect(CRUDBooster::getCurrentMethod())->toBe('getIndex')
-        ->and(CRUDBooster::mainpath())->toBe(route('DynamicControllerGetIndex'));
+it('matches package routes from a compiled route collection', function (): void {
+    $loginUri = Route::getRoutes()->getByName('getLogin')->uri();
+    $compiledRoutes = Route::getRoutes()->toCompiledRouteCollection(app('router'), app());
+    $matchedRoute = $compiledRoutes->match(Request::create('/'.$loginUri, 'GET'));
+
+    expect($matchedRoute->getName())->toBe('getLogin')
+        ->and($matchedRoute->getActionName())->toContain('AdminController@getLogin');
+});
+
+it('parses dynamic application controller actions and main paths', function (): void {
+    Route::group([
+        'prefix' => 'reports',
+        'namespace' => 'App\Http\Controllers\CRUDBooster',
+    ], function (): void {
+        CRUDBooster::routeController('/', 'TestAppController');
+    });
+
+    $route = Route::getRoutes()->getByName('TestAppControllerGetExportReport');
+
+    expect($route)->not->toBeNull()
+        ->and($route->uri())->toStartWith('reports/export-report/');
+
+    $this->withoutMiddleware()->get('/reports/export-report')->assertOk();
+
+    expect(CRUDBooster::getCurrentMethod())->toBe('getExportReport')
+        ->and(CRUDBooster::mainpath())->toBe(route('TestAppControllerGetIndex'));
 });
 
 it('sends email using the template sender, recipient and subject without changing app mailer settings', function (): void {

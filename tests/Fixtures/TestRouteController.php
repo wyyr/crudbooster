@@ -2,7 +2,7 @@
 
 namespace Tests\Fixtures;
 
-class DynamicController
+class TestRouteController
 {
     public function getIndex(): string
     {
