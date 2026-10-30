@@ -1,5 +1,6 @@
 @extends('crudbooster::admin_template')
 @section('content')
+    @php($command = $command ?? (isset($row) ? 'edit' : 'add'))
     <div>
         @if (CRUDBooster::getCurrentMethod() != 'getProfile' && $button_cancel)
             @if (g('return_url'))

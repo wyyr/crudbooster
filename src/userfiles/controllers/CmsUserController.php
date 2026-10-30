@@ -50,6 +50,7 @@ class CmsUserController extends CBController
         $this->hide_form = ['id_cms_privileges'];
 
         $data['page_title'] = cbLang('label_button_profile');
+        $data['command'] = 'edit';
         $data['row'] = CRUDBooster::first('cms_users', CRUDBooster::myId());
 
         return $this->view('crudbooster::default.form', $data);
