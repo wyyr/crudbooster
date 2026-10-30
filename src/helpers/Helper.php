@@ -1,14 +1,14 @@
 <?php
-/* 
+
+/*
 | ---------------------------------------------------------------------------------------------------------------
 | Main Helper of CRUDBooster
 | Do not edit or modify this helper unless your modification will be replace if any update from CRUDBooster.
-| 
+|
 | Homepage : http://crudbooster.com
 | ---------------------------------------------------------------------------------------------------------------
 |
 */
-
 
 use crocodicstudio\crudbooster\helpers\CB;
 use Illuminate\Contracts\Foundation\Application;
@@ -17,12 +17,12 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
 
-if (!function_exists('ends_with')) {
+if (! function_exists('ends_with')) {
     /**
      * Laravel ends_with alternative
-     * @param $text
-     * @param $need
+     *
      * @return bool
      */
     function ends_with($text, $need)
@@ -31,22 +31,19 @@ if (!function_exists('ends_with')) {
     }
 }
 
-if (!function_exists('cbLang')) {
+if (! function_exists('cbLang')) {
     /**
-     * @param $key
-     * @param array $replace
-     * @param null $locale
+     * @param  null  $locale
      * @return array|Application|Translator|string|null
      */
     function cbLang($key, array $replace = [], $locale = null)
     {
-        return trans("crudbooster::crudbooster." . $key, $replace, $locale);
+        return trans('crudbooster::crudbooster.'.$key, $replace, $locale);
     }
 }
 
-if (!function_exists('db')) {
+if (! function_exists('db')) {
     /**
-     * @param string $table
      * @return Builder
      */
     function db(string $table)
@@ -55,31 +52,41 @@ if (!function_exists('db')) {
     }
 }
 
-if (!function_exists('assetThumbnail')) {
+if (! function_exists('assetThumbnail')) {
     function assetThumbnail($path)
     {
         $path = str_replace('uploads/', 'uploads_thumbnail/', $path);
+
         return asset($path);
     }
 }
 
-if (!function_exists('assetResize')) {
+if (! function_exists('assetResize')) {
     function assetResize($path, $width, $height = null, $quality = 70)
     {
         $basename = basename($path);
         $pathWithoutName = str_replace($basename, '', $path);
-        $newLocation = $pathWithoutName . '/w_' . $width . '_h_' . $height . '_' . $basename;
+        $newLocation = $pathWithoutName.'/w_'.$width.'_h_'.$height.'_'.$basename;
         if (Storage::exists($newLocation)) {
             return asset($newLocation);
         } else {
-            $img = Image::make(storage_path($path))->fit($width, $height);
-            $img->save(storage_path($newLocation), $quality);
+            $manager = ImageManager::gd();
+            $img = $manager->read(storage_path($path));
+            if ($width && $height) {
+                $img->cover($width, $height);
+            } elseif ($width) {
+                $img->scale(width: $width);
+            } elseif ($height) {
+                $img->scale(height: $height);
+            }
+            $img->save(storage_path($newLocation), quality: $quality);
+
             return asset($newLocation);
         }
     }
 }
 
-if (!function_exists('extract_unit')) {
+if (! function_exists('extract_unit')) {
     /*
     Credits: Bit Repository
     URL: http://www.bitrepository.com/extract-content-between-two-delimiters-with-php.html
@@ -92,19 +99,19 @@ if (!function_exists('extract_unit')) {
         $second_pos = stripos($str_two, $end);
         $str_three = substr($str_two, 0, $second_pos);
         $unit = trim($str_three); // remove whitespaces
+
         return $unit;
     }
 }
 
-
-if (!function_exists('now')) {
+if (! function_exists('now')) {
     function now()
     {
         return date('Y-m-d H:i:s');
     }
 }
 
-/* 
+/*
 | --------------------------------------------------------------------------------------------------------------
 | Get data from input post/get more simply
 | --------------------------------------------------------------------------------------------------------------
@@ -112,45 +119,44 @@ if (!function_exists('now')) {
 |
 */
 
-if (!function_exists('get_setting')) {
+if (! function_exists('get_setting')) {
     /**
-     * @param $key
-     * @param null $default
+     * @param  null  $default
      * @return bool
      */
     function get_setting($key, $default = null)
     {
         $setting = CB::getSetting($key);
         $setting = ($setting) ?: $default;
+
         return $setting;
     }
 }
 
-if (!function_exists('str_random')) {
+if (! function_exists('str_random')) {
     function str_random($length = 16)
     {
         return Str::random($length);
     }
 }
 
-if (!function_exists('str_slug')) {
-    function str_slug($text, $separator = "-", $language = "en")
+if (! function_exists('str_slug')) {
+    function str_slug($text, $separator = '-', $language = 'en')
     {
         return Str::slug($text, $separator, $language);
     }
 }
 
-if (!function_exists('str_limit')) {
+if (! function_exists('str_limit')) {
     function str_limit($value, $limit = 100, $end = '...')
     {
         return Str::limit($value, $limit, $end);
     }
 }
 
-if (!function_exists('g')) {
+if (! function_exists('g')) {
     /**
-     * @param $key
-     * @param null $default
+     * @param  null  $default
      * @return array|Application|Request|string
      */
     function g($key, $default = null)
@@ -159,20 +165,23 @@ if (!function_exists('g')) {
     }
 }
 
-if (!function_exists('min_var_export')) {
+if (! function_exists('min_var_export')) {
     function min_var_export($input)
     {
         if (is_array($input)) {
             $buffer = [];
-            foreach ($input as $key => $value)
-                $buffer[] = var_export($key, true) . "=>" . min_var_export($value);
-            return "[" . implode(",", $buffer) . "]";
-        } else
+            foreach ($input as $key => $value) {
+                $buffer[] = var_export($key, true).'=>'.min_var_export($value);
+            }
+
+            return '['.implode(',', $buffer).']';
+        } else {
             return var_export($input, true);
+        }
     }
 }
 
-if (!function_exists('rrmdir')) {
+if (! function_exists('rrmdir')) {
     /*
     * http://stackoverflow.com/questions/3338123/how-do-i-recursively-delete-a-directory-and-its-entire-contents-files-sub-dir
     */
@@ -181,15 +190,15 @@ if (!function_exists('rrmdir')) {
         if (is_dir($dir)) {
             $objects = scandir($dir);
             foreach ($objects as $object) {
-                if ($object != "." && $object != "..") {
-                    if (is_dir($dir . "/" . $object))
-                        rrmdir($dir . "/" . $object);
-                    else
-                        unlink($dir . "/" . $object);
+                if ($object != '.' && $object != '..') {
+                    if (is_dir($dir.'/'.$object)) {
+                        rrmdir($dir.'/'.$object);
+                    } else {
+                        unlink($dir.'/'.$object);
+                    }
                 }
             }
             rmdir($dir);
         }
     }
 }
-

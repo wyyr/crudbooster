@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Intervention\Image\ImageManagerStatic as Image;
+use Intervention\Image\ImageManager;
 use ReflectionClass;
 use ReflectionMethod;
 
@@ -146,31 +146,26 @@ class CRUDBooster
         Storage::disk(config('crudbooster.filesystem_driver'))->makeDirectory($file_path_thumbnail);
 
         if (in_array(strtolower($ext), $images_ext)) {
-            $img = Image::make($file);
+            $manager = ImageManager::gd();
+            $img = $manager->read($file);
 
             if (! in_array(strtolower($ext), ['png'])) {
                 if ($resize_width && $resize_height) {
-                    $img->fit($resize_width, $resize_height);
+                    $img->cover($resize_width, $resize_height);
                 } elseif ($resize_width && ! $resize_height) {
-                    $img->resize($resize_width, null, function ($constraint) {
-                        $constraint->aspectRatio();
-                    });
+                    $img->scale(width: $resize_width);
                 } elseif (! $resize_width && $resize_height) {
-                    $img->resize(null, $resize_height, function ($constraint) {
-                        $constraint->aspectRatio();
-                    });
+                    $img->scale(height: $resize_height);
                 } else {
                     if ($img->width() > 1300) {
-                        $img->resize(1300, null, function ($constraint) {
-                            $constraint->aspectRatio();
-                        });
+                        $img->scale(width: 1300);
                     }
                 }
 
-                return self::uploadFile($file_path, $img->encode($ext, 75));
+                return self::uploadFile($file_path, (string) $img->encodeByExtension($ext, quality: 75));
             }
 
-            return self::uploadRawFile($file_path, $img->encode());
+            return self::uploadRawFile($file_path, (string) $img->encodeByExtension($ext));
         }
     }
 
@@ -559,7 +554,7 @@ class CRUDBooster
                                 $childUrl = self::adminPath($c->path);
                                 break;
                         }
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         $c->is_broken = true;
                     }
 
@@ -1001,12 +996,10 @@ class CRUDBooster
             return 'id';
         }
 
-        $pk = DB::getDoctrineSchemaManager()->listTableDetails($table)->getPrimaryKey();
-        if (! $pk) {
-            return null;
-        }
+        $table = self::parseSqlTable($table)['table'] ?? $table;
+        $primary = collect(Schema::getIndexes($table))->firstWhere('primary', true);
 
-        return $pk->getColumns()[0];
+        return $primary['columns'][0] ?? null;
     }
 
     public static function newId($table)
@@ -1335,7 +1328,7 @@ class CRUDBooster
     public static function isExistsController($table)
     {
         $controllerName = CRUDBooster::generateControllerName($table);
-        
+
         $path = base_path('app/Http/Controllers/CRUDBooster');
         $path2 = base_path('app/Http/Controllers/ControllerMaster/');
         if (file_exists($path.$controllerName.'.php') || file_exists($path2.$controllerName.'.php') || file_exists($path2.$controllerName.'.php')) {
@@ -1350,13 +1343,13 @@ class CRUDBooster
         $baseName = $name ?: $table;
 
         $modelName = Str::studly(Str::singular($baseName));
-        $controllerName = $modelName . 'Controller';
+        $controllerName = $modelName.'Controller';
 
         $path = base_path('app/Http/Controllers/CRUDBooster/');
 
         $suffix = 1;
-        while (file_exists($path . $controllerName . '.php')) {
-            $controllerName = $modelName . $suffix . 'Controller';
+        while (file_exists($path.$controllerName.'.php')) {
+            $controllerName = $modelName.$suffix.'Controller';
             $suffix++;
         }
 

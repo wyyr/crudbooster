@@ -2,10 +2,13 @@
 
 namespace crocodicstudio\crudbooster;
 
+use Barryvdh\DomPDF\Facade\Pdf;
 use crocodicstudio\crudbooster\commands\CrudboosterInstallationCommand;
 use crocodicstudio\crudbooster\commands\CrudboosterUpdateCommand;
 use crocodicstudio\crudbooster\commands\CrudboosterVersionCommand;
 use crocodicstudio\crudbooster\commands\Mailqueues;
+use crocodicstudio\crudbooster\helpers\CB;
+use crocodicstudio\crudbooster\helpers\CRUDBooster;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Artisan;
@@ -13,6 +16,8 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Intervention\Image\Facades\Image;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CRUDBoosterServiceProvider extends ServiceProvider
 {
@@ -50,7 +55,7 @@ class CRUDBoosterServiceProvider extends ServiceProvider
 
         // Core Singleton
         $this->app->singleton('crudbooster', function () {
-            return new \crocodicstudio\crudbooster\helpers\CRUDBooster;
+            return new CRUDBooster;
         });
     }
 
@@ -107,11 +112,13 @@ class CRUDBoosterServiceProvider extends ServiceProvider
             $loader = AliasLoader::getInstance();
 
             $aliases = [
-                'PDF' => \Barryvdh\DomPDF\Facade\Pdf::class,
-                'Excel' => \Maatwebsite\Excel\Facades\Excel::class,
-                'Image' => \Intervention\Image\Facades\Image::class,
-                'CRUDBooster' => \crocodicstudio\crudbooster\helpers\CRUDBooster::class,
-                'CB' => \crocodicstudio\crudbooster\helpers\CB::class,
+                'PDF' => Pdf::class,
+                'Excel' => Excel::class,
+                'Image' => class_exists(\Intervention\Image\Laravel\Facades\Image::class)
+                    ? \Intervention\Image\Laravel\Facades\Image::class
+                    : Image::class,
+                'CRUDBooster' => CRUDBooster::class,
+                'CB' => CB::class,
             ];
 
             foreach ($aliases as $alias => $class) {

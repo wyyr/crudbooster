@@ -2,11 +2,12 @@
 
 namespace crocodicstudio\crudbooster\controllers;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Facades\Image;
+use Intervention\Image\ImageManager;
 
 class FileController extends Controller
 {
@@ -14,34 +15,33 @@ class FileController extends Controller
     {
 
         if ($two) {
-            $fullFilePath = 'uploads' . DIRECTORY_SEPARATOR . $one . DIRECTORY_SEPARATOR . $two;
+            $fullFilePath = 'uploads'.DIRECTORY_SEPARATOR.$one.DIRECTORY_SEPARATOR.$two;
             $filename = $two;
             if ($three) {
-                $fullFilePath = 'uploads' . DIRECTORY_SEPARATOR . $one . DIRECTORY_SEPARATOR . $two . DIRECTORY_SEPARATOR . $three;
+                $fullFilePath = 'uploads'.DIRECTORY_SEPARATOR.$one.DIRECTORY_SEPARATOR.$two.DIRECTORY_SEPARATOR.$three;
                 $filename = $three;
                 if ($four) {
-                    $fullFilePath = 'uploads' . DIRECTORY_SEPARATOR . $one . DIRECTORY_SEPARATOR . $two . DIRECTORY_SEPARATOR . $three . DIRECTORY_SEPARATOR . $four;
+                    $fullFilePath = 'uploads'.DIRECTORY_SEPARATOR.$one.DIRECTORY_SEPARATOR.$two.DIRECTORY_SEPARATOR.$three.DIRECTORY_SEPARATOR.$four;
                     $filename = $four;
                     if ($five) {
-                        $fullFilePath = 'uploads' . DIRECTORY_SEPARATOR . $one . DIRECTORY_SEPARATOR . $two . DIRECTORY_SEPARATOR . $three . DIRECTORY_SEPARATOR . $four . DIRECTORY_SEPARATOR . $five;
+                        $fullFilePath = 'uploads'.DIRECTORY_SEPARATOR.$one.DIRECTORY_SEPARATOR.$two.DIRECTORY_SEPARATOR.$three.DIRECTORY_SEPARATOR.$four.DIRECTORY_SEPARATOR.$five;
                         $filename = $five;
                     }
                 }
             }
         } else {
-            $fullFilePath = 'uploads' . DIRECTORY_SEPARATOR . $one;
+            $fullFilePath = 'uploads'.DIRECTORY_SEPARATOR.$one;
             $filename = $one;
         }
 
-        $fullStoragePath = storage_path('app/' . $fullFilePath);
+        $fullStoragePath = storage_path('app/'.$fullFilePath);
         $lifetime = 31556926; // One year in seconds
 
-
-        if (!Storage::exists($fullFilePath)) {
+        if (! Storage::exists($fullFilePath)) {
             abort(404);
         }
 
-        $handler = new \Symfony\Component\HttpFoundation\File\File(storage_path('app/' . $fullFilePath));
+        $handler = new \Symfony\Component\HttpFoundation\File\File(storage_path('app/'.$fullFilePath));
 
         $extension = strtolower(File::extension($fullStoragePath));
         $images_ext = config('crudbooster.IMAGE_EXTENSIONS', 'jpg,png,gif,bmp');
@@ -58,17 +58,17 @@ class FileController extends Controller
                 $h = Request::get('h') ?: $w;
             }
 
-            $imgRaw = Image::cache(function ($image) use ($fullStoragePath, $w, $h) {
-                $im = $image->make($fullStoragePath);
+            $cacheKey = 'cb_img_'.md5($fullStoragePath."_{$w}_{$h}");
+            $imgRaw = Cache::remember($cacheKey, 86400, function () use ($fullStoragePath, $w, $h, $extension) {
                 if ($w) {
-                    if (!$h) {
-                        $im->fit($w);
-                    } else {
-                        $im->fit($w, $h);
-                    }
+                    $manager = ImageManager::gd();
+                    $im = $manager->read($fullStoragePath);
+                    $im->cover($w, $h ?: $w);
+
+                    return (string) $im->encodeByExtension($extension);
                 }
 
-                return $im;
+                return File::get($fullStoragePath);
             });
 
             $imageFileSize = mb_strlen($imgRaw, '8bit') ?: 0;
@@ -81,12 +81,12 @@ class FileController extends Controller
 
         $header_content_type = $handler->getMimeType();
         $header_content_length = ($imageFileSize) ?: $handler->getSize();
-        $header_etag = md5($file_time . $fullFilePath);
+        $header_etag = md5($file_time.$fullFilePath);
         $header_last_modified = gmdate('r', $file_time);
         $header_expires = gmdate('r', $file_time + $lifetime);
 
         $headers = [
-            'Content-Disposition' => 'inline; filename="' . $filename . '"',
+            'Content-Disposition' => 'inline; filename="'.$filename.'"',
             'Last-Modified' => $header_last_modified,
             'Cache-Control' => 'must-revalidate',
             'Expires' => $header_expires,
@@ -113,9 +113,9 @@ class FileController extends Controller
             }
         } else {
             if (Request::get('download')) {
-                return Response::download(storage_path('app/' . $fullFilePath), $filename, $headers);
+                return Response::download(storage_path('app/'.$fullFilePath), $filename, $headers);
             } else {
-                return Response::file(storage_path('app/' . $fullFilePath), $headers);
+                return Response::file(storage_path('app/'.$fullFilePath), $headers);
             }
         }
     }
