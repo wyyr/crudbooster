@@ -1,63 +1,37 @@
-# Welcome To CRUDBooster
+# Install CRUDBooster
 
-CRUDBooster is CRUD Generator for laravel, with the most important features web application development. It's easy, flexible, and powerful.
+## Requirements
 
-## System Requirement and Basic Technical Knowledge
+- Laravel 12 or 13 and the PHP version it requires (8.2 or later)
+- PHP extensions: Mbstring, OpenSSL, PDO, Tokenizer, XML, GD, and Fileinfo
+- Composer and a configured database
 
-- Web Server as:
-  - Apache 2.4.x or higher with rewrite engine on (mod_rewrite)
-  - Nginx 1.24.x or higher
-- Database that laravel supports, actually can be:
-  - MySQL
-  - Postgres
-  - SQLite
-  - SQL Server
-- Composer
-- Laravel 8.x / 9.x / 10.x
-- Php 8.1 or higher and the extensions:
-  - Mcrypt
-  - OpenSSL
-  - Mbstring
-  - Tokenizer
-  - FileInfo
+Some database-inspection features use MySQL-specific queries, so other database drivers may not be fully supported.
 
 ## Installation
 
-- Please make sure you have install laravel project, please follow [https://laravel.com/docs/installation](https://laravel.com/docs/installation)
+Set up your Laravel database in `.env`, then install CRUDBooster:
 
-- Open the terminal, navigate to your laravel project directory.
-
-```php
+```bash
 composer require wyyr/crudbooster
 ```
 
-- Setting the database configuration, open .env file at project root directory
+Back up your database before running the installer. It publishes files, runs migrations, and offers to seed the database:
 
-```
-DB_DATABASE=**your_db_name**
-DB_USERNAME=**your_db_user**
-DB_PASSWORD=**password**
-```
-
-- Run the following command at the terminal
-
-```php
+```bash
 php artisan crudbooster:install
 ```
 
-## Backend URL
+The seeder creates an admin account if none exists:
 
-```php
-/admin/login
-```
+- Email: `admin@crudbooster.com`
+- Password: `123456`
 
-- default email : admin@crudbooster.com
-- default password : 123456
+Change this password immediately, and never leave it active on a public site.
+
+Admin login: `/admin/login`
 
 ## What's Next
 
 - [How To Create A Module (CRUD)](./how-to-create-module.md)
-
-## Table Of Contents
-
 - [Back To Index](./index.md)

@@ -39,12 +39,6 @@ class CrudboosterUpdateCommand extends Command
         }
 
         $this->info('Updating CRUDBooster...');
-
-        $vendorPath = public_path('vendor');
-        if (! File::isDirectory($vendorPath)) {
-            File::makeDirectory($vendorPath, 0777, true, true);
-        }
-
         $this->info('Publishing CRUDBooster assets and migrations...');
         $this->call('vendor:publish', ['--all' => true]);
         $this->call('vendor:publish', ['--tag' => 'cb_migration', '--force' => true]);

@@ -49,11 +49,6 @@ class CrudboosterInstallationCommand extends Command
                 return 1;
             }
 
-            $vendorPath = public_path('vendor');
-            if (! File::isDirectory($vendorPath)) {
-                File::makeDirectory($vendorPath, 0777, true, true);
-            }
-
             $this->info('Publishing crudbooster assets...');
             $this->call('vendor:publish', ['--provider' => 'crocodicstudio\crudbooster\CRUDBoosterServiceProvider']);
 
