@@ -1,17 +1,24 @@
 <?php
 
 use App\Http\Controllers\CRUDBooster\TestRelationController;
+use crocodicstudio\crudbooster\controllers\ApiCustomController;
 use crocodicstudio\crudbooster\CRUDBoosterServiceProvider;
 use crocodicstudio\crudbooster\helpers\CRUDBooster;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Routing\Route as RoutingRoute;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\View\View;
 use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport;
 use Tests\Fixtures;
 use Tests\Fixtures\ExplicitSeeder;
@@ -69,6 +76,37 @@ it('restricts API key management and API exports to superadmins', function (): v
     ] as [$routeName, $parameters]) {
         $this->post(route($routeName, $parameters))->assertForbidden();
     }
+});
+
+it('provides empty defaults for a new API generator form', function (): void {
+    Schema::create('cms_apicustom', function (Blueprint $table): void {
+        $table->id();
+    });
+
+    $action = ApiCustomController::class.'@getGenerator';
+    $route = $this->createMock(RoutingRoute::class);
+    $route->method('getActionName')->willReturn($action);
+    $router = $this->createMock(Router::class);
+    $router->method('getCurrentRoute')->willReturn($route);
+    $router->method('currentRouteAction')->willReturn($action);
+    Route::swap($router);
+    Session::put('admin_is_superadmin', true);
+
+    $response = app(ApiCustomController::class)->getGenerator();
+    $viewData = $response->getData();
+
+    expect($response)->toBeInstanceOf(View::class)
+        ->and((array) $viewData['row'])->toMatchArray([
+            'id' => null,
+            'nama' => null,
+            'tabel' => null,
+            'permalink' => null,
+            'aksi' => null,
+            'method_type' => null,
+            'keterangan' => null,
+        ])
+        ->and($viewData['parameters'])->toBeNull()
+        ->and($viewData['responses'])->toBeNull();
 });
 
 it('changes API key status only through a validated POST request', function (): void {

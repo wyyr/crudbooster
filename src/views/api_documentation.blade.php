@@ -49,18 +49,21 @@
                                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                             }
                         });
-                        swal({
+                        Swal.fire({
                             title: "Are you sure?",
                             text: "You will not be able to recover this data!",
-                            type: "warning",
+                            icon: "warning",
                             showCancelButton: true,
                             confirmButtonColor: "#DD6B55",
-                            confirmButtonText: "Yes, delete it!",
-                            closeOnConfirm: false
-                        }, function () {
+                            confirmButtonText: "Yes, delete it!"
+                        }).then(function (result) {
+                            if (!result.isConfirmed) {
+                                return;
+                            }
+
                             $.post(url, function (resp) {
                                 if (resp.status == 1) {
-                                    swal("Deleted!", "The data has been deleted.", "success");
+                                    Swal.fire("Deleted!", "The data has been deleted.", "success");
                                     location.href = document.location.href;
                                 }
                             })
@@ -187,7 +190,7 @@
                     <tr>
                         <td><?= ++$no;?></td>
                         <td>
-                            <a href='javascript:void(0)' title='API {{$ac->nama}}' style='color:#009fe3' class='link_name_api'><?=$api->nama;?></a> &nbsp;
+                            <a href='javascript:void(0)' title='API {{$api->nama}}' style='color:#009fe3' class='link_name_api'><?=$api->nama;?></a> &nbsp;
                             <sup>
                                 <a title='Delete this API' onclick="deleteApi({{$api->id}})" href="javascript:void(0)"><i class='fa fa-trash'></i></a>
                                 &nbsp; <a title='Edit This API' href="{{url(config('crudbooster.ADMIN_PATH').'/api_generator/edit-api').'/'.$api->id}}"><i

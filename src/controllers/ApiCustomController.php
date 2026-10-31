@@ -133,6 +133,17 @@ class ApiCustomController extends CBController
 
         $data['page_title'] = 'API Generator';
         $data['page_menu'] = Route::getCurrentRoute()->getActionName();
+        $data['row'] = (object) [
+            'id' => null,
+            'nama' => null,
+            'tabel' => null,
+            'permalink' => null,
+            'aksi' => null,
+            'method_type' => null,
+            'keterangan' => null,
+        ];
+        $data['parameters'] = null;
+        $data['responses'] = null;
 
         $tables = CRUDBooster::listTables();
         $tables_list = [];

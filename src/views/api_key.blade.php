@@ -83,21 +83,28 @@
                                 statusForm + " <a class='btn btn-xs btn-danger' href='javascript:void(0)' onclick='deleteApi(" + resp.id + ")'>Delete</a> </td></tr>"
                             );
                             $('.no-screetkey').remove();
-                            swal("Success!", "Your new screet key has been generated successfully", "success");
+                            Swal.fire("Success!", "Your new screet key has been generated successfully", "success");
                         })
                     }
 
                     function deleteApi(id) {
-                        swal({
+                        Swal.fire({
                             title: "Are you sure ?",
                             text: "You will not be able to recover this data!",
-                            type: "warning", showCancelButton: true, confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, delete it!", closeOnConfirm: false
-                        }, function () {
+                            icon: "warning",
+                            showCancelButton: true,
+                            confirmButtonColor: "#DD6B55",
+                            confirmButtonText: "Yes, delete it!"
+                        }).then(function (result) {
+                            if (!result.isConfirmed) {
+                                return;
+                            }
+
                             $.post("{{CRUDBooster::mainpath('delete-api-key')}}", {id: id}, function (resp) {
                                 if (resp.status == 1) {
-                                    swal("Success!", "The screet key has been deleted !", "success");
+                                    Swal.fire("Success!", "The screet key has been deleted !", "success");
                                 } else {
-                                    swal("Upps!", "The screet key can't delete !", "warning");
+                                    Swal.fire("Upps!", "The screet key can't delete !", "warning");
                                 }
                                 location.href = document.location.href;
                             })
