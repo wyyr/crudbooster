@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CRUDBooster\TestRelationController;
 use crocodicstudio\crudbooster\CRUDBoosterServiceProvider;
 use crocodicstudio\crudbooster\helpers\CRUDBooster;
 use Illuminate\Http\Request;
@@ -16,6 +17,18 @@ use Tests\Fixtures;
 use Tests\Fixtures\ExplicitSeeder;
 use Tests\Fixtures\TestRouteController;
 
+beforeEach(function (): void {
+    Route::get('/test-notification-latest', fn () => '')->name('NotificationControllerGetLatestJson');
+    Route::get('/test-notification-index', fn () => '')->name('NotificationControllerGetIndex');
+
+    Route::group([
+        'prefix' => config('crudbooster.ADMIN_PATH'),
+        'namespace' => 'App\Http\Controllers\CRUDBooster',
+    ], function (): void {
+        CRUDBooster::routeController('relation-test', class_basename(TestRelationController::class));
+    });
+});
+
 it('boots the provider and registers package routes', function (): void {
     expect(app()->providerIsLoaded(CRUDBoosterServiceProvider::class))->toBeTrue()
         ->and(app('crudbooster'))->toBeInstanceOf(CRUDBooster::class)
@@ -26,6 +39,135 @@ it('does not register raw SQL or unrestricted record update endpoints', function
     expect(Route::has('ApiCustomControllerPostDataQuery'))->toBeFalse()
         ->and(Route::has('ApiCustomControllerGetUpdateSingle'))->toBeFalse()
         ->and(Route::has('AdminControllerGetUpdateSingle'))->toBeFalse();
+});
+
+it('restricts API key management and API exports to superadmins', function (): void {
+    $this->withoutMiddleware()
+        ->withSession(['admin_is_superadmin' => false])
+        ->get(route('ApiCustomControllerGetScreetKey'))
+        ->assertForbidden();
+
+    $this->get(route('ApiCustomControllerGetDownloadPostman'))
+        ->assertForbidden();
+
+    foreach ([
+        ['ApiCustomControllerGetGenerator', []],
+        ['ApiCustomControllerGetEditApi', ['one' => 1]],
+        ['ApiCustomControllerGetGenerateScreetKey', []],
+        ['ApiCustomControllerGetStatusApikey', []],
+        ['ApiCustomControllerGetDeleteApiKey', []],
+        ['ApiCustomControllerGetColumnTable', ['one' => 'cms_users']],
+        ['ApiCustomControllerGetDeleteApi', ['one' => 1]],
+    ] as [$routeName, $parameters]) {
+        $this->get(route($routeName, $parameters))->assertForbidden();
+    }
+
+    $this->post(route('ApiCustomControllerPostSaveApiCustom'))
+        ->assertForbidden();
+});
+
+it('returns only configured relation data and ignores client SQL conditions', function (): void {
+    DB::table('test_related_records')->insert([
+        ['parent_id' => 5, 'category_id' => 9, 'label' => 'Configured result', 'active' => true],
+        ['parent_id' => 5, 'category_id' => 9, 'label' => 'Inactive result', 'active' => false],
+        ['parent_id' => 6, 'category_id' => 9, 'label' => 'Other parent', 'active' => true],
+    ]);
+
+    $this->withoutMiddleware()
+        ->withSession(['admin_is_superadmin' => true])
+        ->get(route('TestRelationControllerGetDataTable').'?'.http_build_query([
+            'table' => 'test_related_records',
+            'label' => 'label',
+            'fk_name' => 'parent_id',
+            'fk_value' => 5,
+            'add_field_value' => 9,
+            'datatable_where' => '1 = 0',
+        ]))
+        ->assertOk()
+        ->assertExactJson([
+            ['select_value' => 1, 'select_label' => 'Configured result'],
+        ]);
+});
+
+it('rejects relation data tables that are not configured by the controller', function (): void {
+    $this->withoutMiddleware()
+        ->withSession(['admin_is_superadmin' => true])
+        ->get(route('TestRelationControllerGetDataTable').'?'.http_build_query([
+            'table' => 'cms_users',
+            'label' => 'email',
+            'fk_name' => 'id',
+            'fk_value' => 1,
+        ]))
+        ->assertNotFound();
+});
+
+it('uses configured datamodal columns, filters and display metadata', function (): void {
+    DB::table('test_related_records')->insert([
+        'parent_id' => 5,
+        'category_id' => 9,
+        'label' => '<script>alert(1)</script>Configured result',
+        'active' => true,
+    ]);
+
+    $response = $this->withoutMiddleware()
+        ->withSession(['admin_is_superadmin' => true])
+        ->get(route('TestRelationControllerGetModalData').'?'.http_build_query([
+            'table' => 'test_related_records',
+            'columns' => 'id,label,category_id',
+            'name_column' => 'childrenrelated_record_modal_id',
+            'where' => '1 = 0',
+            'select_to' => 'id:attacker_field',
+            'columns_name_alias' => 'Attacker',
+            'paginate' => 100000,
+        ]))
+        ->assertOk();
+
+    expect($response->getContent())
+        ->toContain('Label')
+        ->toContain('alert(1)Configured result')
+        ->not->toContain('<script>alert(1)</script>')
+        ->not->toContain('Attacker');
+});
+
+it('denies relation data access to non-superadmins without module permissions', function (): void {
+    $this->withoutMiddleware()
+        ->withSession(['admin_is_superadmin' => false])
+        ->get(route('TestRelationControllerGetModalData').'?'.http_build_query([
+            'table' => 'test_related_records',
+            'columns' => 'id,label,category_id',
+            'name_column' => 'childrenrelated_record_modal_id',
+        ]))
+        ->assertForbidden();
+});
+
+it('allows relation data access with module read permission', function (): void {
+    DB::table('test_related_records')->insert([
+        'parent_id' => 5,
+        'category_id' => 9,
+        'label' => 'Permitted result',
+        'active' => true,
+    ]);
+
+    $this->withoutMiddleware()
+        ->withSession([
+            'admin_is_superadmin' => false,
+            'admin_privileges_roles' => [
+                (object) [
+                    'path' => 'relation-test',
+                    'is_read' => true,
+                    'is_create' => false,
+                    'is_edit' => false,
+                ],
+            ],
+        ])
+        ->get(route('TestRelationControllerGetDataTable').'?'.http_build_query([
+            'table' => 'test_related_records',
+            'label' => 'label',
+            'fk_name' => 'parent_id',
+            'fk_value' => 5,
+        ]))
+        ->assertOk()
+        ->assertJsonFragment(['select_label' => 'Permitted result']);
 });
 
 it('does not seed a default admin during provider boot', function (): void {
@@ -58,6 +200,22 @@ it('renders package views with asset urls matching the public publish path', fun
         ->and($errorPage)->toContain(asset('crudbooster/assets/adminlte/bootstrap/css/bootstrap.min.css'))
         ->and($dataModal)->toContain(asset('crudbooster/ionic/css/ionicons.min.css'))
         ->and($errorPage.$dataModal)->not->toContain(asset('vendor/crudbooster/'));
+});
+
+it('compiles the select and data-modal component views', function (): void {
+    $blade = app('blade.compiler');
+    $finder = app('view')->getFinder();
+
+    foreach ([
+        'crudbooster::default.type_components.select.component',
+        'crudbooster::default.type_components.child.component',
+        'crudbooster::default.type_components.datamodal.component',
+    ] as $viewName) {
+        $viewPath = $finder->find($viewName);
+        $blade->compile($viewPath);
+
+        expect(file_exists($blade->getCompiledPath($viewPath)))->toBeTrue();
+    }
 });
 
 it('registers dynamic controller routes with expected names and slugs', function (): void {

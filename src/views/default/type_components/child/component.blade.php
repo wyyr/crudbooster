@@ -79,7 +79,7 @@ $name = str_slug($form['label'], '');
 
                                                     @push('bottom')
                                                         <script type="text/javascript">
-                                                            var url_{{$name_column}} = "{{CRUDBooster::mainpath('modal-data')}}?table={{$col['datamodal_table']}}&columns=id,{{$col['datamodal_columns']}}&name_column={{$name_column}}&where={{urlencode($col['datamodal_where'])}}&select_to={{ urlencode($col['datamodal_select_to']) }}&columns_name_alias={{urlencode($col['datamodal_columns_alias'])}}&paginate={{urlencode($col['datamodal_paginate'])}}";
+                                                            var url_{{$name_column}} = "{{CRUDBooster::mainpath('modal-data')}}?table={{$col['datamodal_table']}}&columns=id,{{$col['datamodal_columns']}}&name_column={{$name_column}}";
                                                             var url_is_setted_{{$name_column}} = false;
 
                                                             function showModal{{$name_column}}() {
@@ -270,14 +270,18 @@ $name = str_slug($form['label'], '');
                                                                         var fk_name = "{{$col['parent_select']}}";
                                                                         var fk_value = $('#{{$name.$col['parent_select']}}').val();
                                                                         var datatable = "{{$col['datatable']}}".split(',');
-                                                                        var datatableWhere = "{{$col['datatable_where']}}";
                                                                         var table = datatable[0].trim('');
                                                                         var label = datatable[1].trim('');
                                                                         var value = "{{$value}}";
 
                                                                         if (fk_value != '') {
                                                                             $current.html("<option value=''>{{cbLang('text_loading')}} {{$col['label']}}");
-                                                                            $.get("{{CRUDBooster::mainpath('data-table')}}?table=" + table + "&label=" + label + "&fk_name=" + fk_name + "&fk_value=" + fk_value + "&datatable_where=" + encodeURI(datatableWhere), function (response) {
+                                                                            $.get("{{CRUDBooster::mainpath('data-table')}}", {
+                                                                                table: table,
+                                                                                label: label,
+                                                                                fk_name: fk_name,
+                                                                                fk_value: fk_value
+                                                                            }, function (response) {
                                                                                 if (response) {
                                                                                     $current.html("<option value=''>{{$default}}");
                                                                                     $.each(response, function (i, obj) {

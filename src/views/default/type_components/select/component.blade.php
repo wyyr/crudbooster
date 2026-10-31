@@ -26,28 +26,21 @@
                             $("#{{ $add_field }}").val() : "";
                     @endif
 
-                    var datatableWhere = "{{ $form['datatable_where'] ?? '' }}";
-                    @if (!empty($add_field))
-                        if (datatableWhere) {
-                            if (add_field) {
-                                datatableWhere = datatableWhere + " and {{ $add_field }} = " + add_field;
-                            }
-                        } else {
-                            if (add_field) {
-                                datatableWhere = "{{ $add_field }} = " + add_field;
-                            }
-                        }
-                    @endif
-
                     var table = datatable[0] ? datatable[0].trim() : '';
                     var label = datatable[1] ? datatable[1].trim() : '';
                     var value = "{{ $value }}";
 
                     if (fk_value != '') {
                         $current.html("<option value=''>{{ cbLang('text_loading') }} {{ $form['label'] }}");
-                        $.get("{{ CRUDBooster::mainpath('data-table') }}?table=" + table + "&label=" + label +
-                            "&fk_name=" + fk_name + "&fk_value=" + fk_value + "&datatable_where=" +
-                            encodeURI(datatableWhere),
+                        $.get("{{ CRUDBooster::mainpath('data-table') }}", {
+                            table: table,
+                            label: label,
+                            fk_name: fk_name,
+                            fk_value: fk_value,
+                            @if (!empty($add_field))
+                                add_field_value: add_field,
+                            @endif
+                        },
                             function(response) {
                                 if (response) {
                                     $current.html("<option value=''>{{ $default }}");

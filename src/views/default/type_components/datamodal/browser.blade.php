@@ -11,8 +11,8 @@
 @include('crudbooster::admin_template_plugins')
 
 <?php
-$name = Request::get('name_column');
-$coloms_alias = explode(',', 'ID,'.Request::get('columns_name_alias'));
+$name = $name_column ?? Request::get('name_column');
+$coloms_alias = explode(',', 'ID,'.($columns_name_alias ?? Request::get('columns_name_alias')));
 if (count($coloms_alias) < 2 && isset($columns)) {
     $coloms_alias = $columns;
 }
@@ -35,33 +35,35 @@ if (count($coloms_alias) < 2 && isset($columns)) {
         <tr>
             @foreach($columns as $col)
                 @php
-                $img_extension = ['jpg', 'jpeg', 'png', 'gif', 'bmp'];
-                $ext = isset($row)&&isset($col) ? pathinfo($row->$col, PATHINFO_EXTENSION) : null;
-                if ($ext && in_array($ext, $img_extension)) {
-                    echo "<td><a href='".asset($row->$col)."' data-lightbox='roadtrip'><img src='".asset($row->$col)."' width='50px' height='30px'/></a></td>";
-                } else {
-                    echo "<td>".Str::of(strip_tags($row->$col))->limit(50)."</td>";
-                }
+                    $value = (string) ($row->$col ?? '');
+                    $img_extension = ['jpg', 'jpeg', 'png', 'gif', 'bmp'];
+                    $ext = pathinfo($value, PATHINFO_EXTENSION);
                 @endphp
+                @if ($ext && in_array(strtolower($ext), $img_extension, true))
+                    <td><a href="{{ asset($value) }}" data-lightbox="roadtrip"><img src="{{ asset($value) }}" width="50px" height="30px"/></a></td>
+                @else
+                    <td>{{ Str::of(strip_tags($value))->limit(50) }}</td>
+                @endif
             @endforeach
-            <?php
-            $select_data_result = [];
-            $select_data_result['datamodal_id'] = $row->id;
-            $select_data_result['datamodal_label'] = $row->{$columns[1]} ?: $row->id;
-            $select_data = Request::get('select_to');
-            if ($select_data) {
-                $select_data = explode(',', $select_data);
-                if ($select_data) {
-                    foreach ($select_data as $s) {
-                        $s_exp = explode(':', $s);
-                        $field_name = $s_exp[0];
-                        $target_field_name = $s_exp[1];
+            @php
+                $select_data_result = [
+                    'datamodal_id' => $row->id,
+                    'datamodal_label' => $row->{$columns[1]} ?: $row->id,
+                ];
+                $select_data = array_filter(array_map('trim', explode(',', $select_to ?? Request::get('select_to', ''))));
+                foreach ($select_data as $mapping) {
+                    [$field_name, $target_field_name] = array_pad(explode(':', $mapping, 2), 2, null);
+                    if (
+                        $field_name
+                        && $target_field_name
+                        && in_array($field_name, $columns, true)
+                        && preg_match('/^[A-Za-z_][A-Za-z0-9_-]*$/', $target_field_name) === 1
+                    ) {
                         $select_data_result[$target_field_name] = $row->$field_name;
                     }
                 }
-            }
-            ?>
-            <td><a class='btn btn-primary' href='javascript:void(0)' onclick='parent.selectAdditionalData{{$name}}({!! json_encode($select_data_result) !!})'><i
+            @endphp
+            <td><a class='btn btn-primary' href='javascript:void(0)' onclick='parent.selectAdditionalData{{$name}}({!! json_encode($select_data_result, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!})'><i
                             class='fa fa-check-circle'></i> {{cbLang('datamodal_select')}}</a></td>
         </tr>
     @endforeach

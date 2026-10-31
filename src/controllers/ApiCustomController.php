@@ -53,6 +53,7 @@ class ApiCustomController extends CBController
 
     public function getDownloadPostman()
     {
+        $this->ensureSuperadminAccess();
         $this->cbLoader();
         $data = [];
         $data['variables'] = [];
@@ -116,6 +117,7 @@ class ApiCustomController extends CBController
 
     public function getScreetKey()
     {
+        $this->ensureSuperadminAccess();
         $this->cbLoader();
         $data['page_title'] = 'API Generator';
         $data['page_menu'] = Route::getCurrentRoute()->getActionName();
@@ -126,12 +128,8 @@ class ApiCustomController extends CBController
 
     public function getGenerator()
     {
+        $this->ensureSuperadminAccess();
         $this->cbLoader();
-
-        if (! CRUDBooster::isSuperadmin()) {
-            CRUDBooster::insertLog(cbLang('log_try_view', ['name' => 'API Index', 'module' => 'API']));
-            CRUDBooster::redirect(CRUDBooster::adminPath(), cbLang('denied_access'));
-        }
 
         $data['page_title'] = 'API Generator';
         $data['page_menu'] = Route::getCurrentRoute()->getActionName();
@@ -151,12 +149,8 @@ class ApiCustomController extends CBController
 
     public function getEditApi($id)
     {
+        $this->ensureSuperadminAccess();
         $this->cbLoader();
-
-        if (! CRUDBooster::isSuperadmin()) {
-            CRUDBooster::insertLog(cbLang('log_try_view', ['name' => 'API Edit', 'module' => 'API']));
-            CRUDBooster::redirect(CRUDBooster::adminPath(), cbLang('denied_access'));
-        }
 
         $row = DB::table('cms_apicustom')->where('id', $id)->first();
 
@@ -181,6 +175,7 @@ class ApiCustomController extends CBController
 
     public function getGenerateScreetKey()
     {
+        $this->ensureSuperadminAccess();
         $this->cbLoader();
         // Generate a random string.
         $token = openssl_random_pseudo_bytes(16);
@@ -204,6 +199,7 @@ class ApiCustomController extends CBController
 
     public function getStatusApikey()
     {
+        $this->ensureSuperadminAccess();
         CRUDBooster::valid(['id', 'status'], 'view');
 
         $id = Request::get('id');
@@ -216,7 +212,7 @@ class ApiCustomController extends CBController
 
     public function getDeleteApiKey()
     {
-
+        $this->ensureSuperadminAccess();
         $id = Request::get('id');
         if (DB::table('cms_apikey')->where('id', $id)->delete()) {
             return response()->json(['status' => 1]);
@@ -227,6 +223,7 @@ class ApiCustomController extends CBController
 
     public function getColumnTable($table, $type = 'list')
     {
+        $this->ensureSuperadminAccess();
         $this->cbLoader();
         $result = [];
 
@@ -278,6 +275,7 @@ class ApiCustomController extends CBController
 
     public function postSaveApiCustom()
     {
+        $this->ensureSuperadminAccess();
         $this->cbLoader();
         $posts = Request::all();
 
@@ -347,6 +345,7 @@ class ApiCustomController extends CBController
 
     public function getDeleteApi($id)
     {
+        $this->ensureSuperadminAccess();
         $this->cbLoader();
         $row = DB::table('cms_apicustom')->where('id', $id)->first();
         DB::table('cms_apicustom')->where('id', $id)->delete();
@@ -355,5 +354,10 @@ class ApiCustomController extends CBController
         @unlink(base_path('app/Http/Controllers/Api'.$controllerName.'Controller.php'));
 
         return response()->json(['status' => 1]);
+    }
+
+    private function ensureSuperadminAccess(): void
+    {
+        abort_unless(CRUDBooster::isSuperadmin(), 403, cbLang('denied_access'));
     }
 }

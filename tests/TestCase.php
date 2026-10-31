@@ -26,6 +26,7 @@ abstract class TestCase extends OrchestraTestCase
             'foreign_key_constraints' => true,
         ]);
         $app['config']->set('cache.default', 'array');
+        $app['config']->set('session.driver', 'array');
         $app['config']->set('mail.default', 'smtp');
         $app['config']->set('mail.mailers.smtp', [
             'transport' => 'array',
@@ -57,6 +58,16 @@ abstract class TestCase extends OrchestraTestCase
         Schema::connection('testing')->create('test_seed_markers', function (Blueprint $table): void {
             $table->id();
             $table->boolean('seeded');
+        });
+        Schema::connection('testing')->create('test_relation_modules', function (Blueprint $table): void {
+            $table->id();
+        });
+        Schema::connection('testing')->create('test_related_records', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('parent_id');
+            $table->unsignedBigInteger('category_id');
+            $table->string('label');
+            $table->boolean('active');
         });
     }
 }

@@ -687,61 +687,186 @@ class CBController extends Controller
 
     public function getDataTable()
     {
+        $this->authorizeConfiguredRelationData();
+        $this->cbLoader();
+
         $table = request('table');
         $label = request('label');
-        $datatableWhere = urldecode(request('datatable_where'));
         $foreign_key_name = request('fk_name');
         $foreign_key_value = request('fk_value');
-        if ($table && $label && $foreign_key_name && $foreign_key_value) {
-            $query = DB::table($table);
-            if ($datatableWhere) {
-                $query->whereRaw($datatableWhere);
-            }
-            $query->select('id as select_value', $label.' as select_label');
-            $query->where($foreign_key_name, $foreign_key_value);
-            $query->orderby($label, 'asc');
 
-            return response()->json($query->get());
-        } else {
-            return response()->json([]);
+        if (! is_string($table) || ! is_string($label) || ! is_string($foreign_key_name) || ! is_scalar($foreign_key_value)) {
+            abort(404);
         }
+
+        $definition = $this->findConfiguredDataTable($table, $label, $foreign_key_name);
+        if (! $definition) {
+            abort(404);
+        }
+
+        $tableColumns = Schema::getColumnListing($table);
+        if (
+            ! in_array('id', $tableColumns, true)
+            || ! in_array($label, $tableColumns, true)
+            || ! in_array($foreign_key_name, $tableColumns, true)
+        ) {
+            abort(404);
+        }
+
+        $query = DB::table($table);
+        if (! empty($definition['datatable_where'])) {
+            $query->whereRaw($definition['datatable_where']);
+        }
+        $query->select('id as select_value', $label.' as select_label');
+        $query->where($foreign_key_name, $foreign_key_value);
+
+        $parentSelect = array_map('trim', explode(',', $definition['parent_select']));
+        if (! empty($parentSelect[1]) && request()->filled('add_field_value')) {
+            abort_unless(is_scalar(request('add_field_value')), 404);
+            abort_unless(in_array($parentSelect[1], $tableColumns, true), 404);
+            $query->where($parentSelect[1], request('add_field_value'));
+        }
+
+        return response()->json($query->orderBy($label)->get());
     }
 
     public function getModalData()
     {
-        $table = request('table');
-        $where = request('where');
-        $where = urldecode($where);
-        $columns = request('columns');
-        $columns = explode(',', $columns);
-        $paginate = request('paginate');
-        $paginate = urldecode($paginate);
-        $table = CRUDBooster::parseSqlTable($table)['table'];
-        $tablePK = CB::pk($table);
-        $result = DB::table($table);
+        $this->authorizeConfiguredRelationData();
+        $this->cbLoader();
 
-        if (request('q')) {
-            $result->where(function ($where) use ($columns) {
-                foreach ($columns as $c => $col) {
+        $requestedTable = request('table');
+        $requestedColumns = request('columns');
+        if (! is_string($requestedTable) || ! is_string($requestedColumns)) {
+            abort(404);
+        }
+
+        $definition = $this->findConfiguredDataModal($requestedTable, $requestedColumns);
+        if (! $definition) {
+            abort(404);
+        }
+
+        $table = $definition['datamodal_table'];
+        $columns = array_merge(['id'], array_map('trim', explode(',', $definition['datamodal_columns'])));
+        $tableColumns = Schema::getColumnListing($table);
+        abort_unless(count(array_diff($columns, $tableColumns)) === 0, 404);
+
+        $nameColumn = request('name_column');
+        abort_unless(is_string($nameColumn) && preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $nameColumn) === 1, 404);
+
+        $paginate = filter_var($definition['datamodal_paginate'] ?? 6, FILTER_VALIDATE_INT);
+        $paginate = $paginate && $paginate > 0 ? min($paginate, 100) : 6;
+        $search = request('q');
+        abort_unless($search === null || (is_string($search) && strlen($search) <= 255), 404);
+
+        $tablePK = CB::pk($table);
+        $result = DB::table($table)->select($columns);
+
+        if ($search !== null && $search !== '') {
+            $result->where(function ($query) use ($columns, $search) {
+                foreach (array_slice($columns, 1) as $c => $col) {
                     if ($c == 0) {
-                        $where->where($col, 'like', '%'.request('q').'%');
+                        $query->where($col, 'like', '%'.$search.'%');
                     } else {
-                        $where->orWhere($col, 'like', '%'.request('q').'%');
+                        $query->orWhere($col, 'like', '%'.$search.'%');
                     }
                 }
             });
         }
 
-        if ($where) {
-            $result->whereraw($where);
+        if (! empty($definition['datamodal_where'])) {
+            $result->whereRaw($definition['datamodal_where']);
         }
 
         $result->orderby($tablePK, 'desc');
 
-        $data['result'] = $result->paginate($paginate ?: 6);
+        $data['result'] = $result->paginate($paginate);
         $data['columns'] = $columns;
+        $data['name_column'] = $nameColumn;
+        $data['select_to'] = $definition['datamodal_select_to'] ?? '';
+        $data['columns_name_alias'] = $definition['datamodal_columns_alias'] ?? '';
 
         return view('crudbooster::default.type_components.datamodal.browser', $data);
+    }
+
+    private function authorizeConfiguredRelationData(): void
+    {
+        if (CRUDBooster::isSuperadmin()) {
+            return;
+        }
+
+        $privilege = CRUDBooster::myPrivilege();
+        abort_unless($privilege && (
+            $privilege->is_read
+            || $privilege->is_create
+            || $privilege->is_edit
+        ), 403, cbLang('denied_access'));
+    }
+
+    private function getConfiguredFields(): array
+    {
+        return $this->collectConfiguredFields($this->form ?? []);
+    }
+
+    private function collectConfiguredFields(array $fields): array
+    {
+        $configuredFields = [];
+
+        foreach ($fields as $field) {
+            if (! is_array($field)) {
+                continue;
+            }
+
+            $configuredFields[] = $field;
+            if (is_array($field['columns'] ?? null)) {
+                $configuredFields = array_merge($configuredFields, $this->collectConfiguredFields($field['columns']));
+            }
+        }
+
+        return $configuredFields;
+    }
+
+    private function findConfiguredDataTable(string $table, string $label, string $foreignKey): ?array
+    {
+        foreach ($this->getConfiguredFields() as $field) {
+            if (empty($field['datatable']) || empty($field['parent_select'])) {
+                continue;
+            }
+
+            $datatable = array_map('trim', explode(',', $field['datatable']));
+            $parentSelect = array_map('trim', explode(',', $field['parent_select']));
+
+            if (
+                count($datatable) >= 2
+                && $datatable[0] === $table
+                && $datatable[1] === $label
+                && ($parentSelect[0] ?? null) === $foreignKey
+            ) {
+                return $field;
+            }
+        }
+
+        return null;
+    }
+
+    private function findConfiguredDataModal(string $table, string $columns): ?array
+    {
+        $requestedColumns = array_map('trim', explode(',', $columns));
+
+        foreach ($this->getConfiguredFields() as $field) {
+            if (empty($field['datamodal_table']) || empty($field['datamodal_columns'])) {
+                continue;
+            }
+
+            $configuredColumns = array_map('trim', explode(',', $field['datamodal_columns']));
+            $expectedColumns = array_merge(['id'], $configuredColumns);
+
+            if ($field['datamodal_table'] === $table && $requestedColumns === $expectedColumns) {
+                return $field;
+            }
+        }
+
+        return null;
     }
 
     public function getFindData()
