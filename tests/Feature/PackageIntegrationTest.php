@@ -22,6 +22,12 @@ it('boots the provider and registers package routes', function (): void {
         ->and(Route::has('getLogin'))->toBeTrue();
 });
 
+it('does not register raw SQL or unrestricted record update endpoints', function (): void {
+    expect(Route::has('ApiCustomControllerPostDataQuery'))->toBeFalse()
+        ->and(Route::has('ApiCustomControllerGetUpdateSingle'))->toBeFalse()
+        ->and(Route::has('AdminControllerGetUpdateSingle'))->toBeFalse();
+});
+
 it('does not seed a default admin during provider boot', function (): void {
     expect(DB::table('cms_users')->where('email', 'admin@crudbooster.com')->exists())->toBeFalse();
 });

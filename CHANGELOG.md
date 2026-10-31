@@ -35,5 +35,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Security
 
 - Stop creating `public/vendor` with world-writable permissions during installation and updates.
+- Remove dynamically registered endpoints that executed arbitrary SQL or updated arbitrary records without per-record authorization.
 
 This unreleased set includes breaking changes and should be released under a new major version according to SemVer. Do not treat it as a release until a version and date are assigned and the corresponding tag is published.

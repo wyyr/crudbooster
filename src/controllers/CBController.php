@@ -685,14 +685,6 @@ class CBController extends Controller
         }
     }
 
-    public function postDataQuery()
-    {
-        $query = request('query');
-        $query = DB::select(DB::raw($query));
-
-        return response()->json($query);
-    }
-
     public function getDataTable()
     {
         $table = request('table');
@@ -750,18 +742,6 @@ class CBController extends Controller
         $data['columns'] = $columns;
 
         return view('crudbooster::default.type_components.datamodal.browser', $data);
-    }
-
-    public function getUpdateSingle()
-    {
-        $table = request('table');
-        $column = request('column');
-        $value = request('value');
-        $id = request('id');
-        $tablePK = CB::pk($table);
-        DB::table($table)->where($tablePK, $id)->update([$column => $value]);
-
-        return redirect()->back()->with(['message_type' => 'success', 'message' => cbLang('alert_delete_data_success')]);
     }
 
     public function getFindData()
