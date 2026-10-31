@@ -1,6 +1,6 @@
 {
     "name": "wyyr/crudbooster",
-    "description": "Community Edition of CRUDBooster, a CRUD Generator Based On Laravel Easy To Make An Advanced Backend",
+    "description": "Community-maintained fork of CRUDBooster 5.x, bringing the classic Laravel CRUD generator up to date for PHP 8.2+ and Laravel 12/13",
     "type": "library",
     "license": "MIT",
     "keywords": [
@@ -14,8 +14,15 @@
     ],
     "authors": [
         {
+            "name": "Ferry",
+            "email": "ferry@crocodic.com",
+            "role": "Original Author"
+        },
+        {
             "name": "Wayy",
-            "email": "wyyr@pm.me"
+            "email": "wyyr@pm.me",
+            "homepage": "https://github.com/wyyr",
+            "role": "Maintainer"
         }
     ],
     "minimum-stability": "stable",

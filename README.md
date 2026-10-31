@@ -8,6 +8,8 @@
 # About CRUDBooster
 CRUDBooster is a Laravel CRUD Generator. With a new concept of scaffolding, very easy for the beginner and professional. It's easy to use, easy to custom, and very flexible. Don't limit your mind, CRUDBooster gives us a true flexibility to develop an app. You can utilize its built in CRUD Generator or even you just need for your master data only.
 
+This project is a fork of [crocodic-studio/crudbooster](https://github.com/crocodic-studio/crudbooster). The original repository was archived by its owner on February 9, 2025, and is now read-only. This fork is maintained independently and is not an official continuation of the original project.
+
 ## Let's Get Started
 ### [Installation](/docs/en/installation.md)
 ### [Documentation](/docs/en/index.md)
