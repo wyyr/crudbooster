@@ -239,6 +239,22 @@
         @endif
     </script>
 
+    <script>
+        function cbSubmitPostForm(url) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = url;
+
+            const token = document.createElement('input');
+            token.type = 'hidden';
+            token.name = '_token';
+            token.value = document.querySelector('meta[name="csrf-token"]').content;
+            form.appendChild(token);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    </script>
+
     @stack('bottom')
 
     <!-- Optionally, you can add Slimscroll and FastClick plugins.

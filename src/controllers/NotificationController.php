@@ -25,7 +25,11 @@ class NotificationController extends CBController
         $read_notification_url = url(config('crudbooster.ADMIN_PATH')).'/notifications/read';
 
         $this->col = [];
-        $this->col[] = ['label' => 'Content', 'name' => 'content', 'callback_php' => '"<a href=\"'.$read_notification_url.'/$row->id\">$row->content</a>"'];
+        $this->col[] = [
+            'label' => 'Content',
+            'name' => 'content',
+            'callback_php' => '"<form method=\"POST\" action=\"'.$read_notification_url.'/$row->id\"><input type=\"hidden\" name=\"_token\" value=\"'.csrf_token().'\"><button type=\"submit\" class=\"btn btn-link\">".e($row->content)."</button></form>"',
+        ];
         $this->col[] = [
             'label' => 'Read',
             'name' => 'is_read',
@@ -57,10 +61,19 @@ class NotificationController extends CBController
         return response()->json(['items' => $rows->get(), 'total' => $total]);
     }
 
-    public function getRead($id)
+    public function postRead($id)
     {
+        $row = DB::table('cms_notifications')
+            ->where('id', $id)
+            ->where(function ($query): void {
+                $query->where('id_cms_users', 0)
+                    ->orWhere('id_cms_users', CRUDBooster::myId());
+            })
+            ->first();
+
+        abort_if(! $row, 404);
+
         DB::table('cms_notifications')->where('id', $id)->update(['is_read' => 1]);
-        $row = DB::table('cms_notifications')->where('id', $id)->first();
 
         return redirect($row->url);
     }

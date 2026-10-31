@@ -94,17 +94,7 @@
                                     title='Edit This Meta Setting' class='btn btn-box-tool'><i class='fa fa-pencil'></i></a>
                                 <a style="visibility:hidden" href='javascript:;' title='Delete this Setting'
                                     class='btn btn-box-tool'
-                                    onClick='swal({ 
-                                        title: "Are you sure?", 
-                                        text: "You will not be able to recover {{ addslashes($s->label) }}!", 
-                                        type: "warning", 
-                                        showCancelButton: true, 
-                                        confirmButtonColor: "#DD6B55", 
-                                        confirmButtonText: "Yes, delete it!", 
-                                        closeOnConfirm: false 
-                                    }, function(){ 
-                                        location.href="{{ CRUDBooster::mainpath('delete/' . $s->id) }}"; 
-                                    });'>
+                                    onclick='{{ CRUDBooster::deleteConfirm(CRUDBooster::mainpath("delete/$s->id")) }}'>
                                     <i class='fa fa-trash'></i>
                                 </a>
                             </label>
@@ -130,7 +120,7 @@
                                     if ($value) {
                                         echo "<p><a href='" . \Illuminate\Support\Facades\Storage::disk(config('crudbooster.filesystem_driver'))->url($value) . "' target='_blank' title='Download the file of $s->label'><i class='fa fa-download'></i> Download the File  of $s->label</a></p>";
                                         echo "<input type='hidden' name='$s->name' value='$value'/>";
-                                        echo "<div class='pull-right'><a class='btn btn-danger btn-xs' onclick='if(confirm(\"Are you sure want to delete ?\")) location.href=\"" . CRUDBooster::mainpath("delete-file-setting?id=$s->id") . "\"' title='Click here to delete'><i class='fa fa-trash'></i></a></div>";
+                                        echo "<div class='pull-right'><a class='btn btn-danger btn-xs' href='#' data-delete-url='" . e(CRUDBooster::mainpath("delete-file-setting?id=$s->id")) . "' onclick='if(confirm(\"Are you sure want to delete ?\")) cbSubmitPostForm(this.dataset.deleteUrl); return false;' title='Click here to delete'><i class='fa fa-trash'></i></a></div>";
                                     } else {
                                         echo "<input type='file' name='$s->name' class='form-control'/>";
                                     }
@@ -140,7 +130,7 @@
                                     if ($value) {
                                         echo "<p><a href='" . \Illuminate\Support\Facades\Storage::disk(config('crudbooster.filesystem_driver'))->url($value) . "' target='_blank' title='Download the file of $s->label'><i class='fa fa-download'></i> Download the File  of $s->label</a></p>";
                                         echo "<input type='hidden' name='$s->name' value='$value'/>";
-                                        echo "<div class='pull-right'><a class='btn btn-danger btn-xs' onclick='if(confirm(\"Are you sure want to delete ?\")) location.href=\"" . CRUDBooster::mainpath("delete-file-setting?id=$s->id") . "\"' title='Click here to delete'><i class='fa fa-trash'></i></a></div>";
+                                        echo "<div class='pull-right'><a class='btn btn-danger btn-xs' href='#' data-delete-url='" . e(CRUDBooster::mainpath("delete-file-setting?id=$s->id")) . "' onclick='if(confirm(\"Are you sure want to delete ?\")) cbSubmitPostForm(this.dataset.deleteUrl); return false;' title='Click here to delete'><i class='fa fa-trash'></i></a></div>";
                                     } else {
                                         echo "<input type='file' name='$s->name' class='form-control'/>";
                                     }

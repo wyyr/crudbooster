@@ -28,8 +28,9 @@
             endif;
             ?>
             @if(!$readonly || !$disabled)
-                <p><a class='btn btn-danger btn-delete btn-sm' onclick="if(!confirm('{{cbLang("delete_title_confirm")}}')) return false"
-                      href='{{url(CRUDBooster::mainpath("delete-image?image=".$value."&id=".$row->id."&column=".$name))}}'><i
+                <p><a class='btn btn-danger btn-delete btn-sm' href='#'
+                      data-delete-url='{{url(CRUDBooster::mainpath("delete-image?image=".$value."&id=".$row->id."&column=".$name))}}'
+                      onclick="if(!confirm('{{cbLang("delete_title_confirm")}}')) return false; cbSubmitPostForm(this.dataset.deleteUrl); return false;"><i
                                 class='fa fa-ban'></i> {{cbLang('text_delete')}} </a></p>
             @endif
         @endif

@@ -189,7 +189,7 @@ class PrivilegeController extends CBController
         ]), 'success');
     }
 
-    public function getDelete($id)
+    public function postDelete($id)
     {
         $this->cbLoader();
 

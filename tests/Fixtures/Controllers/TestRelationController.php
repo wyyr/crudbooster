@@ -6,6 +6,11 @@ use crocodicstudio\crudbooster\controllers\CBController;
 
 class TestRelationController extends CBController
 {
+    public function getDeleteLegacy(): void
+    {
+        abort(404);
+    }
+
     public function cbInit(): void
     {
         $this->table = 'test_relation_modules';

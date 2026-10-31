@@ -571,19 +571,21 @@ class CRUDBooster
 
     public static function deleteConfirm($redirectTo)
     {
-        echo 'Swal.fire({   
-            title: "'.cbLang('delete_title_confirm').'",   
-            text: "'.cbLang('delete_description_confirm').'",   
-            icon: "warning",   
-            showCancelButton: true,   
-            confirmButtonColor: "#ff0000",   
-            confirmButtonText: "'.cbLang('confirmation_yes').'",  
-            cancelButtonText: "'.cbLang('confirmation_no')."\", 
+        $jsonFlags = JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP;
+
+        echo 'Swal.fire({
+            title: '.json_encode(cbLang('delete_title_confirm'), $jsonFlags).',
+            text: '.json_encode(cbLang('delete_description_confirm'), $jsonFlags).',
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#ff0000",
+            confirmButtonText: '.json_encode(cbLang('confirmation_yes'), $jsonFlags).',
+            cancelButtonText: '.json_encode(cbLang('confirmation_no'), $jsonFlags).',
         }).then((result) => {
             if (result.isConfirmed) {
-                window.location.href=\"$redirectTo\";
+                cbSubmitPostForm('.json_encode($redirectTo, $jsonFlags).');
             }
-        })";
+        })';
     }
 
     public static function getModulePath()
@@ -1995,6 +1997,10 @@ class CRUDBooster
             foreach ($controller_methods as $method) {
 
                 if ($method->class != 'Illuminate\Routing\Controller' && $method->name != 'getIndex') {
+                    if (substr($method->name, 0, 9) == 'getDelete') {
+                        continue;
+                    }
+
                     if (substr($method->name, 0, 3) == 'get') {
                         $method_name = substr($method->name, 3);
                         $slug = array_filter(preg_split('/(?=[A-Z])/', $method_name));

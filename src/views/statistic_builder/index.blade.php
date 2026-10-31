@@ -271,22 +271,22 @@
                 var componentID = $(this).data('componentid');
                 var $this = $(this);
 
-                swal({
-                        title: "Are you sure?",
-                        text: "You will not be able to recover this widget !",
-                        type: "warning",
-                        showCancelButton: true,
-                        confirmButtonColor: "#DD6B55",
-                        confirmButtonText: "Yes",
-                        closeOnConfirm: true
-                    },
-                    function () {
-
-                        $.get("{{CRUDBooster::mainpath('delete-component')}}/" + componentID, function () {
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "You will not be able to recover this widget !",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Yes",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.post("{{CRUDBooster::mainpath('delete-component')}}/" + componentID, {
+                            _token: $('meta[name="csrf-token"]').attr('content')
+                        }, function () {
                             $this.parents('.border-box').remove();
-
                         });
-                    });
+                    }
+                });
 
             })
             $(document).on('click', '.btn-edit-component', function () {

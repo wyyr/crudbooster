@@ -203,7 +203,7 @@ class StatisticBuilderController extends CBController
         return response()->json(['status' => true]);
     }
 
-    public function getDeleteComponent($id)
+    public function postDeleteComponent($id)
     {
         if (! CRUDBooster::isSuperadmin()) {
             CRUDBooster::insertLog(cbLang('log_try_view', ['name' => 'Delete Component', 'module' => 'Statistic']));

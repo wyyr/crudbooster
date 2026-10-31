@@ -167,7 +167,7 @@
                                         <a class='fas fa-pencil-alt' title='Edit'
                                             href='{{ route('MenuControllerGetEdit') . '/' . $menu->id }}?return_url={{ urlencode(Request::fullUrl()) }}'></a>&nbsp;&nbsp;<a
                                             title='Delete' class='fa fa-trash'
-                                            onclick='{{ CRUDBooster::deleteConfirm(route('MenuControllerGetDelete') . '/' . $menu->id) }}'
+                                            onclick='{{ CRUDBooster::deleteConfirm(route('MenuControllerPostDelete') . '/' . $menu->id) }}'
                                             href='javascript:void(0)'></a></span>
                                     <br /><em class="text-muted">
                                         <small><i class="fa fa-users"></i> &nbsp; {{ implode(', ', $privileges) }}</small>
@@ -197,7 +197,7 @@
                                                     <span class='float-right'><a class='fas fa-pencil-alt' title='Edit'
                                                             href='{{ route('MenuControllerGetEdit') . '/' . $child->id }}?return_url={{ urlencode(Request::fullUrl()) }}'></a>&nbsp;&nbsp;<a
                                                             title="Delete" class='fa fa-trash'
-                                                            onclick='{{ CRUDBooster::deleteConfirm(route('MenuControllerGetDelete') . '/' . $child->id) }}'
+                                                            onclick='{{ CRUDBooster::deleteConfirm(route('MenuControllerPostDelete') . '/' . $child->id) }}'
                                                             href='javascript:void(0)'></a></span>
                                                     <br /><em class="text-muted">
                                                         <small><i class="fa fa-users"></i> &nbsp;
@@ -230,7 +230,7 @@
                                         <a class="fas fa-pencil-alt" title="Edit"
                                             href='{{ route('MenuControllerGetEdit') . '/' . $menu->id }}?return_url={{ urlencode(Request::fullUrl()) }}'></a>&nbsp;&nbsp;<a
                                             title='Delete' class='fa fa-trash'
-                                            onclick='{{ CRUDBooster::deleteConfirm(route('MenuControllerGetDelete', ['id' => $menu->id])) }}'
+                                            onclick='{{ CRUDBooster::deleteConfirm(route('MenuControllerPostDelete', ['id' => $menu->id])) }}'
                                             href='javascript:void(0)'></a></span>
                                 </div>
                                 <ul>
@@ -242,7 +242,7 @@
                                                         <a class='fas fa-pencil-alt' title='Edit'
                                                             href='{{ route('MenuControllerGetEdit', ['id' => $child->id]) }}?return_url={{ urlencode(Request::fullUrl()) }}'></a>&nbsp;&nbsp;<a
                                                             title="Delete" class='fa fa-trash'
-                                                            onclick='{{ CRUDBooster::deleteConfirm(route('MenuControllerGetDelete', ['id' => $child->id])) }}'
+                                                            onclick='{{ CRUDBooster::deleteConfirm(route('MenuControllerPostDelete', ['id' => $child->id])) }}'
                                                             href='javascript:void(0)'></a></span></div>
                                             </li>
                                         @endforeach

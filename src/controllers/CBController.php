@@ -1552,7 +1552,7 @@ class CBController extends Controller
         }
     }
 
-    public function getDelete($id)
+    public function postDelete($id)
     {
         $this->cbLoader();
         $row = DB::table($this->table)->where($this->primary_key, $id)->first();
@@ -1872,13 +1872,22 @@ class CBController extends Controller
         return redirect()->back()->with(['message_type' => $type, 'message' => $message]);
     }
 
-    public function getDeleteImage()
+    public function postDeleteImage()
     {
         $this->cbLoader();
         $id = request('id');
         $column = request('column');
 
+        abort_unless(
+            is_string($column) && collect($this->getConfiguredFields())->contains(
+                fn (array $field): bool => ($field['name'] ?? null) === $column
+                    && in_array($field['type'] ?? null, ['upload', 'upload_image', 'upload_file'], true)
+            ),
+            404
+        );
+
         $row = DB::table($this->table)->where($this->primary_key, $id)->first();
+        abort_if(! $row, 404);
 
         if (! CRUDBooster::isDelete() && $this->global_privilege == false) {
             CRUDBooster::insertLog(cbLang('log_try_delete_image', [
@@ -1888,10 +1897,8 @@ class CBController extends Controller
             CRUDBooster::redirect(CRUDBooster::adminPath(), cbLang('denied_access'));
         }
 
-        $row = DB::table($this->table)->where($this->primary_key, $id)->first();
-
-        $file = $row->{$column};
-        if (Storage::disk(config('crudbooster.filesystem_driver'))->exists($file)) {
+        $file = $row->{$column} ?? null;
+        if ($file && Storage::disk(config('crudbooster.filesystem_driver'))->exists($file)) {
             Storage::disk(config('crudbooster.filesystem_driver'))->delete($file);
         }
 

@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Routing\Route as RoutingRoute;
 use Illuminate\Routing\Router;
+use Illuminate\Session\TokenMismatchException;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
@@ -22,6 +23,7 @@ use Illuminate\View\View;
 use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport;
 use Tests\Fixtures;
 use Tests\Fixtures\ExplicitSeeder;
+use Tests\Fixtures\TestCsrfMiddleware;
 use Tests\Fixtures\TestRouteController;
 
 beforeEach(function (): void {
@@ -46,6 +48,97 @@ it('does not register raw SQL or unrestricted record update endpoints', function
     expect(Route::has('ApiCustomControllerPostDataQuery'))->toBeFalse()
         ->and(Route::has('ApiCustomControllerGetUpdateSingle'))->toBeFalse()
         ->and(Route::has('AdminControllerGetUpdateSingle'))->toBeFalse();
+});
+
+it('registers destructive actions only as POST routes', function (): void {
+    Route::group(['namespace' => 'crocodicstudio\crudbooster\controllers'], function (): void {
+        foreach ([
+            'PrivilegeController',
+            'SettingController',
+            'StatisticBuilderController',
+            'NotificationController',
+        ] as $controller) {
+            CRUDBooster::routeController('security-test/'.$controller, $controller, 'crocodicstudio\crudbooster\controllers');
+        }
+    });
+
+    foreach ([
+        'TestRelationControllerPostDelete',
+        'TestRelationControllerPostDeleteImage',
+        'PrivilegeControllerPostDelete',
+        'SettingControllerPostDeleteFileSetting',
+        'StatisticBuilderControllerPostDeleteComponent',
+        'NotificationControllerPostRead',
+    ] as $routeName) {
+        $route = Route::getRoutes()->getByName($routeName);
+
+        expect($route)->not->toBeNull()
+            ->and($route->methods())->toContain('POST');
+    }
+
+    $deleteRoute = Route::getRoutes()->getByName('TestRelationControllerPostDelete');
+
+    expect(Route::has('TestRelationControllerGetDelete'))->toBeFalse()
+        ->and(Route::has('TestRelationControllerGetDeleteImage'))->toBeFalse()
+        ->and(Route::has('TestRelationControllerGetDeleteLegacy'))->toBeFalse()
+        ->and(Route::has('SettingControllerGetDeleteFileSetting'))->toBeFalse()
+        ->and(Route::has('StatisticBuilderControllerGetDeleteComponent'))->toBeFalse()
+        ->and(Route::has('NotificationControllerGetRead'))->toBeFalse()
+        ->and($deleteRoute->uri())->toContain('relation-test/delete/');
+
+    $this->get(route('TestRelationControllerPostDelete', ['one' => 1]))
+        ->assertMethodNotAllowed();
+});
+
+it('does not let users mark another user notification as read', function (): void {
+    Schema::create('cms_notifications', function (Blueprint $table): void {
+        $table->increments('id');
+        $table->integer('id_cms_users')->nullable();
+        $table->string('content')->nullable();
+        $table->string('url')->nullable();
+        $table->boolean('is_read')->nullable();
+        $table->timestamps();
+    });
+
+    Route::group(['namespace' => 'crocodicstudio\crudbooster\controllers'], function (): void {
+        CRUDBooster::routeController('security-test/notifications', 'NotificationController', 'crocodicstudio\crudbooster\controllers');
+    });
+
+    $notificationId = DB::table('cms_notifications')->insertGetId([
+        'id_cms_users' => 999,
+        'content' => 'Other user notification',
+        'url' => '/',
+        'is_read' => false,
+    ]);
+
+    $this->withoutMiddleware()
+        ->withSession(['admin_id' => 1])
+        ->post(route('NotificationControllerPostRead', ['one' => $notificationId]))
+        ->assertNotFound();
+
+    expect(DB::table('cms_notifications')->where('id', $notificationId)->value('is_read'))->toBe(0);
+});
+
+it('renders notification read actions with a CSRF-protected POST form', function (): void {
+    $controller = app(\crocodicstudio\crudbooster\controllers\NotificationController::class);
+    $controller->cbInit();
+    $row = (object) ['id' => 7, 'content' => '<script>alert(1)</script>'];
+    $callback = $controller->col[0]['callback_php'];
+
+    eval('$value = '.$callback.';');
+
+    expect($value)->toContain('method="POST"')
+        ->toContain('name="_token"')
+        ->toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
+});
+
+it('submits CRUD delete confirmations as POST requests', function (): void {
+    ob_start();
+    CRUDBooster::deleteConfirm('/admin/relation-test/delete/1');
+    $script = str_replace('\\/', '/', ob_get_clean());
+
+    expect($script)->toContain('cbSubmitPostForm("/admin/relation-test/delete/1")')
+        ->not->toContain('window.location.href');
 });
 
 it('restricts API key management and API exports to superadmins', function (): void {
@@ -139,6 +232,28 @@ it('changes API key status only through a validated POST request', function (): 
         ->assertRedirect();
 
     expect(DB::table('cms_apikey')->where('id', 1)->value('status'))->toBe('active');
+});
+
+it('enforces CSRF tokens using Laravel web middleware', function (): void {
+    Config::set('app.key', 'base64:'.base64_encode(str_repeat('a', 32)));
+    app()->forgetInstance('encrypter');
+
+    $session = app('session')->driver();
+    $session->start();
+    $token = $session->token();
+    $middleware = app(TestCsrfMiddleware::class);
+    $next = fn () => response('', 204);
+
+    $missingTokenRequest = Request::create('/csrf-regression', 'POST');
+    $missingTokenRequest->setLaravelSession($session);
+
+    expect(fn () => $middleware->handle($missingTokenRequest, $next))
+        ->toThrow(TokenMismatchException::class);
+
+    $validTokenRequest = Request::create('/csrf-regression', 'POST', ['_token' => $token]);
+    $validTokenRequest->setLaravelSession($session);
+
+    expect($middleware->handle($validTokenRequest, $next)->getStatusCode())->toBe(204);
 });
 
 it('returns only configured relation data and ignores client SQL conditions', function (): void {
@@ -277,7 +392,7 @@ it('renders package views with asset urls matching the public publish path', fun
         ->and($errorPage.$dataModal)->not->toContain(asset('vendor/crudbooster/'));
 });
 
-it('compiles the select and data-modal component views', function (): void {
+it('compiles relation and POST delete views', function (): void {
     $blade = app('blade.compiler');
     $finder = app('view')->getFinder();
 
@@ -285,6 +400,11 @@ it('compiles the select and data-modal component views', function (): void {
         'crudbooster::default.type_components.select.component',
         'crudbooster::default.type_components.child.component',
         'crudbooster::default.type_components.datamodal.component',
+        'crudbooster::default.type_components.upload.component',
+        'crudbooster::admin_template',
+        'crudbooster::menus_management',
+        'crudbooster::setting',
+        'crudbooster::statistic_builder.index',
     ] as $viewName) {
         $viewPath = $finder->find($viewName);
         $blade->compile($viewPath);

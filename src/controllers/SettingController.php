@@ -83,12 +83,19 @@ class SettingController extends CBController
         $this->return_url = CRUDBooster::mainpath('show').'?group='.$posdata['group_setting'];
     }
 
-    public function getDeleteFileSetting()
+    public function postDeleteFileSetting()
     {
+        if (! CRUDBooster::isSuperadmin()) {
+            CRUDBooster::insertLog(cbLang('log_try_view', ['name' => 'Setting', 'module' => 'Setting']));
+            CRUDBooster::redirect(CRUDBooster::adminPath(), cbLang('denied_access'));
+        }
+
         $id = g('id');
         $row = CRUDBooster::first('cms_settings', $id);
+        abort_if(! $row, 404);
+
         Cache::forget('setting_'.$row->name);
-        if (Storage::disk(config('crudbooster.filesystem_driver'))->exists($row->content)) {
+        if ($row->content && Storage::disk(config('crudbooster.filesystem_driver'))->exists($row->content)) {
             Storage::disk(config('crudbooster.filesystem_driver'))->delete($row->content);
         }
         DB::table('cms_settings')->where('id', $id)->update(['content' => null]);
