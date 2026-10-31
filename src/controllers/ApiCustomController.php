@@ -173,7 +173,7 @@ class ApiCustomController extends CBController
         return view('crudbooster::api_generator', $data);
     }
 
-    public function getGenerateScreetKey()
+    public function postGenerateScreetKey()
     {
         $this->ensureSuperadminAccess();
         $this->cbLoader();
@@ -197,10 +197,13 @@ class ApiCustomController extends CBController
         return response()->json($response);
     }
 
-    public function getStatusApikey()
+    public function postStatusApikey()
     {
         $this->ensureSuperadminAccess();
-        CRUDBooster::valid(['id', 'status'], 'view');
+        request()->validate([
+            'id' => 'required|integer|exists:cms_apikey,id',
+            'status' => 'required|in:0,1',
+        ]);
 
         $id = Request::get('id');
         $status = (Request::get('status') == 1) ? 'active' : 'non active';
@@ -210,7 +213,7 @@ class ApiCustomController extends CBController
         return redirect()->back()->with(['message' => 'You have been update api key status !', 'message_type' => 'success']);
     }
 
-    public function getDeleteApiKey()
+    public function postDeleteApiKey()
     {
         $this->ensureSuperadminAccess();
         $id = Request::get('id');
@@ -343,7 +346,7 @@ class ApiCustomController extends CBController
         return redirect(CRUDBooster::mainpath())->with(['message' => 'Yeay, your api has been saved successfully !', 'message_type' => 'success']);
     }
 
-    public function getDeleteApi($id)
+    public function postDeleteApi($id)
     {
         $this->ensureSuperadminAccess();
         $this->cbLoader();

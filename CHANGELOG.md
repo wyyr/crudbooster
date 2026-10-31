@@ -38,5 +38,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove dynamically registered endpoints that executed arbitrary SQL or updated arbitrary records without per-record authorization.
 - Restrict data-table and data-modal endpoints to controller-configured fields and module permissions; ignore request-supplied SQL conditions.
 - Restrict API key management, API generator actions, and Postman export to superadmins.
+- Use CSRF-protected POST routes for API key status changes, API key generation/deletion, and generated API deletion.
 
 This unreleased set includes breaking changes and should be released under a new major version according to SemVer. Do not treat it as a release until a version and date are assigned and the corresponding tag is published.

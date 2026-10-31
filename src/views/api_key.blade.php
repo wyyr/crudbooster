@@ -40,11 +40,14 @@
                         <td>{{ $row->hit }}</td>
                         <td>{!! ($row->status=='active')?"<span class='badge badge-success'>Active</span>":"<span class='badge badge-secondary'>Non Active</span>" !!}</td>
                         <td>
-                            @if($row->status == 'active')
-                                <a class="btn btn-sm btn-secondary" href='{{ CRUDBooster::mainpath("status-apikey?id=$row->id&status=0") }}'>Disable</a>
-                            @else
-                                <a class="btn btn-sm btn-success" href='{{ CRUDBooster::mainpath("status-apikey?id=$row->id&status=1") }}'>Enable</a>
-                            @endif
+                            <form method="POST" action="{{ CRUDBooster::mainpath('status-apikey') }}" class="d-inline">
+                                @csrf
+                                <input type="hidden" name="id" value="{{ $row->id }}">
+                                <input type="hidden" name="status" value="{{ $row->status == 'active' ? 0 : 1 }}">
+                                <button class="btn btn-sm {{ $row->status == 'active' ? 'btn-secondary' : 'btn-success' }}" type="submit">
+                                    {{ $row->status == 'active' ? 'Disable' : 'Enable' }}
+                                </button>
+                            </form>
 
                             <a class="btn btn-sm btn-danger" href='javascript:void(0)' onclick='deleteApi({{$row->id}})'>Delete</a>
                         </td>
@@ -62,12 +65,22 @@
             @push('bottom')
                 <script>
                     var lastno = <?=$no?>;
+                    $.ajaxSetup({
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        }
+                    });
 
                     function generate_screet_key() {
-                        $.get("<?php echo route('ApiCustomControllerGetGenerateScreetKey')?>", function (resp) {
+                        $.post("<?php echo route('ApiCustomControllerPostGenerateScreetKey')?>", function (resp) {
                             lastno += 1;
+                            var statusForm = "<form method='POST' action='{{CRUDBooster::mainpath('status-apikey')}}' class='d-inline'>" +
+                                "<input type='hidden' name='_token' value='{{ csrf_token() }}'>" +
+                                "<input type='hidden' name='id' value='" + resp.id + "'>" +
+                                "<input type='hidden' name='status' value='0'>" +
+                                "<button class='btn btn-xs btn-default' type='submit'>Non Active</button></form>";
                             $('#table-apikey').append("<tr><td>" + lastno + "</td><td>" + resp.key + "</td><td>0</td><td><span class='label label-success'>Active</span></td><td>" +
-                                "<a class='btn btn-xs btn-default' href='{{CRUDBooster::mainpath("status-apikey")}}?id=" + resp.id + "&status=0'>Non Active</a> <a class='btn btn-xs btn-danger' href='javascript:void(0)' onclick='deleteApi(" + resp.id + ")'>Delete</a> </td></tr>"
+                                statusForm + " <a class='btn btn-xs btn-danger' href='javascript:void(0)' onclick='deleteApi(" + resp.id + ")'>Delete</a> </td></tr>"
                             );
                             $('.no-screetkey').remove();
                             swal("Success!", "Your new screet key has been generated successfully", "success");
@@ -80,7 +93,7 @@
                             text: "You will not be able to recover this data!",
                             type: "warning", showCancelButton: true, confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, delete it!", closeOnConfirm: false
                         }, function () {
-                            $.get("{{CRUDBooster::mainpath('delete-api-key')}}?id=" + id, function (resp) {
+                            $.post("{{CRUDBooster::mainpath('delete-api-key')}}", {id: id}, function (resp) {
                                 if (resp.status == 1) {
                                     swal("Success!", "The screet key has been deleted !", "success");
                                 } else {

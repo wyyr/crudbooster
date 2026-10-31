@@ -44,6 +44,11 @@
 
                     function deleteApi(id) {
                         var url = "{{url(config('crudbooster.ADMIN_PATH').'/api_generator/delete-api')}}/" + id;
+                        $.ajaxSetup({
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            }
+                        });
                         swal({
                             title: "Are you sure?",
                             text: "You will not be able to recover this data!",
@@ -53,7 +58,7 @@
                             confirmButtonText: "Yes, delete it!",
                             closeOnConfirm: false
                         }, function () {
-                            $.get(url, function (resp) {
+                            $.post(url, function (resp) {
                                 if (resp.status == 1) {
                                     swal("Deleted!", "The data has been deleted.", "success");
                                     location.href = document.location.href;

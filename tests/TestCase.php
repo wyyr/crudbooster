@@ -59,6 +59,13 @@ abstract class TestCase extends OrchestraTestCase
             $table->id();
             $table->boolean('seeded');
         });
+        Schema::connection('testing')->create('cms_apikey', function (Blueprint $table): void {
+            $table->id();
+            $table->string('screetkey')->nullable();
+            $table->integer('hit')->nullable();
+            $table->string('status', 25)->default('active');
+            $table->timestamps();
+        });
         Schema::connection('testing')->create('test_relation_modules', function (Blueprint $table): void {
             $table->id();
         });

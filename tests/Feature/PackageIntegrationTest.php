@@ -53,17 +53,54 @@ it('restricts API key management and API exports to superadmins', function (): v
     foreach ([
         ['ApiCustomControllerGetGenerator', []],
         ['ApiCustomControllerGetEditApi', ['one' => 1]],
-        ['ApiCustomControllerGetGenerateScreetKey', []],
-        ['ApiCustomControllerGetStatusApikey', []],
-        ['ApiCustomControllerGetDeleteApiKey', []],
         ['ApiCustomControllerGetColumnTable', ['one' => 'cms_users']],
-        ['ApiCustomControllerGetDeleteApi', ['one' => 1]],
     ] as [$routeName, $parameters]) {
         $this->get(route($routeName, $parameters))->assertForbidden();
     }
 
     $this->post(route('ApiCustomControllerPostSaveApiCustom'))
         ->assertForbidden();
+
+    foreach ([
+        ['ApiCustomControllerPostGenerateScreetKey', []],
+        ['ApiCustomControllerPostStatusApikey', []],
+        ['ApiCustomControllerPostDeleteApiKey', []],
+        ['ApiCustomControllerPostDeleteApi', ['one' => 1]],
+    ] as [$routeName, $parameters]) {
+        $this->post(route($routeName, $parameters))->assertForbidden();
+    }
+});
+
+it('changes API key status only through a validated POST request', function (): void {
+    DB::table('cms_apikey')->insert([
+        'screetkey' => 'test-secret',
+        'hit' => 0,
+        'status' => 'non active',
+    ]);
+
+    $statusRoute = Route::getRoutes()->getByName('ApiCustomControllerPostStatusApikey');
+
+    expect($statusRoute)->not->toBeNull()
+        ->and($statusRoute->methods())->toContain('POST')
+        ->and(Route::has('ApiCustomControllerGetStatusApikey'))->toBeFalse()
+        ->and(Route::has('ApiCustomControllerGetGenerateScreetKey'))->toBeFalse()
+        ->and(Route::has('ApiCustomControllerGetDeleteApiKey'))->toBeFalse()
+        ->and(Route::has('ApiCustomControllerGetDeleteApi'))->toBeFalse();
+
+    $this->withoutMiddleware()
+        ->withSession(['admin_is_superadmin' => true])
+        ->get(route('ApiCustomControllerPostStatusApikey'))
+        ->assertMethodNotAllowed();
+
+    $this->withoutMiddleware()
+        ->withSession(['admin_is_superadmin' => true])
+        ->post(route('ApiCustomControllerPostStatusApikey'), [
+            'id' => 1,
+            'status' => '1',
+        ])
+        ->assertRedirect();
+
+    expect(DB::table('cms_apikey')->where('id', 1)->value('status'))->toBe('active');
 });
 
 it('returns only configured relation data and ignores client SQL conditions', function (): void {
