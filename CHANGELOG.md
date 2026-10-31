@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [3.0.0] - 2026-10-31
 
 ### Added
 
@@ -42,4 +42,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Breaking:** Change CRUD, upload-image, settings-file, statistic-component, and notification-read mutations from GET to POST. Rename custom `getDelete*` actions to `postDelete*`, update named routes from `Get...` to `Post...`, and submit valid web CSRF tokens; URL slugs remain unchanged.
 - Require superadmin access to delete setting files, restrict upload deletion to controller-configured upload fields, and limit notification reads to global or current-user records.
 
-This unreleased set includes breaking changes and should be released under a new major version according to SemVer. Do not treat it as a release until a version and date are assigned and the corresponding tag is published.
+This major release includes breaking changes. Review the migration actions above before upgrading from CRUDBooster 2.x.
