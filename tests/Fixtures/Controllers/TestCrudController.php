@@ -18,8 +18,8 @@ class TestCrudController extends CBController
         $this->button_import = true;
         $this->button_export = true;
         $this->col = [
-            ['label' => 'Name', 'name' => 'name'],
-            ['label' => 'Status', 'name' => 'status'],
+            ['label' => 'Name', 'name' => 'name', 'str_limit' => 0, 'nl2br' => false, 'image' => false, 'download' => false],
+            ['label' => 'Status', 'name' => 'status', 'str_limit' => 0, 'nl2br' => false, 'image' => false, 'download' => false],
         ];
         $this->form = [
             ['label' => 'Name', 'name' => 'name', 'required' => true, 'validation' => 'required|min:3'],

@@ -4,12 +4,11 @@ namespace crocodicstudio\crudbooster\controllers;
 
 error_reporting(E_ALL ^ E_NOTICE);
 
-use crocodicstudio\crudbooster\export\DefaultExportXls;
+use crocodicstudio\crudbooster\export\ExportWorkflow;
 use crocodicstudio\crudbooster\helpers\CB;
 use crocodicstudio\crudbooster\helpers\CRUDBooster;
 use crocodicstudio\crudbooster\imports\ImportWorkflow;
 use crocodicstudio\crudbooster\relations\RelationConfigurationResolver;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -19,7 +18,6 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use Maatwebsite\Excel\Facades\Excel;
 
 class CBController extends Controller
 {
@@ -670,19 +668,7 @@ class CBController extends Controller
             DB::table('cms_settings')->where('name', 'default_paper_size')->update(['content' => $papersize]);
         }
 
-        switch ($filetype) {
-            case 'pdf':
-                $view = view('crudbooster::export', $response)->render();
-                $pdf = App::make('dompdf.wrapper');
-                $pdf->loadHTML($view);
-                $pdf->setPaper($papersize, $paperorientation);
-
-                return $pdf->stream($filename.'.pdf');
-            case 'xls':
-                return Excel::download(new DefaultExportXls($response), $filename.'.xlsx');
-            case 'csv':
-                return Excel::download(new DefaultExportXls($response), $filename.'.csv');
-        }
+        return app(ExportWorkflow::class)->export($filetype, $response, $filename, $papersize, $paperorientation);
     }
 
     public function getDataTable()

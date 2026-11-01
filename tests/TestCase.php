@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use Barryvdh\DomPDF\ServiceProvider as DompdfServiceProvider;
 use crocodicstudio\crudbooster\CRUDBoosterServiceProvider;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,6 +15,7 @@ abstract class TestCase extends OrchestraTestCase
     {
         return [
             CRUDBoosterServiceProvider::class,
+            DompdfServiceProvider::class,
             ExcelServiceProvider::class,
         ];
     }

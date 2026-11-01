@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 function bindCrudRequest(string $uri, string $method = 'GET', array $input = []): void
 {
@@ -92,6 +93,24 @@ function prepareImportCsv(array $headers, array $rows, array $mapping): array
         ->and(Session::get('select_column'))->toBe($mapping);
 
     return [$temporaryStoragePath, $file];
+}
+
+function addSqliteExportSchemaMetadata(): void
+{
+    DB::statement("ATTACH DATABASE ':memory:' AS information_schema");
+    DB::statement('CREATE TABLE information_schema.COLUMNS (TABLE_SCHEMA TEXT, TABLE_NAME TEXT, COLUMN_NAME TEXT, DATA_TYPE TEXT)');
+
+    $metadata = [];
+    foreach (Schema::getColumnListing('test_crud_records') as $column) {
+        $metadata[] = [
+            'TABLE_SCHEMA' => config('crudbooster.MAIN_DB_DATABASE'),
+            'TABLE_NAME' => 'test_crud_records',
+            'COLUMN_NAME' => $column,
+            'DATA_TYPE' => 'text',
+        ];
+    }
+
+    DB::table('information_schema.COLUMNS')->insert($metadata);
 }
 
 beforeEach(function (): void {
@@ -829,6 +848,104 @@ it('rolls back relation inserts when an imported row fails and continues later r
             File::deleteDirectory($temporaryStoragePath);
         }
     }
+});
+
+it('requires backend login before exporting data', function (): void {
+    $this->post(route('TestCrudControllerPostExportData'), ['fileformat' => 'csv'])
+        ->assertRedirect('/'.config('crudbooster.ADMIN_PATH').'/login');
+});
+
+it('exports filtered and limited data as PDF, XLSX, and CSV with legacy filenames and page-size persistence', function (): void {
+    addSqliteExportSchemaMetadata();
+
+    foreach (range(1, 205) as $number) {
+        DB::table('test_crud_records')->insert([
+            'name' => 'Filtered record '.$number,
+            'status' => 'open',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+    DB::table('test_crud_records')->insert([
+        'name' => 'Excluded record',
+        'status' => 'closed',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    DB::table('cms_settings')->insert([
+        'name' => 'default_paper_size',
+        'content' => 'Letter',
+    ]);
+
+    $exportInput = [
+        'filename' => 'Filtered report',
+        'limit' => 2,
+        'columns' => ['name', 'status'],
+        'filter_column' => [
+            'name' => [
+                'value' => 'Filtered record',
+                'type' => 'like',
+            ],
+        ],
+        'page_size' => 'A4',
+        'page_orientation' => 'landscape',
+        'default_paper_size' => '1',
+    ];
+    $session = [
+        'admin_id' => 1,
+        'admin_is_superadmin' => false,
+        'admin_privileges_roles' => [
+            (object) [
+                'path' => 'crud-test',
+                'is_visible' => true,
+                'is_read' => true,
+            ],
+        ],
+    ];
+
+    $pdfResponse = $this->withSession($session)
+        ->post(route('TestCrudControllerPostExportData'), [...$exportInput, 'fileformat' => 'pdf']);
+
+    $pdfResponse->assertOk();
+    expect($pdfResponse->headers->get('content-disposition'))
+        ->toContain('inline')
+        ->toContain('Filtered report.pdf')
+        ->and($pdfResponse->getContent())->toStartWith('%PDF');
+    expect(DB::table('cms_settings')->where('name', 'default_paper_size')->value('content'))->toBe('A4');
+
+    $withoutSavingPaperSize = $exportInput;
+    unset($withoutSavingPaperSize['default_paper_size']);
+    $this->withSession($session)
+        ->post(route('TestCrudControllerPostExportData'), [...$withoutSavingPaperSize, 'fileformat' => 'pdf'])
+        ->assertOk();
+    expect(DB::table('cms_settings')->where('name', 'default_paper_size')->value('content'))->toBe('A4');
+
+    $xlsxResponse = $this->withSession($session)
+        ->post(route('TestCrudControllerPostExportData'), [...$exportInput, 'fileformat' => 'xls']);
+
+    $xlsxResponse->assertOk()->assertDownload('Filtered report.xlsx');
+    $xlsxPath = $xlsxResponse->baseResponse->getFile()->getPathname();
+    $xlsxRows = IOFactory::load($xlsxPath)->getActiveSheet()->toArray();
+    $xlsxContent = implode("\n", array_map(static fn (array $row): string => implode('|', $row), $xlsxRows));
+    expect($xlsxContent)
+        ->toContain('Filtered record 205')
+        ->toContain('Filtered record 204')
+        ->not->toContain('Filtered record 203')
+        ->not->toContain('Excluded record');
+
+    $csvResponse = $this->withSession($session)
+        ->post(route('TestCrudControllerPostExportData'), [...$exportInput, 'fileformat' => 'csv']);
+
+    $csvResponse->assertOk()->assertDownload('Filtered report.csv');
+    $csvPath = $csvResponse->baseResponse->getFile()->getPathname();
+    $csvContent = file_get_contents($csvPath);
+    expect($csvContent)
+        ->toContain('Filtered record 205')
+        ->toContain('Filtered record 204')
+        ->not->toContain('Filtered record 203')
+        ->not->toContain('Excluded record');
+
+    expect(DB::table('cms_settings')->where('name', 'default_paper_size')->value('content'))->toBe('A4');
 });
 
 it('logs in a valid user and stores privilege session keys', function (): void {
