@@ -9,6 +9,9 @@ class TestCrudController extends CBController
     /** @var array<int, string> */
     public array $hookCalls = [];
 
+    /** @var array<int, array{0: mixed, 1: mixed}> */
+    public array $selectedActionCalls = [];
+
     public function cbInit(): void
     {
         $this->table = 'test_crud_records';
@@ -24,6 +27,13 @@ class TestCrudController extends CBController
         $this->form = [
             ['label' => 'Name', 'name' => 'name', 'required' => true, 'validation' => 'required|min:3'],
             ['label' => 'Status', 'name' => 'status', 'type' => 'text'],
+            [
+                'label' => 'Categories',
+                'name' => 'categories',
+                'type' => 'checkbox',
+                'datatable' => 'test_crud_categories,name',
+                'relationship_table' => 'test_crud_record_category',
+            ],
             [
                 'label' => 'Notes',
                 'name' => 'notes',
@@ -77,5 +87,12 @@ class TestCrudController extends CBController
     public function hook_after_delete($id): void
     {
         $this->hookCalls[] = 'after_delete';
+    }
+
+    public function actionButtonSelected($id_selected, $button_name): bool
+    {
+        $this->selectedActionCalls[] = [$id_selected, $button_name];
+
+        return true;
     }
 }

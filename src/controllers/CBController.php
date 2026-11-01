@@ -4,12 +4,17 @@ namespace crocodicstudio\crudbooster\controllers;
 
 error_reporting(E_ALL ^ E_NOTICE);
 
+use crocodicstudio\crudbooster\crud\CreateRecordAction;
+use crocodicstudio\crudbooster\crud\DeleteRecordsAction;
+use crocodicstudio\crudbooster\crud\UpdateRecordAction;
 use crocodicstudio\crudbooster\export\ExportWorkflow;
 use crocodicstudio\crudbooster\helpers\CB;
 use crocodicstudio\crudbooster\helpers\CRUDBooster;
 use crocodicstudio\crudbooster\imports\ImportWorkflow;
 use crocodicstudio\crudbooster\relations\RelationConfigurationResolver;
 use crocodicstudio\crudbooster\uploads\DeleteUploadedFileAction;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -892,15 +897,42 @@ class CBController extends Controller
 
     public function validation($id = null)
     {
+        $response = $this->validationResponse($id);
+
+        if ($response instanceof JsonResponse) {
+            $response->send();
+            exit;
+        }
+
+        if ($response instanceof RedirectResponse) {
+            Session::driver()->save();
+            $response->send();
+            exit;
+        }
+    }
+
+    private function validationResponse($id = null, bool $validateMissingInput = false): JsonResponse|RedirectResponse|null
+    {
 
         $request_all = request()->all();
         $array_input = [];
         foreach ($this->data_inputan as $di) {
             $ai = [];
-            $name = $di['name'];
-            $type = $di['type'] ?? 'text';
+            $name = $di['name'] ?? null;
+            if (! $name) {
+                continue;
+            }
 
-            if (! isset($request_all[$name])) {
+            $type = $di['type'] ?? 'text';
+            $hasInput = array_key_exists($name, $request_all);
+
+            if (! $validateMissingInput && ! isset($request_all[$name])) {
+                continue;
+            }
+
+            if ($validateMissingInput
+                && ($type === 'child' && ! isset($request_all[$name])
+                    || ! $hasInput && ! ($di['required'] ?? false) && empty($di['validation']))) {
                 continue;
             }
 
@@ -931,13 +963,10 @@ class CBController extends Controller
             if (@$di['mimes']) {
                 $ai[] = 'mimes:'.$di['mimes'];
             }
-            $name = $di['name'];
-            if (! $name) {
-                continue;
-            }
-
             if ($type == 'money') {
-                $request_all[$name] = preg_replace('/[^\d-]+/', '', $request_all[$name]);
+                if ($hasInput) {
+                    $request_all[$name] = preg_replace('/[^\d-]+/', '', $request_all[$name]);
+                }
             }
 
             if ($type == 'child') {
@@ -1013,21 +1042,19 @@ class CBController extends Controller
             $message_all = $message->all();
 
             if (Request::ajax()) {
-                $res = response()->json([
+                return response()->json([
                     'message' => cbLang('alert_validation_error', ['error' => implode(', ', $message_all)]),
                     'message_type' => 'warning',
-                ])->send();
-                exit;
-            } else {
-                $res = redirect()->back()->with('errors', $message)->with([
-                    'message' => cbLang('alert_validation_error', ['error' => implode(', ', $message_all)]),
-                    'message_type' => 'warning',
-                ])->withInput();
-                \Session::driver()->save();
-                $res->send();
-                exit;
+                ]);
             }
+
+            return redirect()->back()->with('errors', $message)->with([
+                'message' => cbLang('alert_validation_error', ['error' => implode(', ', $message_all)]),
+                'message_type' => 'warning',
+            ])->withInput();
         }
+
+        return null;
     }
 
     public function input_assignment($id = null)
@@ -1186,10 +1213,15 @@ class CBController extends Controller
                 'name' => request($this->title_field),
                 'module' => CRUDBooster::getCurrentModule()->name,
             ]));
-            CRUDBooster::redirect(CRUDBooster::adminPath(), cbLang('denied_access'));
+
+            return $this->redirectResponse(CRUDBooster::adminPath(), cbLang('denied_access'));
         }
 
-        $this->validation();
+        $validationResponse = $this->validationResponse(null, true);
+        if ($validationResponse) {
+            return $validationResponse;
+        }
+
         $this->input_assignment();
 
         if (Schema::hasColumn($this->table, 'created_at')) {
@@ -1198,77 +1230,12 @@ class CBController extends Controller
 
         $this->hook_before_add($this->arr);
 
-        $id = DB::table($this->table)->insertGetId($this->arr);
-
-        // fix bug if primary key is uuid
-        if (isset($this->arr[$this->primary_key]) && $this->arr[$this->primary_key] != $id) {
-            $id = $this->arr[$this->primary_key];
-        }
-
-        // Looping Data Input Again After Insert
-        foreach ($this->data_inputan as $ro) {
-            $name = $ro['name'] ?? null;
-            $type = $ro['type'] ?? null;
-
-            if (! $name || ! $type) {
-                continue;
-            }
-
-            $inputData = request($name);
-
-            // Insert Data Checkbox if Type Datatable
-            if (in_array($type, ['checkbox', 'select2']) && ! empty($ro['relationship_table'])) {
-                $datatable = explode(',', $ro['datatable'])[0];
-                $foreignKey = CRUDBooster::getForeignKey($this->table, $ro['relationship_table']);
-                $foreignKey2 = CRUDBooster::getForeignKey($datatable, $ro['relationship_table']);
-
-                DB::table($ro['relationship_table'])->where($foreignKey, $id)->delete();
-
-                if (is_array($inputData)) {
-                    // $relationship_table_pk = CB::pk($ro['relationship_table']);
-                    foreach ($inputData as $relationId) {
-                        DB::table($ro['relationship_table'])->insert([
-                            // $relationship_table_pk => CRUDBooster::newId($ro['relationship_table']),
-                            $foreignKey => $id,
-                            $foreignKey2 => $relationId,
-                        ]);
-                    }
-                }
-            }
-
-            if ($type == 'child') {
-                $slugName = str_slug($ro['label'], '');
-                $columns = $ro['columns'];
-                $fk = $ro['foreign_key'];
-
-                $firstColData = request($slugName.'-'.$columns[0]['name']);
-
-                if (is_array($firstColData)) {
-                    $childArray = [];
-                    foreach ($firstColData as $index => $val) {
-                        $columnData = [];
-                        foreach ($columns as $col) {
-                            $colName = $col['name'];
-                            $colValue = request($slugName.'-'.$colName)[$index] ?? null;
-
-                            if (isset($colValue)) {
-                                $columnData[$colName] = $colValue;
-                            }
-                        }
-
-                        if (! empty($columnData)) {
-                            $columnData[$fk] = $id;
-                            $childArray[] = $columnData;
-                        }
-                    }
-
-                    if (! empty($childArray)) {
-                        $childTable = CRUDBooster::parseSqlTable($ro['table'])['table'];
-                        DB::table($childTable)->insert($childArray);
-                    }
-                }
-            }
-        }
+        $id = app(CreateRecordAction::class)->execute(
+            $this->table,
+            $this->primary_key,
+            $this->arr,
+            $this->data_inputan,
+        );
 
         $this->hook_after_add($id);
 
@@ -1286,7 +1253,7 @@ class CBController extends Controller
             $url = $this->return_url ?: CRUDBooster::mainpath();
         }
 
-        CRUDBooster::redirect($url, $message, 'success');
+        return $this->redirectResponse($url, $message, 'success');
     }
 
     public function getEdit($id)
@@ -1314,13 +1281,19 @@ class CBController extends Controller
     {
         $this->cbLoader();
         $row = DB::table($this->table)->where($this->primary_key, $id)->first();
+        abort_if(! $row, 404);
 
         if (! CRUDBooster::isUpdate() && $this->global_privilege == false) {
             CRUDBooster::insertLog(cbLang('log_try_add', ['name' => $row->{$this->title_field}, 'module' => CRUDBooster::getCurrentModule()->name]));
-            CRUDBooster::redirect(CRUDBooster::adminPath(), cbLang('denied_access'));
+
+            return $this->redirectResponse(CRUDBooster::adminPath(), cbLang('denied_access'));
         }
 
-        $this->validation($id);
+        $validationResponse = $this->validationResponse($id, true);
+        if ($validationResponse) {
+            return $validationResponse;
+        }
+
         $this->input_assignment($id);
 
         if (Schema::hasColumn($this->table, 'updated_at')) {
@@ -1328,129 +1301,13 @@ class CBController extends Controller
         }
 
         $this->hook_before_edit($this->arr, $id);
-        DB::table($this->table)->where($this->primary_key, $id)->update($this->arr);
-
-        // Looping Data Input Again After Insert
-        foreach ($this->data_inputan as $ro) {
-            $name = $ro['name'] ?? null;
-            $type = $ro['type'] ?? null;
-            $rel_table = $ro['relationship_table'] ?? null;
-            $datatable_raw = $ro['datatable'] ?? null;
-
-            if (! $name || ! $type) {
-                continue;
-            }
-
-            $inputdata = request($name);
-
-            // Insert Data Checkbox if Type Datatable
-            if ($type == 'checkbox') {
-                if ($rel_table && $datatable_raw) {
-                    $datatable = explode(',', $datatable_raw)[0];
-
-                    $foreignKey2 = CRUDBooster::getForeignKey($datatable, $rel_table);
-                    $foreignKey = CRUDBooster::getForeignKey($this->table, $rel_table);
-                    DB::table($rel_table)->where($foreignKey, $id)->delete();
-
-                    if ($inputdata) {
-                        foreach ($inputdata as $input_id) {
-                            // $relationship_table_pk = CB::pk($rel_table);
-                            DB::table($rel_table)->insert([
-                                // $relationship_table_pk => CRUDBooster::newId($rel_table),
-                                $foreignKey => $id,
-                                $foreignKey2 => $input_id,
-                            ]);
-                        }
-                    }
-                }
-            }
-
-            if ($type == 'select2') {
-                $datatable_orig = $ro['datatable_orig'] ?? '';
-
-                if ($rel_table && $datatable_orig == '') {
-                    $datatable = explode(',', $datatable_raw ?? '')[0];
-
-                    if ($datatable) {
-                        $foreignKey2 = CRUDBooster::getForeignKey($datatable, $rel_table);
-                        $foreignKey = CRUDBooster::getForeignKey($this->table, $rel_table);
-                        DB::table($rel_table)->where($foreignKey, $id)->delete();
-
-                        if ($inputdata) {
-                            foreach ($inputdata as $input_id) {
-                                // $relationship_table_pk = CB::pk($rel_table);
-                                DB::table($rel_table)->insert([
-                                    // $relationship_table_pk => CRUDBooster::newId($rel_table),
-                                    $foreignKey => $id,
-                                    $foreignKey2 => $input_id,
-                                ]);
-                            }
-                        }
-                    }
-                }
-
-                if ($rel_table && $datatable_orig != '') {
-                    $params = explode('|', $datatable_orig);
-                    $params[2] = $params[2] ?? 'id';
-                    DB::table($params[0])->where($params[2], $id)->update([$params[1] => implode(',', (array) $inputdata)]);
-                }
-            }
-
-            if ($type == 'child') {
-                $label = $ro['label'] ?? '';
-                $name = str_slug($label, '');
-                $columns = $ro['columns'] ?? [];
-                $table_raw = $ro['table'] ?? null;
-                $fk = $ro['foreign_key'] ?? null;
-
-                if (! $table_raw || ! $fk || empty($columns)) {
-                    continue;
-                }
-
-                $first_col_name = $columns[0]['name'] ?? null;
-                $getColName = request($name.'-'.$first_col_name);
-
-                $count_input_data = (is_array($getColName)) ? (count($getColName) - 1) : -1;
-                $child_array = [];
-                $childtable = CRUDBooster::parseSqlTable($table_raw)['table'];
-
-                DB::table($childtable)->where($fk, $id)->delete();
-
-                if ($count_input_data >= 0) {
-                    $lastId = CRUDBooster::newId($childtable);
-                    $childtablePK = CB::pk($childtable);
-
-                    for ($i = 0; $i <= $count_input_data; $i++) {
-                        $column_data = [];
-                        foreach ($columns as $col) {
-                            $colname = $col['name'] ?? null;
-                            if (! $colname) {
-                                continue;
-                            }
-
-                            $req_data = request($name.'-'.$colname);
-                            $colvalue = $req_data[$i] ?? null;
-
-                            if (isset($colvalue)) {
-                                $column_data[$colname] = $colvalue;
-                            }
-                        }
-
-                        if (! empty($column_data)) {
-                            $column_data[$childtablePK] = $lastId;
-                            $column_data[$fk] = $id;
-                            $child_array[] = $column_data;
-                            $lastId++;
-                        }
-                    }
-                }
-
-                if (! empty($child_array)) {
-                    $child_array = array_reverse($child_array);
-                    DB::table($childtable)->insert($child_array);
-                }
-            }
-        }
+        app(UpdateRecordAction::class)->execute(
+            $this->table,
+            $this->primary_key,
+            $id,
+            $this->arr,
+            $this->data_inputan,
+        );
 
         $this->hook_after_edit($id);
 
@@ -1465,12 +1322,12 @@ class CBController extends Controller
         ]), LogController::displayDiff($old_values, $this->arr));
 
         if ($this->return_url) {
-            CRUDBooster::redirect($this->return_url, cbLang('alert_update_data_success'), 'success');
+            return $this->redirectResponse($this->return_url, cbLang('alert_update_data_success'), 'success');
         } else {
             if (request('submit') == cbLang('button_save_more')) {
-                CRUDBooster::redirect(CRUDBooster::mainpath('add'), cbLang('alert_update_data_success'), 'success');
+                return $this->redirectResponse(CRUDBooster::mainpath('add'), cbLang('alert_update_data_success'), 'success');
             } else {
-                CRUDBooster::redirect(CRUDBooster::mainpath(), cbLang('alert_update_data_success'), 'success');
+                return $this->redirectResponse(CRUDBooster::mainpath(), cbLang('alert_update_data_success'), 'success');
             }
         }
     }
@@ -1479,13 +1336,15 @@ class CBController extends Controller
     {
         $this->cbLoader();
         $row = DB::table($this->table)->where($this->primary_key, $id)->first();
+        abort_if(! $row, 404);
 
         if (! CRUDBooster::isDelete() && $this->global_privilege == false || $this->button_delete == false) {
             CRUDBooster::insertLog(cbLang('log_try_delete', [
                 'name' => $row->{$this->title_field},
                 'module' => CRUDBooster::getCurrentModule()->name,
             ]));
-            CRUDBooster::redirect(CRUDBooster::adminPath(), cbLang('denied_access'));
+
+            return $this->redirectResponse(CRUDBooster::adminPath(), cbLang('denied_access'));
         }
 
         // insert log
@@ -1493,17 +1352,34 @@ class CBController extends Controller
 
         $this->hook_before_delete($id);
 
-        if (CRUDBooster::isColumnExists($this->table, 'deleted_at')) {
-            DB::table($this->table)->where($this->primary_key, $id)->update(['deleted_at' => date('Y-m-d H:i:s')]);
-        } else {
-            DB::table($this->table)->where($this->primary_key, $id)->delete();
-        }
+        app(DeleteRecordsAction::class)->execute(
+            $this->table,
+            $this->primary_key,
+            $id,
+            CRUDBooster::isColumnExists($this->table, 'deleted_at'),
+        );
 
         $this->hook_after_delete($id);
 
         $url = g('return_url') ?: CRUDBooster::referer();
 
-        CRUDBooster::redirect($url, cbLang('alert_delete_data_success'), 'success');
+        return $this->redirectResponse($url, cbLang('alert_delete_data_success'), 'success');
+    }
+
+    private function redirectResponse(?string $url, string $message, string $type = 'warning'): JsonResponse|RedirectResponse
+    {
+        if (request()->ajax()) {
+            return response()->json([
+                'message' => $message,
+                'message_type' => $type,
+                'redirect_url' => $url,
+            ]);
+        }
+
+        return redirect($url)->with([
+            'message' => $message,
+            'message_type' => $type,
+        ]);
     }
 
     public function getDetail($id)
@@ -1658,14 +1534,20 @@ class CBController extends Controller
                 CRUDBooster::redirect(CRUDBooster::adminPath(), cbLang('denied_access'));
             }
 
-            $this->hook_before_delete($id_selected);
             $tablePK = CB::pk($this->table);
-            if (CRUDBooster::isColumnExists($this->table, 'deleted_at')) {
+            $selectedIds = array_values(array_unique((array) $id_selected, SORT_REGULAR));
+            abort_unless(
+                DB::table($this->table)->whereIn($tablePK, $selectedIds)->count() === count($selectedIds),
+                404
+            );
 
-                DB::table($this->table)->whereIn($tablePK, $id_selected)->update(['deleted_at' => date('Y-m-d H:i:s')]);
-            } else {
-                DB::table($this->table)->whereIn($tablePK, $id_selected)->delete();
-            }
+            $this->hook_before_delete($id_selected);
+            app(DeleteRecordsAction::class)->execute(
+                $this->table,
+                $tablePK,
+                $selectedIds,
+                CRUDBooster::isColumnExists($this->table, 'deleted_at'),
+            );
             CRUDBooster::insertLog(cbLang('log_delete', ['name' => implode(',', $id_selected), 'module' => CRUDBooster::getCurrentModule()->name]));
 
             $this->hook_after_delete($id_selected);

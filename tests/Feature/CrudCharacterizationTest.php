@@ -1,11 +1,13 @@
 <?php
 
 use App\Http\Controllers\CRUDBooster\TestCrudController;
+use App\Http\Controllers\CRUDBooster\TestCrudUuidController;
 use crocodicstudio\crudbooster\helpers\CRUDBooster;
 use crocodicstudio\crudbooster\imports\DefaultImportExcel;
 use crocodicstudio\crudbooster\middlewares\CBBackend;
 use crocodicstudio\crudbooster\uploads\DeleteUploadedFileAction;
 use crocodicstudio\crudbooster\uploads\UploadFileAction;
+use Illuminate\Database\QueryException;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Filesystem\FilesystemManager;
@@ -156,10 +158,25 @@ beforeEach(function (): void {
         $table->string('photo')->nullable();
         $table->timestamps();
     });
+    Schema::create('test_crud_uuid_records', function (Blueprint $table): void {
+        $table->string('id')->primary();
+        $table->string('name');
+        $table->timestamps();
+    });
     Schema::create('test_crud_notes', function (Blueprint $table): void {
         $table->id();
         $table->unsignedBigInteger('record_id');
         $table->string('body');
+    });
+    Schema::create('test_crud_categories', function (Blueprint $table): void {
+        $table->id();
+        $table->string('name');
+    });
+    Schema::create('test_crud_record_category', function (Blueprint $table): void {
+        $table->unsignedBigInteger('test_crud_records_id');
+        $table->unsignedBigInteger('test_crud_categories_id');
+        $table->foreign('test_crud_records_id')->references('id')->on('test_crud_records');
+        $table->foreign('test_crud_categories_id')->references('id')->on('test_crud_categories');
     });
 
     DB::table('cms_moduls')->insert([
@@ -169,6 +186,13 @@ beforeEach(function (): void {
         'table_name' => 'test_crud_records',
         'controller' => 'TestCrudController',
     ]);
+    DB::table('cms_moduls')->insert([
+        'name' => 'CRUD UUID Test',
+        'icon' => 'fa fa-cube',
+        'path' => 'crud-uuid-test',
+        'table_name' => 'test_crud_uuid_records',
+        'controller' => 'TestCrudUuidController',
+    ]);
 
     Route::group([
         'middleware' => ['web', CBBackend::class],
@@ -176,6 +200,7 @@ beforeEach(function (): void {
         'namespace' => 'App\Http\Controllers\CRUDBooster',
     ], function (): void {
         CRUDBooster::routeController('crud-test', class_basename(TestCrudController::class));
+        CRUDBooster::routeController('crud-uuid-test', class_basename(TestCrudUuidController::class));
     });
 });
 
@@ -266,7 +291,7 @@ it('renders add, edit, detail, and import views for a superadmin subclass contro
         ->and($add->name())->toBe('crudbooster::default.form')
         ->and($add->getData()['command'])->toBe('add')
         ->and(view()->shared('forms')[0]['name'])->toBe('name')
-        ->and(view()->shared('forms')[2]['type'])->toBe('child')
+        ->and(view()->shared('forms')[3]['type'])->toBe('child')
         ->and($edit)->toBeInstanceOf(View::class)
         ->and($edit->getData()['command'])->toBe('edit')
         ->and($edit->getData()['row']->name)->toBe('Existing')
@@ -1252,4 +1277,479 @@ it('rejects invalid login credentials without creating a session', function (): 
 it('redirects guests away from protected backend routes', function (): void {
     $this->get('/'.config('crudbooster.ADMIN_PATH').'/api_generator')
         ->assertRedirect('/'.config('crudbooster.ADMIN_PATH').'/login');
+});
+
+it('creates a parent record with pivot and child rows and preserves hook and redirect behavior', function (): void {
+    DB::table('test_crud_categories')->insert([
+        ['name' => 'First'],
+        ['name' => 'Second'],
+    ]);
+
+    $controller = new TestCrudController;
+    app()->instance(TestCrudController::class, $controller);
+
+    $response = $this->from('/admin/crud-test/add')
+        ->withSession(['admin_id' => 1, 'admin_is_superadmin' => true])
+        ->post(route('TestCrudControllerPostAddSave'), [
+            'name' => 'Parent record',
+            'status' => 'active',
+            'categories' => [1, 2],
+            'notes-body' => ['First note', 'Second note'],
+            'return_url' => '/admin/crud-test',
+        ]);
+
+    $response->assertRedirect('/admin/crud-test')
+        ->assertSessionHas('message_type', 'success');
+
+    $record = DB::table('test_crud_records')->where('name', 'Parent record')->first();
+
+    expect($record)->not->toBeNull()
+        ->and($record->status)->toBe('active')
+        ->and($record->created_at)->not->toBeNull()
+        ->and(DB::table('test_crud_record_category')->where('test_crud_records_id', $record->id)->pluck('test_crud_categories_id')->all())->toBe([1, 2])
+        ->and(DB::table('test_crud_notes')->where('record_id', $record->id)->orderBy('id')->pluck('body')->all())->toBe(['First note', 'Second note'])
+        ->and($controller->hookCalls)->toBe(['before_add', 'after_add']);
+});
+
+it('updates parent, pivot, and child rows without changing update hook ordering', function (): void {
+    DB::table('test_crud_categories')->insert([
+        ['name' => 'First'],
+        ['name' => 'Second'],
+    ]);
+    $recordId = DB::table('test_crud_records')->insertGetId([
+        'name' => 'Original record',
+        'status' => 'draft',
+        'created_at' => '2025-01-01 00:00:00',
+        'updated_at' => '2025-01-01 00:00:00',
+    ]);
+    DB::table('test_crud_record_category')->insert([
+        'test_crud_records_id' => $recordId,
+        'test_crud_categories_id' => 1,
+    ]);
+    DB::table('test_crud_notes')->insert([
+        'id' => 7,
+        'record_id' => $recordId,
+        'body' => 'Old note',
+    ]);
+
+    $controller = new TestCrudController;
+    app()->instance(TestCrudController::class, $controller);
+
+    $response = $this->from('/admin/crud-test/edit/'.$recordId)
+        ->withSession(['admin_id' => 1, 'admin_is_superadmin' => true])
+        ->post(route('TestCrudControllerPostEditSave', ['one' => $recordId]), [
+            'name' => 'Updated record',
+            'status' => 'published',
+            'categories' => [2],
+            'notes-body' => ['Replacement one', 'Replacement two'],
+            'return_url' => '/admin/crud-test',
+        ]);
+
+    $response->assertRedirect('/admin/crud-test')
+        ->assertSessionHas('message_type', 'success');
+
+    expect(DB::table('test_crud_records')->where('id', $recordId)->value('name'))->toBe('Updated record')
+        ->and(DB::table('test_crud_records')->where('id', $recordId)->value('updated_at'))->not->toBe('2025-01-01 00:00:00')
+        ->and(DB::table('test_crud_record_category')->where('test_crud_records_id', $recordId)->pluck('test_crud_categories_id')->all())->toBe([2])
+        ->and(DB::table('test_crud_notes')->where('record_id', $recordId)->orderBy('id')->pluck('body')->all())->toBe(['Replacement one', 'Replacement two'])
+        ->and(DB::table('test_crud_notes')->where('record_id', $recordId)->orderBy('id')->pluck('id')->all())->toBe([1, 2])
+        ->and($controller->hookCalls)->toBe(['before_edit', 'after_edit']);
+});
+
+it('deletes one record and preserves before/after delete hooks and the redirect', function (): void {
+    $recordId = DB::table('test_crud_records')->insertGetId([
+        'name' => 'Record to delete',
+        'status' => 'active',
+    ]);
+    $controller = new TestCrudController;
+    app()->instance(TestCrudController::class, $controller);
+
+    $response = $this->from('/admin/crud-test')
+        ->withSession(['admin_id' => 1, 'admin_is_superadmin' => true])
+        ->post(route('TestCrudControllerPostDelete', ['one' => $recordId]));
+
+    $response->assertRedirect('/admin/crud-test')
+        ->assertSessionHas('message_type', 'success');
+
+    expect(DB::table('test_crud_records')->where('id', $recordId)->exists())->toBeFalse()
+        ->and($controller->hookCalls)->toBe(['before_delete', 'after_delete']);
+});
+
+it('bulk deletes selected records and calls the delete hooks once with the selected IDs', function (): void {
+    $recordIds = [
+        DB::table('test_crud_records')->insertGetId(['name' => 'First record']),
+        DB::table('test_crud_records')->insertGetId(['name' => 'Second record']),
+    ];
+    $controller = new TestCrudController;
+    app()->instance(TestCrudController::class, $controller);
+
+    $response = $this->from('/admin/crud-test')
+        ->withSession(['admin_id' => 1, 'admin_is_superadmin' => true])
+        ->post(route('TestCrudControllerPostActionSelected'), [
+            'checkbox' => $recordIds,
+            'button_name' => 'delete',
+        ]);
+
+    $response->assertRedirect()
+        ->assertSessionHas('message_type', 'success');
+
+    expect(DB::table('test_crud_records')->whereIn('id', $recordIds)->exists())->toBeFalse()
+        ->and($controller->hookCalls)->toBe(['before_delete', 'after_delete']);
+});
+
+it('returns not found for missing update and delete IDs without changing records', function (): void {
+    $recordId = DB::table('test_crud_records')->insertGetId([
+        'name' => 'Untouched record',
+        'status' => 'active',
+    ]);
+
+    $this->withSession(['admin_id' => 1, 'admin_is_superadmin' => true])
+        ->post(route('TestCrudControllerPostEditSave', ['one' => 999]), [
+            'name' => 'Must not be created',
+            'status' => 'changed',
+        ])
+        ->assertNotFound();
+
+    $this->withSession(['admin_id' => 1, 'admin_is_superadmin' => true])
+        ->post(route('TestCrudControllerPostDelete', ['one' => 999]))
+        ->assertNotFound();
+
+    expect(DB::table('test_crud_records')->count())->toBe(1)
+        ->and(DB::table('test_crud_records')->where('id', $recordId)->value('name'))->toBe('Untouched record')
+        ->and(DB::table('test_crud_records')->where('id', $recordId)->value('status'))->toBe('active');
+});
+
+it('preserves UUID primary keys and passes the configured key to the after-add hook', function (): void {
+    $controller = new TestCrudUuidController;
+    app()->instance(TestCrudUuidController::class, $controller);
+
+    $response = $this->withSession(['admin_id' => 1, 'admin_is_superadmin' => true])
+        ->post(route('TestCrudUuidControllerPostAddSave'), [
+            'id' => 'record-uuid-1',
+            'name' => 'UUID record',
+            'return_url' => '/admin/crud-uuid-test',
+        ]);
+
+    $response->assertRedirect('/admin/crud-uuid-test')
+        ->assertSessionHas('message_type', 'success');
+
+    expect(DB::table('test_crud_uuid_records')->where('id', 'record-uuid-1')->value('name'))->toBe('UUID record')
+        ->and($controller->lastAfterAddId)->toBe('record-uuid-1')
+        ->and($controller->hookCalls)->toBe(['before_add', 'after_add']);
+});
+
+it('rolls back all create writes when a pivot insert fails', function (): void {
+    $controller = new TestCrudController;
+    app()->instance(TestCrudController::class, $controller);
+    $this->withoutExceptionHandling();
+
+    expect(fn () => $this->withSession(['admin_id' => 1, 'admin_is_superadmin' => true])
+        ->post(route('TestCrudControllerPostAddSave'), [
+            'name' => 'Parent record',
+            'status' => 'active',
+            'categories' => [999],
+            'notes-body' => ['Must roll back'],
+        ]))->toThrow(QueryException::class);
+
+    expect(DB::table('test_crud_records')->count())->toBe(0)
+        ->and(DB::table('test_crud_record_category')->count())->toBe(0)
+        ->and(DB::table('test_crud_notes')->count())->toBe(0)
+        ->and($controller->hookCalls)->toBe(['before_add']);
+});
+
+it('rolls back parent and pivot writes when child-row insertion fails', function (): void {
+    DB::table('test_crud_categories')->insert(['name' => 'Valid category']);
+    DB::unprepared("CREATE TRIGGER reject_test_crud_notes BEFORE INSERT ON test_crud_notes BEGIN SELECT RAISE(ABORT, 'notes rejected'); END");
+    $controller = new TestCrudController;
+    app()->instance(TestCrudController::class, $controller);
+    $this->withoutExceptionHandling();
+
+    expect(fn () => $this->withSession(['admin_id' => 1, 'admin_is_superadmin' => true])
+        ->post(route('TestCrudControllerPostAddSave'), [
+            'name' => 'Parent record',
+            'status' => 'active',
+            'categories' => [1],
+            'notes-body' => ['Rejected note'],
+        ]))->toThrow(QueryException::class);
+
+    expect(DB::table('test_crud_records')->count())->toBe(0)
+        ->and(DB::table('test_crud_record_category')->count())->toBe(0)
+        ->and(DB::table('test_crud_notes')->count())->toBe(0)
+        ->and($controller->hookCalls)->toBe(['before_add']);
+});
+
+it('rolls back create when the configured child table does not have the requested column', function (): void {
+    Schema::drop('test_crud_notes');
+    Schema::create('test_crud_notes', function (Blueprint $table): void {
+        $table->id();
+        $table->unsignedBigInteger('record_id');
+        $table->string('other_body');
+    });
+
+    $controller = new TestCrudController;
+    app()->instance(TestCrudController::class, $controller);
+    $this->withoutExceptionHandling();
+
+    expect(fn () => $this->withSession(['admin_id' => 1, 'admin_is_superadmin' => true])
+        ->post(route('TestCrudControllerPostAddSave'), [
+            'name' => 'Parent record',
+            'notes-body' => ['Invalid child column'],
+        ]))->toThrow(QueryException::class);
+
+    expect(DB::table('test_crud_records')->count())->toBe(0)
+        ->and(DB::table('test_crud_record_category')->count())->toBe(0)
+        ->and($controller->hookCalls)->toBe(['before_add']);
+});
+
+it('rolls back parent, pivot, and child changes when an update relation fails', function (): void {
+    DB::table('test_crud_categories')->insert(['name' => 'Existing category']);
+    $recordId = DB::table('test_crud_records')->insertGetId([
+        'name' => 'Original record',
+        'status' => 'draft',
+    ]);
+    DB::table('test_crud_record_category')->insert([
+        'test_crud_records_id' => $recordId,
+        'test_crud_categories_id' => 1,
+    ]);
+    DB::table('test_crud_notes')->insert([
+        'record_id' => $recordId,
+        'body' => 'Original note',
+    ]);
+
+    $controller = new TestCrudController;
+    app()->instance(TestCrudController::class, $controller);
+    $this->withoutExceptionHandling();
+
+    expect(fn () => $this->withSession(['admin_id' => 1, 'admin_is_superadmin' => true])
+        ->post(route('TestCrudControllerPostEditSave', ['one' => $recordId]), [
+            'name' => 'Changed record',
+            'status' => 'published',
+            'categories' => [999],
+            'notes-body' => ['Changed note'],
+        ]))->toThrow(QueryException::class);
+
+    expect(DB::table('test_crud_records')->where('id', $recordId)->value('name'))->toBe('Original record')
+        ->and(DB::table('test_crud_record_category')->where('test_crud_records_id', $recordId)->pluck('test_crud_categories_id')->all())->toBe([1])
+        ->and(DB::table('test_crud_notes')->where('record_id', $recordId)->pluck('body')->all())->toBe(['Original note'])
+        ->and($controller->hookCalls)->toBe(['before_edit']);
+});
+
+it('restores existing child rows and parent data when a child replacement fails', function (): void {
+    DB::table('test_crud_categories')->insert(['name' => 'Existing category']);
+    $recordId = DB::table('test_crud_records')->insertGetId([
+        'name' => 'Original record',
+        'status' => 'draft',
+    ]);
+    DB::table('test_crud_record_category')->insert([
+        'test_crud_records_id' => $recordId,
+        'test_crud_categories_id' => 1,
+    ]);
+    DB::table('test_crud_notes')->insert([
+        'record_id' => $recordId,
+        'body' => 'Original note',
+    ]);
+    DB::unprepared("CREATE TRIGGER reject_test_crud_notes BEFORE INSERT ON test_crud_notes BEGIN SELECT RAISE(ABORT, 'notes rejected'); END");
+
+    $controller = new TestCrudController;
+    app()->instance(TestCrudController::class, $controller);
+    $this->withoutExceptionHandling();
+
+    expect(fn () => $this->withSession(['admin_id' => 1, 'admin_is_superadmin' => true])
+        ->post(route('TestCrudControllerPostEditSave', ['one' => $recordId]), [
+            'name' => 'Changed record',
+            'status' => 'published',
+            'categories' => [1],
+            'notes-body' => ['Replacement note'],
+        ]))->toThrow(QueryException::class);
+
+    expect(DB::table('test_crud_records')->where('id', $recordId)->value('name'))->toBe('Original record')
+        ->and(DB::table('test_crud_record_category')->where('test_crud_records_id', $recordId)->pluck('test_crud_categories_id')->all())->toBe([1])
+        ->and(DB::table('test_crud_notes')->where('record_id', $recordId)->pluck('body')->all())->toBe(['Original note'])
+        ->and($controller->hookCalls)->toBe(['before_edit']);
+});
+
+it('does not bulk-delete any rows when one selected ID is invalid', function (): void {
+    $recordId = DB::table('test_crud_records')->insertGetId(['name' => 'Keep this record']);
+    $controller = new TestCrudController;
+    app()->instance(TestCrudController::class, $controller);
+
+    $this->withSession(['admin_id' => 1, 'admin_is_superadmin' => true])
+        ->post(route('TestCrudControllerPostActionSelected'), [
+            'checkbox' => [$recordId, 999],
+            'button_name' => 'delete',
+        ])
+        ->assertNotFound();
+
+    expect(DB::table('test_crud_records')->where('id', $recordId)->exists())->toBeTrue()
+        ->and($controller->hookCalls)->toBe([]);
+});
+
+it('dispatches custom bulk actions with the original selected IDs and button name', function (): void {
+    $recordIds = [
+        DB::table('test_crud_records')->insertGetId(['name' => 'First selected']),
+        DB::table('test_crud_records')->insertGetId(['name' => 'Second selected']),
+    ];
+    $controller = new TestCrudController;
+    app()->instance(TestCrudController::class, $controller);
+
+    $this->from('/admin/crud-test')
+        ->withSession(['admin_id' => 1, 'admin_is_superadmin' => true])
+        ->post(route('TestCrudControllerPostActionSelected'), [
+            'checkbox' => $recordIds,
+            'button_name' => 'mark-reviewed',
+        ])
+        ->assertRedirect()
+        ->assertSessionHas('message_type', 'success');
+
+    expect($controller->selectedActionCalls)->toBe([[$recordIds, 'mark-reviewed']])
+        ->and(DB::table('test_crud_records')->whereIn('id', $recordIds)->count())->toBe(2);
+});
+
+it('clears pivot and child rows when an update omits their inputs', function (): void {
+    DB::table('test_crud_categories')->insert(['name' => 'Existing category']);
+    $recordId = DB::table('test_crud_records')->insertGetId([
+        'name' => 'Record with relations',
+        'status' => 'active',
+    ]);
+    DB::table('test_crud_record_category')->insert([
+        'test_crud_records_id' => $recordId,
+        'test_crud_categories_id' => 1,
+    ]);
+    DB::table('test_crud_notes')->insert([
+        'record_id' => $recordId,
+        'body' => 'Existing note',
+    ]);
+
+    $this->withSession(['admin_id' => 1, 'admin_is_superadmin' => true])
+        ->post(route('TestCrudControllerPostEditSave', ['one' => $recordId]), [
+            'name' => 'Record with cleared relations',
+            'status' => 'active',
+        ])
+        ->assertRedirect();
+
+    expect(DB::table('test_crud_record_category')->where('test_crud_records_id', $recordId)->count())->toBe(0)
+        ->and(DB::table('test_crud_notes')->where('record_id', $recordId)->count())->toBe(0);
+});
+
+it('soft-deletes records when the configured table has a deleted-at column', function (): void {
+    Schema::table('test_crud_records', function (Blueprint $table): void {
+        $table->timestamp('deleted_at')->nullable();
+    });
+    $recordId = DB::table('test_crud_records')->insertGetId(['name' => 'Soft delete record']);
+
+    $this->from('/admin/crud-test')
+        ->withSession(['admin_id' => 1, 'admin_is_superadmin' => true])
+        ->post(route('TestCrudControllerPostDelete', ['one' => $recordId]))
+        ->assertRedirect('/admin/crud-test')
+        ->assertSessionHas('message_type', 'success');
+
+    expect(DB::table('test_crud_records')->where('id', $recordId)->exists())->toBeTrue()
+        ->and(DB::table('test_crud_records')->where('id', $recordId)->value('deleted_at'))->not->toBeNull();
+});
+
+it('does not persist or invoke hooks when create validation fails', function (): void {
+    $controller = new TestCrudController;
+    app()->instance(TestCrudController::class, $controller);
+
+    foreach ([['status' => 'active'], ['name' => '', 'status' => 'active']] as $input) {
+        $this->from('/admin/crud-test/add')
+            ->withSession(['admin_id' => 1, 'admin_is_superadmin' => true])
+            ->post(route('TestCrudControllerPostAddSave'), $input)
+            ->assertRedirect()
+            ->assertSessionHas('message_type', 'warning');
+    }
+
+    expect(DB::table('test_crud_records')->count())->toBe(0)
+        ->and($controller->hookCalls)->toBe([]);
+});
+
+it('does not persist or invoke hooks when create permission is denied', function (): void {
+    $controller = new TestCrudController;
+    app()->instance(TestCrudController::class, $controller);
+
+    $this->withSession([
+        'admin_id' => 1,
+        'admin_is_superadmin' => false,
+        'admin_privileges_roles' => [],
+    ])->post(route('TestCrudControllerPostAddSave'), [
+        'name' => 'Denied record',
+        'status' => 'active',
+    ])->assertRedirect('/admin');
+
+    expect(DB::table('test_crud_records')->count())->toBe(0)
+        ->and($controller->hookCalls)->toBe([]);
+});
+
+it('does not update or delete records when write permissions are denied', function (): void {
+    $recordId = DB::table('test_crud_records')->insertGetId([
+        'name' => 'Protected record',
+        'status' => 'original',
+    ]);
+    $controller = new TestCrudController;
+    app()->instance(TestCrudController::class, $controller);
+    $session = [
+        'admin_id' => 1,
+        'admin_is_superadmin' => false,
+        'admin_privileges_roles' => [],
+    ];
+
+    $this->withSession($session)
+        ->post(route('TestCrudControllerPostEditSave', ['one' => $recordId]), [
+            'name' => 'Unauthorized update',
+            'status' => 'changed',
+        ])
+        ->assertRedirect('/admin');
+
+    $this->withSession($session)
+        ->post(route('TestCrudControllerPostDelete', ['one' => $recordId]))
+        ->assertRedirect('/admin');
+
+    expect(DB::table('test_crud_records')->where('id', $recordId)->value('name'))->toBe('Protected record')
+        ->and(DB::table('test_crud_records')->where('id', $recordId)->value('status'))->toBe('original')
+        ->and(DB::table('test_crud_records')->where('id', $recordId)->exists())->toBeTrue()
+        ->and($controller->hookCalls)->toBe([]);
+});
+
+it('writes the CRUD log after a successful create when debug logging is enabled', function (): void {
+    DB::table('cms_settings')->insert([
+        'name' => 'api_debug_mode',
+        'content' => '1',
+    ]);
+    $server = $_SERVER;
+    $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+    $_SERVER['HTTP_USER_AGENT'] = 'CRUD characterization test';
+
+    try {
+        $this->withSession(['admin_id' => 1, 'admin_is_superadmin' => true])
+            ->post(route('TestCrudControllerPostAddSave'), [
+                'name' => 'Logged record',
+                'status' => 'active',
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('message_type', 'success');
+    } finally {
+        $_SERVER = $server;
+    }
+
+    expect(DB::table('cms_logs')->count())->toBe(1)
+        ->and(DB::table('cms_logs')->value('description'))->toBe(cbLang('log_add', [
+            'name' => 'Logged record',
+            'module' => 'CRUD Test',
+        ]));
+});
+
+it('returns the legacy JSON redirect payload for AJAX CRUD writes', function (): void {
+    $response = $this->withHeaders(['X-Requested-With' => 'XMLHttpRequest'])
+        ->withSession(['admin_id' => 1, 'admin_is_superadmin' => true])
+        ->post(route('TestCrudControllerPostAddSave'), [
+            'name' => 'AJAX record',
+            'status' => 'active',
+            'return_url' => '/admin/crud-test',
+        ]);
+
+    $response->assertOk()
+        ->assertJson([
+            'message_type' => 'success',
+            'redirect_url' => '/admin/crud-test',
+        ]);
 });

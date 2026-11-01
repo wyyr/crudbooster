@@ -51,6 +51,16 @@ abstract class TestCase extends OrchestraTestCase
             $table->string('name');
             $table->text('content')->nullable();
         });
+        Schema::connection('testing')->create('cms_logs', function (Blueprint $table): void {
+            $table->increments('id');
+            $table->string('ipaddress', 50)->nullable();
+            $table->string('useragent')->nullable();
+            $table->string('url')->nullable();
+            $table->string('description')->nullable();
+            $table->text('details')->nullable();
+            $table->integer('id_cms_users')->nullable();
+            $table->timestamps();
+        });
         Schema::connection('testing')->create('cms_email_templates', function (Blueprint $table): void {
             $table->id();
             $table->string('slug');
