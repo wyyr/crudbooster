@@ -292,12 +292,51 @@ it('rejects relation data tables that are not configured by the controller', fun
         ->assertNotFound();
 });
 
+it('rejects relation data requests that do not match a configured field definition', function (): void {
+    $this->withoutMiddleware()
+        ->withSession(['admin_is_superadmin' => true])
+        ->get(route('TestRelationControllerGetDataTable').'?'.http_build_query([
+            'table' => 'test_related_records',
+            'label' => 'label',
+            'fk_name' => 'category_id',
+            'fk_value' => 5,
+        ]))
+        ->assertNotFound();
+});
+
+it('rejects relation requests with non-scalar configuration selectors', function (): void {
+    $this->withoutMiddleware()
+        ->withSession(['admin_is_superadmin' => true])
+        ->get(route('TestRelationControllerGetDataTable').'?'.http_build_query([
+            'table' => ['test_related_records'],
+            'label' => 'label',
+            'fk_name' => 'parent_id',
+            'fk_value' => 5,
+        ]))
+        ->assertNotFound();
+
+    $this->withoutMiddleware()
+        ->withSession(['admin_is_superadmin' => true])
+        ->get(route('TestRelationControllerGetModalData').'?'.http_build_query([
+            'table' => 'test_related_records',
+            'columns' => ['id', 'label'],
+            'name_column' => 'childrenrelated_record_modal_id',
+        ]))
+        ->assertNotFound();
+});
+
 it('uses configured datamodal columns, filters and display metadata', function (): void {
     DB::table('test_related_records')->insert([
         'parent_id' => 5,
         'category_id' => 9,
         'label' => '<script>alert(1)</script>Configured result',
         'active' => true,
+    ]);
+    DB::table('test_related_records')->insert([
+        'parent_id' => 5,
+        'category_id' => 9,
+        'label' => 'Inactive result',
+        'active' => false,
     ]);
 
     $response = $this->withoutMiddleware()
@@ -317,7 +356,62 @@ it('uses configured datamodal columns, filters and display metadata', function (
         ->toContain('Label')
         ->toContain('alert(1)Configured result')
         ->not->toContain('<script>alert(1)</script>')
-        ->not->toContain('Attacker');
+        ->not->toContain('Attacker')
+        ->not->toContain('Inactive result');
+});
+
+it('uses configured datamodal pagination instead of a client override', function (): void {
+    foreach (range(1, 11) as $number) {
+        DB::table('test_related_records')->insert([
+            'parent_id' => 5,
+            'category_id' => 9,
+            'label' => sprintf('Record %02d', $number),
+            'active' => true,
+        ]);
+    }
+
+    $this->withoutMiddleware()
+        ->withSession(['admin_is_superadmin' => true])
+        ->get(route('TestRelationControllerGetModalData').'?'.http_build_query([
+            'table' => 'test_related_records',
+            'columns' => 'id,label,category_id',
+            'name_column' => 'childrenrelated_record_modal_id',
+            'paginate' => 1,
+            'page' => 2,
+        ]))
+        ->assertOk()
+        ->assertSeeText('Record 01')
+        ->assertDontSeeText('Record 11');
+});
+
+it('rejects datamodal columns that do not match the configured order', function (): void {
+    $this->withoutMiddleware()
+        ->withSession(['admin_is_superadmin' => true])
+        ->get(route('TestRelationControllerGetModalData').'?'.http_build_query([
+            'table' => 'test_related_records',
+            'columns' => 'id,category_id,label',
+            'name_column' => 'childrenrelated_record_modal_id',
+        ]))
+        ->assertNotFound();
+});
+
+it('normalizes whitespace when matching configured datamodal columns', function (): void {
+    DB::table('test_related_records')->insert([
+        'parent_id' => 5,
+        'category_id' => 9,
+        'label' => 'Whitespace match',
+        'active' => true,
+    ]);
+
+    $this->withoutMiddleware()
+        ->withSession(['admin_is_superadmin' => true])
+        ->get(route('TestRelationControllerGetModalData').'?'.http_build_query([
+            'table' => 'test_related_records',
+            'columns' => 'id, label, category_id',
+            'name_column' => 'childrenrelated_record_modal_id',
+        ]))
+        ->assertOk()
+        ->assertSeeText('Whitespace match');
 });
 
 it('denies relation data access to non-superadmins without module permissions', function (): void {

@@ -8,6 +8,7 @@ use crocodicstudio\crudbooster\export\DefaultExportXls;
 use crocodicstudio\crudbooster\helpers\CB;
 use crocodicstudio\crudbooster\helpers\CRUDBooster;
 use crocodicstudio\crudbooster\imports\DefaultImportExcel;
+use crocodicstudio\crudbooster\relations\RelationConfigurationResolver;
 use Exception;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
@@ -699,7 +700,8 @@ class CBController extends Controller
             abort(404);
         }
 
-        $definition = $this->findConfiguredDataTable($table, $label, $foreign_key_name);
+        $definition = (new RelationConfigurationResolver($this->form ?? []))
+            ->findDataTable($table, $label, $foreign_key_name);
         if (! $definition) {
             abort(404);
         }
@@ -741,7 +743,8 @@ class CBController extends Controller
             abort(404);
         }
 
-        $definition = $this->findConfiguredDataModal($requestedTable, $requestedColumns);
+        $definition = (new RelationConfigurationResolver($this->form ?? []))
+            ->findDataModal($requestedTable, $requestedColumns);
         if (! $definition) {
             abort(404);
         }
@@ -801,72 +804,6 @@ class CBController extends Controller
             || $privilege->is_create
             || $privilege->is_edit
         ), 403, cbLang('denied_access'));
-    }
-
-    private function getConfiguredFields(): array
-    {
-        return $this->collectConfiguredFields($this->form ?? []);
-    }
-
-    private function collectConfiguredFields(array $fields): array
-    {
-        $configuredFields = [];
-
-        foreach ($fields as $field) {
-            if (! is_array($field)) {
-                continue;
-            }
-
-            $configuredFields[] = $field;
-            if (is_array($field['columns'] ?? null)) {
-                $configuredFields = array_merge($configuredFields, $this->collectConfiguredFields($field['columns']));
-            }
-        }
-
-        return $configuredFields;
-    }
-
-    private function findConfiguredDataTable(string $table, string $label, string $foreignKey): ?array
-    {
-        foreach ($this->getConfiguredFields() as $field) {
-            if (empty($field['datatable']) || empty($field['parent_select'])) {
-                continue;
-            }
-
-            $datatable = array_map('trim', explode(',', $field['datatable']));
-            $parentSelect = array_map('trim', explode(',', $field['parent_select']));
-
-            if (
-                count($datatable) >= 2
-                && $datatable[0] === $table
-                && $datatable[1] === $label
-                && ($parentSelect[0] ?? null) === $foreignKey
-            ) {
-                return $field;
-            }
-        }
-
-        return null;
-    }
-
-    private function findConfiguredDataModal(string $table, string $columns): ?array
-    {
-        $requestedColumns = array_map('trim', explode(',', $columns));
-
-        foreach ($this->getConfiguredFields() as $field) {
-            if (empty($field['datamodal_table']) || empty($field['datamodal_columns'])) {
-                continue;
-            }
-
-            $configuredColumns = array_map('trim', explode(',', $field['datamodal_columns']));
-            $expectedColumns = array_merge(['id'], $configuredColumns);
-
-            if ($field['datamodal_table'] === $table && $requestedColumns === $expectedColumns) {
-                return $field;
-            }
-        }
-
-        return null;
     }
 
     public function getFindData()
