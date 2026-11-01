@@ -7,9 +7,8 @@ error_reporting(E_ALL ^ E_NOTICE);
 use crocodicstudio\crudbooster\export\DefaultExportXls;
 use crocodicstudio\crudbooster\helpers\CB;
 use crocodicstudio\crudbooster\helpers\CRUDBooster;
-use crocodicstudio\crudbooster\imports\DefaultImportExcel;
+use crocodicstudio\crudbooster\imports\ImportWorkflow;
 use crocodicstudio\crudbooster\relations\RelationConfigurationResolver;
-use Exception;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -1557,33 +1556,15 @@ class CBController extends Controller
         $data['page_title'] = 'Import Data';
 
         if (request('file') && ! request('import')) {
-            $file = base64_decode(request('file'));
-            $file = storage_path('app/'.$file);
-            $import = new DefaultImportExcel;
-            Excel::import($import, $file);
-
-            $countRows = array_sum(array_map('count', $import->sheetData));
-
-            Session::put('total_data_import', $countRows);
-
-            $data_import_column = [];
-            foreach ($import->sheetData as $rows) {
-                foreach ($rows as $value) {
-                    $a = [];
-                    foreach ($value as $k => $v) {
-                        $a[] = $k;
-                    }
-                    if ($a && count($a)) {
-                        $data_import_column = $a;
-                    }
-                    break;
-                }
+            $workflow = app(ImportWorkflow::class);
+            $filePath = $workflow->resolveFilePath(request('file'));
+            if ($filePath === null) {
+                abort(404);
             }
 
-            $table_columns = DB::getSchemaBuilder()->getColumnListing($this->table);
-
-            $data['table_columns'] = $table_columns;
-            $data['data_import_column'] = $data_import_column;
+            $preview = $workflow->preview($filePath, $this->table);
+            Session::put('total_data_import', $preview['total_data_import']);
+            $data = array_merge($data, $preview);
         }
 
         return view('crudbooster::import', $data);
@@ -1602,125 +1583,36 @@ class CBController extends Controller
     public function postDoImportChunk()
     {
         $this->cbLoader();
-        $file_md5 = md5(request('file'));
+        $fileToken = request('file');
+        if (! is_string($fileToken) || $fileToken === '') {
+            return response()->json(['status' => false, 'message' => 'The import file is invalid.'], 422);
+        }
+
+        $fileMd5 = md5($fileToken);
 
         if (request('file') && request('resume') == 1) {
-            $total = Session::get('total_data_import');
-            $prog = intval(Cache::get('success_'.$file_md5)) / $total * 100;
-            $prog = round($prog, 2);
+            $total = (int) Session::get('total_data_import', 0);
+            $processed = (int) Cache::get('processed_'.$fileMd5, 0);
+            $prog = $total > 0 ? round(min($processed / $total * 100, 100), 2) : 100;
             if ($prog >= 100) {
-                Cache::forget('success_'.$file_md5);
+                Cache::forget('success_'.$fileMd5);
+                Cache::forget('processed_'.$fileMd5);
             }
 
-            return response()->json(['progress' => $prog, 'last_error' => Cache::get('error_'.$file_md5)]);
+            return response()->json(['progress' => $prog, 'last_error' => Cache::get('error_'.$fileMd5)]);
         }
 
-        $select_column = Session::get('select_column');
-        $select_column = array_filter($select_column);
-        $table_columns = DB::getSchemaBuilder()->getColumnListing($this->table);
-
-        $file = base64_decode(request('file'));
-        $file = storage_path('app/'.$file);
-
-        $import = new DefaultImportExcel;
-        Excel::import($import, $file);
-
-        $has_created_at = false;
-        if (CRUDBooster::isColumnExists($this->table, 'created_at')) {
-            $has_created_at = true;
+        $workflow = app(ImportWorkflow::class);
+        $filePath = $workflow->resolveFilePath($fileToken);
+        if ($filePath === null) {
+            return response()->json(['status' => false, 'message' => 'The import file is invalid.'], 422);
         }
 
-        $has_password = false;
-        if (CRUDBooster::isColumnExists($this->table, 'password')) {
-            $has_password = true;
-        }
-
-        foreach ($import->sheetData as $rows) {
-            foreach ($rows as $value) {
-                $a = [];
-                foreach ($select_column as $sk => $s) {
-                    $colname = $table_columns[$sk];
-
-                    if (CRUDBooster::isForeignKey($colname)) {
-
-                        // Skip if value is empty
-                        if ($value[$s] == '') {
-                            continue;
-                        }
-
-                        if (intval($value[$s])) {
-                            $a[$colname] = $value[$s];
-                        } else {
-                            $relation_table = CRUDBooster::getTableForeignKey($colname);
-                            $relation_moduls = DB::table('cms_moduls')->where('table_name', $relation_table)->first();
-
-                            $relation_class = __NAMESPACE__.'\\'.$relation_moduls->controller;
-                            if (! class_exists($relation_class)) {
-                                $relation_class = '\App\Http\Controllers\CRUDBooster\\'.$relation_moduls->controller;
-                            }
-                            $relation_class = new $relation_class;
-                            $relation_class->cbLoader();
-
-                            $title_field = $relation_class->title_field;
-
-                            $relation_insert_data = [];
-                            $relation_insert_data[$title_field] = $value[$s];
-
-                            if (CRUDBooster::isColumnExists($relation_table, 'created_at')) {
-                                $relation_insert_data['created_at'] = date('Y-m-d H:i:s');
-                            }
-
-                            try {
-                                $relation_exists = DB::table($relation_table)->where($title_field, $value[$s])->first();
-                                if ($relation_exists) {
-                                    $relation_primary_key = $relation_class->primary_key;
-                                    $relation_id = $relation_exists->$relation_primary_key;
-                                } else {
-                                    $relation_id = DB::table($relation_table)->insertGetId($relation_insert_data);
-                                }
-
-                                $a[$colname] = $relation_id;
-                            } catch (Exception $e) {
-                                exit($e);
-                            }
-                        } // END IS INT
-
-                    } else {
-                        $a[$colname] = $value[$s];
-                    }
-                }
-
-                $has_title_field = true;
-                foreach ($a as $k => $v) {
-                    if ($k == $this->title_field && $v == '') {
-                        $has_title_field = false;
-                        break;
-                    }
-                }
-
-                if ($has_title_field == false) {
-                    continue;
-                }
-
-                try {
-                    // remove spaces
-                    $a = array_map('trim', $a);
-
-                    if ($has_created_at) {
-                        $a['created_at'] = date('Y-m-d H:i:s');
-                    }
-
-                    if ($has_password && $a['password'] != '') {
-                        $a['password'] = bcrypt($a['password']);
-                    }
-
-                    DB::table($this->table)->insert($a);
-                    Cache::increment('success_'.$file_md5);
-                } catch (Exception $e) {
-                    $e = (string) $e;
-                    Cache::put('error_'.$file_md5, $e, 500);
-                }
-            }
+        $selectedColumns = Session::get('select_column');
+        $selectedColumns = is_array($selectedColumns) ? array_filter($selectedColumns) : [];
+        $error = $workflow->import($filePath, $this->table, $this->title_field, $selectedColumns, $fileMd5);
+        if ($error !== null) {
+            return response()->json(['status' => false, 'message' => $error], 422);
         }
 
         return response()->json(['status' => true]);

@@ -5,6 +5,7 @@ namespace Tests;
 use crocodicstudio\crudbooster\CRUDBoosterServiceProvider;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Maatwebsite\Excel\ExcelServiceProvider;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 
 abstract class TestCase extends OrchestraTestCase
@@ -13,6 +14,7 @@ abstract class TestCase extends OrchestraTestCase
     {
         return [
             CRUDBoosterServiceProvider::class,
+            ExcelServiceProvider::class,
         ];
     }
 
@@ -72,10 +74,10 @@ abstract class TestCase extends OrchestraTestCase
         });
         Schema::connection('testing')->create('test_related_records', function (Blueprint $table): void {
             $table->id();
-            $table->unsignedBigInteger('parent_id');
-            $table->unsignedBigInteger('category_id');
+            $table->unsignedBigInteger('parent_id')->nullable();
+            $table->unsignedBigInteger('category_id')->nullable();
             $table->string('label');
-            $table->boolean('active');
+            $table->boolean('active')->nullable();
         });
     }
 }

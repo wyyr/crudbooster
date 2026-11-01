@@ -1094,6 +1094,7 @@ class CRUDBooster
 
     public static function isForeignKey($fieldName)
     {
+        $table = null;
         if (substr($fieldName, 0, 3) == 'id_') {
             $table = substr($fieldName, 3);
         } elseif (substr($fieldName, -3) == '_id') {

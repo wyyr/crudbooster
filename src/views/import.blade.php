@@ -49,33 +49,50 @@
                     <script type="text/javascript">
                         $(function () {
                             var total = {{ intval(Session::get('total_data_import')) }};
+                            var progressUrl = "{{ CRUDBooster::mainpath('do-import-chunk?file='.Request::get('file')) }}";
+                            var importUrl = "{{ CRUDBooster::mainpath('do-import-chunk').'?file='.Request::get('file') }}";
+                            var showImportFailure = function (xhr) {
+                                var message = xhr.responseJSON && xhr.responseJSON.message
+                                    ? xhr.responseJSON.message
+                                    : 'Import failed. Please review the file and try again.';
+                                $('#status-import').removeClass('text-success').addClass('text-danger').text(message);
+                                $('#upload-footer').show();
+                                clearInterval(int_prog);
+                            };
+                            var finishImport = function (resp) {
+                                $('#progress-import').css('width', '100%');
+                                $('#progress-import').attr('aria-valuenow', 100);
+                                if (resp.last_error) {
+                                    $('#status-import').removeClass('text-success').addClass('text-danger')
+                                        .text('Import completed with row errors: ' + resp.last_error);
+                                } else {
+                                    $('#status-import').removeClass('text-danger').addClass('text-success')
+                                        .html("<i class='fa fa-check-square-o'></i> Import Data Completed !");
+                                }
+                                clearInterval(int_prog);
+                                $('#upload-footer').show();
+                            };
 
                             var int_prog = setInterval(function () {
-
-                                $.post("{{ CRUDBooster::mainpath('do-import-chunk?file='.Request::get('file')) }}", {resume: 1}, function (resp) {
+                                $.post(progressUrl, {resume: 1}, function (resp) {
                                     console.log(resp.progress);
                                     $('#progress-import').css('width', resp.progress + '%');
                                     $('#status-import').html("<i class='fa fa-spin fa-spinner'></i> Please wait importing... (" + resp.progress + "%)");
                                     $('#progress-import').attr('aria-valuenow', resp.progress);
                                     if (resp.progress >= 100) {
-                                        $('#status-import').addClass('text-success').html("<i class='fa fa-check-square-o'></i> Import Data Completed !");
-                                        clearInterval(int_prog);
+                                        finishImport(resp);
                                     }
-                                })
-
+                                }).fail(showImportFailure);
 
                             }, 2500);
 
-                            $.post("{{ CRUDBooster::mainpath('do-import-chunk').'?file='.Request::get('file') }}", function (resp) {
-                                if (resp.status == true) {
-                                    $('#progress-import').css('width', '100%');
-                                    $('#progress-import').attr('aria-valuenow', 100);
-                                    $('#status-import').addClass('text-success').html("<i class='fa fa-check-square-o'></i> Import Data Completed !");
-                                    clearInterval(int_prog);
-                                    $('#upload-footer').show();
-                                    console.log('Import Success');
+                            $.post(importUrl).done(function (resp) {
+                                if (resp.status === true) {
+                                    $.post(progressUrl, {resume: 1}).done(finishImport).fail(showImportFailure);
+                                } else {
+                                    showImportFailure({responseJSON: resp});
                                 }
-                            })
+                            }).fail(showImportFailure);
 
                         })
 

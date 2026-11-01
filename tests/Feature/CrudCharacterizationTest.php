@@ -2,17 +2,22 @@
 
 use App\Http\Controllers\CRUDBooster\TestCrudController;
 use crocodicstudio\crudbooster\helpers\CRUDBooster;
+use crocodicstudio\crudbooster\imports\DefaultImportExcel;
+use crocodicstudio\crudbooster\middlewares\CBBackend;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Routing\Route as RoutingRoute;
 use Illuminate\Routing\Router;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 function bindCrudRequest(string $uri, string $method = 'GET', array $input = []): void
@@ -37,6 +42,56 @@ function bindCrudAction(string $uri, string $action, string $method = 'GET'): vo
 
     $currentRoute = new ReflectionProperty(Router::class, 'current');
     $currentRoute->setValue(app('router'), $route);
+}
+
+/**
+ * @param  array<int, string>  $headers
+ * @param  array<int, array<int, string>>  $rows
+ * @param  array<int, string>  $mapping
+ * @return array{0: string, 1: string}
+ */
+function prepareImportCsv(array $headers, array $rows, array $mapping): array
+{
+    $temporaryStoragePath = sys_get_temp_dir().DIRECTORY_SEPARATOR.'crudbooster-import-'.bin2hex(random_bytes(8));
+    app()->useStoragePath($temporaryStoragePath);
+    config(['filesystems.disks.local.root' => storage_path('app/private')]);
+    Storage::forgetDisk('local');
+
+    $relativeFilePath = 'uploads/import/records.csv';
+    $absoluteFilePath = Storage::disk('local')->path($relativeFilePath);
+    File::ensureDirectoryExists(dirname($absoluteFilePath));
+    $handle = fopen($absoluteFilePath, 'wb');
+    fputcsv($handle, $headers);
+    foreach ($rows as $row) {
+        fputcsv($handle, $row);
+    }
+    fclose($handle);
+
+    $file = base64_encode($relativeFilePath);
+    bindCrudAction('/admin/crud-test/import-data?file='.$file, TestCrudController::class.'@getImportData');
+    $preview = app(TestCrudController::class)->getImportData();
+
+    expect($preview)->toBeInstanceOf(View::class)
+        ->and($preview->name())->toBe('crudbooster::import')
+        ->and($preview->getData()['data_import_column'])->toBe(array_map(
+            static fn (string $header): string => Str::snake($header),
+            $headers,
+        ))
+        ->and(Session::get('total_data_import'))->toBe(count($rows));
+
+    bindCrudAction(
+        '/admin/crud-test/done-import?file='.$file.'&import=1',
+        TestCrudController::class.'@postDoneImport',
+        'POST',
+    );
+    request()->merge(['select_column' => $mapping]);
+    $mappedView = app(TestCrudController::class)->postDoneImport();
+
+    expect($mappedView)->toBeInstanceOf(View::class)
+        ->and($mappedView->name())->toBe('crudbooster::import')
+        ->and(Session::get('select_column'))->toBe($mapping);
+
+    return [$temporaryStoragePath, $file];
 }
 
 beforeEach(function (): void {
@@ -93,6 +148,7 @@ beforeEach(function (): void {
     ]);
 
     Route::group([
+        'middleware' => ['web', CBBackend::class],
         'prefix' => config('crudbooster.ADMIN_PATH'),
         'namespace' => 'App\Http\Controllers\CRUDBooster',
     ], function (): void {
@@ -125,7 +181,30 @@ it('registers the CRUD module dynamic routes with expected names, verbs, and URI
             ->and($route->uri())->toBe($uri);
     }
 
+    expect(Route::getRoutes()->getByName('TestCrudControllerGetImportData')->gatherMiddleware())
+        ->toContain('web', CBBackend::class)
+        ->and(Route::getRoutes()->getByName('TestCrudControllerPostDoImportChunk')->gatherMiddleware())
+        ->toContain('web', CBBackend::class);
+
     expect(Route::has('TestCrudControllerGetDelete'))->toBeFalse();
+});
+
+it('requires a backend session for import workflow routes', function (): void {
+    $this->get(route('TestCrudControllerGetImportData'))
+        ->assertRedirect('/'.config('crudbooster.ADMIN_PATH').'/login');
+
+    $this->post(route('TestCrudControllerPostDoImportChunk'), ['file' => base64_encode('missing.csv')])
+        ->assertRedirect('/'.config('crudbooster.ADMIN_PATH').'/login');
+});
+
+it('compiles import error handling without rendering row errors as HTML', function (): void {
+    $template = File::get(dirname(__DIR__, 2).DIRECTORY_SEPARATOR.'src'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'import.blade.php');
+    $compiledTemplate = Blade::compileString($template);
+
+    expect($compiledTemplate)
+        ->toContain('.text(message)')
+        ->toContain('Import completed with row errors:')
+        ->toContain('.fail(showImportFailure)');
 });
 
 it('renders add, edit, detail, and import views for a superadmin subclass controller', function (): void {
@@ -266,6 +345,490 @@ it('accepts spreadsheet import uploads onto an isolated disk', function (): void
 
     parse_str((string) parse_url((string) $response->headers->get('Location'), PHP_URL_QUERY), $query);
     Storage::disk('local')->assertExists(base64_decode($query['file']));
+});
+
+it('previews a spreadsheet and imports selected columns into the configured table', function (): void {
+    $temporaryStoragePath = null;
+    try {
+        $temporaryStoragePath = sys_get_temp_dir().DIRECTORY_SEPARATOR.'crudbooster-import-'.bin2hex(random_bytes(8));
+        app()->useStoragePath($temporaryStoragePath);
+        config(['filesystems.disks.local.root' => storage_path('app/private')]);
+        Storage::forgetDisk('local');
+
+        $uploadResponse = $this->withoutMiddleware()
+            ->withSession(['admin_id' => 1, 'admin_is_superadmin' => true])
+            ->post(route('TestCrudControllerPostDoUploadImportData'), [
+                'userfile' => UploadedFile::fake()->createWithContent(
+                    'records.csv',
+                    "Name,Status\n  Widget A  ,open\n,ignored\nWidget B,closed\n",
+                ),
+            ]);
+        $uploadResponse->assertRedirect();
+
+        parse_str((string) parse_url((string) $uploadResponse->headers->get('Location'), PHP_URL_QUERY), $query);
+        $file = $query['file'] ?? null;
+        expect($file)->toBeString();
+
+        $relativeFilePath = base64_decode($file);
+        expect(File::exists(Storage::disk('local')->path($relativeFilePath)))->toBeTrue();
+
+        bindCrudAction('/admin/crud-test/import-data?file='.$file, TestCrudController::class.'@getImportData');
+        $preview = app(TestCrudController::class)->getImportData();
+        expect($preview->getData()['data_import_column'])->toBe(['name', 'status'])
+            ->and(Session::get('total_data_import'))->toBe(3);
+
+        bindCrudAction(
+            '/admin/crud-test/done-import?file='.$file.'&import=1',
+            TestCrudController::class.'@postDoneImport',
+            'POST',
+        );
+        request()->merge(['select_column' => [1 => 'name', 2 => 'status']]);
+        app(TestCrudController::class)->postDoneImport();
+
+        $this->withSession([
+            'admin_id' => 1,
+            'admin_is_superadmin' => true,
+            'total_data_import' => 3,
+            'select_column' => [
+                1 => 'name',
+                2 => 'status',
+            ],
+        ])
+            ->post(route('TestCrudControllerPostDoImportChunk').'?'.http_build_query(['file' => $file]))
+            ->assertOk()
+            ->assertExactJson(['status' => true]);
+
+        expect(DB::table('test_crud_records')->orderBy('id')->get(['name', 'status'])->map(fn ($row): array => (array) $row)->all())
+            ->toBe([
+                ['name' => 'Widget A', 'status' => 'open'],
+                ['name' => 'Widget B', 'status' => 'closed'],
+            ])
+            ->and(Session::get('select_column'))->toBe([1 => 'name', 2 => 'status'])
+            ->and(File::exists(Storage::disk('local')->path($relativeFilePath)))->toBeTrue();
+    } finally {
+        if ($temporaryStoragePath !== null) {
+            File::deleteDirectory($temporaryStoragePath);
+        }
+    }
+});
+
+it('rejects invalid import mappings without writing partial rows', function (): void {
+    $temporaryStoragePath = null;
+
+    try {
+        [$temporaryStoragePath, $file] = prepareImportCsv(
+            ['Name', 'Status'],
+            [['Valid row', 'open']],
+            [99 => 'name'],
+        );
+
+        $this->withSession([
+            'admin_id' => 1,
+            'admin_is_superadmin' => true,
+            'total_data_import' => 1,
+            'select_column' => [99 => 'name'],
+        ])
+            ->post(route('TestCrudControllerPostDoImportChunk').'?'.http_build_query(['file' => $file]))
+            ->assertUnprocessable()
+            ->assertExactJson([
+                'status' => false,
+                'message' => 'The selected import columns are invalid.',
+            ]);
+
+        expect(DB::table('test_crud_records')->count())->toBe(0);
+    } finally {
+        if ($temporaryStoragePath !== null) {
+            File::deleteDirectory($temporaryStoragePath);
+        }
+    }
+});
+
+it('rejects import mappings for headings that are not in the file', function (): void {
+    $temporaryStoragePath = null;
+
+    try {
+        [$temporaryStoragePath, $file] = prepareImportCsv(
+            ['Name', 'Status'],
+            [['Valid row', 'open']],
+            [1 => 'missing_heading'],
+        );
+
+        $this->withSession([
+            'admin_id' => 1,
+            'admin_is_superadmin' => true,
+            'total_data_import' => 1,
+            'select_column' => [1 => 'missing_heading'],
+        ])
+            ->post(route('TestCrudControllerPostDoImportChunk').'?'.http_build_query(['file' => $file]))
+            ->assertUnprocessable()
+            ->assertExactJson([
+                'status' => false,
+                'message' => 'The selected import columns are invalid.',
+            ]);
+
+        expect(DB::table('test_crud_records')->count())->toBe(0);
+    } finally {
+        if ($temporaryStoragePath !== null) {
+            File::deleteDirectory($temporaryStoragePath);
+        }
+    }
+});
+
+it('rejects missing import mappings and invalid file tokens without writing rows', function (): void {
+    $temporaryStoragePath = null;
+
+    try {
+        [$temporaryStoragePath, $file] = prepareImportCsv(
+            ['Name', 'Status'],
+            [['Valid row', 'open']],
+            [],
+        );
+
+        $this->withSession([
+            'admin_id' => 1,
+            'admin_is_superadmin' => true,
+            'total_data_import' => 1,
+        ])
+            ->post(route('TestCrudControllerPostDoImportChunk').'?'.http_build_query(['file' => $file]))
+            ->assertUnprocessable()
+            ->assertExactJson([
+                'status' => false,
+                'message' => 'The selected import columns are invalid.',
+            ]);
+
+        $this->withSession([
+            'admin_id' => 1,
+            'admin_is_superadmin' => true,
+        ])
+            ->post(route('TestCrudControllerPostDoImportChunk').'?'.http_build_query([
+                'file' => base64_encode('../outside.csv'),
+            ]))
+            ->assertUnprocessable()
+            ->assertExactJson([
+                'status' => false,
+                'message' => 'The import file is invalid.',
+            ]);
+
+        expect(DB::table('test_crud_records')->count())->toBe(0);
+    } finally {
+        if ($temporaryStoragePath !== null) {
+            File::deleteDirectory($temporaryStoragePath);
+        }
+    }
+});
+
+it('rejects missing import files during preview', function (): void {
+    $this->withSession(['admin_id' => 1, 'admin_is_superadmin' => true])
+        ->get(route('TestCrudControllerGetImportData').'?'.http_build_query([
+            'file' => base64_encode('missing.csv'),
+        ]))->assertNotFound();
+});
+
+it('imports files containing more than one spreadsheet chunk', function (): void {
+    $temporaryStoragePath = null;
+
+    try {
+        $rows = [];
+        for ($index = 1; $index <= 205; $index++) {
+            $rows[] = ['Chunked '.$index, 'open'];
+        }
+
+        [$temporaryStoragePath, $file] = prepareImportCsv(
+            ['Name', 'Status'],
+            $rows,
+            [1 => 'name', 2 => 'status'],
+        );
+
+        $this->withSession([
+            'admin_id' => 1,
+            'admin_is_superadmin' => true,
+            'total_data_import' => 205,
+            'select_column' => [1 => 'name', 2 => 'status'],
+        ])
+            ->post(route('TestCrudControllerPostDoImportChunk').'?'.http_build_query(['file' => $file]))
+            ->assertOk()
+            ->assertExactJson(['status' => true]);
+
+        expect(DB::table('test_crud_records')->count())->toBe(205)
+            ->and(DB::table('test_crud_records')->where('name', 'Chunked 205')->exists())->toBeTrue()
+            ->and((new DefaultImportExcel)->chunkSize())->toBe(200);
+
+        $this->withSession([
+            'admin_id' => 1,
+            'admin_is_superadmin' => true,
+            'total_data_import' => 205,
+        ])
+            ->post(route('TestCrudControllerPostDoImportChunk').'?'.http_build_query([
+                'file' => $file,
+                'resume' => 1,
+            ]))
+            ->assertOk()
+            ->assertExactJson([
+                'progress' => 100,
+                'last_error' => null,
+            ]);
+    } finally {
+        if ($temporaryStoragePath !== null) {
+            File::deleteDirectory($temporaryStoragePath);
+        }
+    }
+});
+
+it('preserves timestamp and password handling for selected import columns', function (): void {
+    Schema::table('test_crud_records', function (Blueprint $table): void {
+        $table->string('password')->nullable();
+    });
+
+    $columns = Schema::getColumnListing('test_crud_records');
+    $passwordColumn = array_search('password', $columns, true);
+    $temporaryStoragePath = null;
+
+    try {
+        [$temporaryStoragePath, $file] = prepareImportCsv(
+            ['Name', 'Status', 'Password'],
+            [
+                ['Plain record', 'open', ''],
+                ['Protected record', 'closed', 'secret123'],
+            ],
+            [
+                array_search('name', $columns, true) => 'name',
+                array_search('status', $columns, true) => 'status',
+                $passwordColumn => 'password',
+            ],
+        );
+
+        $this->withSession([
+            'admin_id' => 1,
+            'admin_is_superadmin' => true,
+            'total_data_import' => 2,
+            'select_column' => [
+                array_search('name', $columns, true) => 'name',
+                array_search('status', $columns, true) => 'status',
+                $passwordColumn => 'password',
+            ],
+        ])
+            ->post(route('TestCrudControllerPostDoImportChunk').'?'.http_build_query(['file' => $file]))
+            ->assertOk()
+            ->assertExactJson(['status' => true]);
+
+        $records = DB::table('test_crud_records')->orderBy('id')->get();
+        expect($records)->toHaveCount(2)
+            ->and($records[0]->password)->toBe('')
+            ->and($records[0]->created_at)->not->toBeNull()
+            ->and(Hash::check('secret123', $records[1]->password))->toBeTrue()
+            ->and($records[1]->created_at)->not->toBeNull();
+    } finally {
+        if ($temporaryStoragePath !== null) {
+            File::deleteDirectory($temporaryStoragePath);
+        }
+    }
+});
+
+it('records row failures while continuing later imports and reporting progress', function (): void {
+    Schema::table('test_crud_records', function (Blueprint $table): void {
+        $table->unique('name');
+    });
+
+    $temporaryStoragePath = null;
+
+    try {
+        [$temporaryStoragePath, $file] = prepareImportCsv(
+            ['Name', 'Status'],
+            [
+                ['Duplicate', 'open'],
+                ['Duplicate', 'closed'],
+                ['After failure', 'open'],
+            ],
+            [1 => 'name', 2 => 'status'],
+        );
+
+        $this->withSession([
+            'admin_id' => 1,
+            'admin_is_superadmin' => true,
+            'total_data_import' => 3,
+            'select_column' => [1 => 'name', 2 => 'status'],
+        ])
+            ->post(route('TestCrudControllerPostDoImportChunk').'?'.http_build_query(['file' => $file]))
+            ->assertOk()
+            ->assertExactJson(['status' => true]);
+
+        expect(DB::table('test_crud_records')->orderBy('id')->pluck('name')->all())
+            ->toBe(['Duplicate', 'After failure']);
+
+        $this->withSession([
+            'admin_id' => 1,
+            'admin_is_superadmin' => true,
+            'total_data_import' => 3,
+        ])
+            ->post(route('TestCrudControllerPostDoImportChunk').'?'.http_build_query([
+                'file' => $file,
+                'resume' => 1,
+            ]))
+            ->assertOk()
+            ->assertJsonPath('progress', 100)
+            ->assertJsonPath('last_error', fn (?string $error): bool => $error !== null && str_contains($error, 'Duplicate'));
+    } finally {
+        if ($temporaryStoragePath !== null) {
+            File::deleteDirectory($temporaryStoragePath);
+        }
+    }
+});
+
+it('imports non-password fields when the target table has an optional password column', function (): void {
+    Schema::table('test_crud_records', function (Blueprint $table): void {
+        $table->string('password')->nullable();
+    });
+
+    $temporaryStoragePath = null;
+
+    try {
+        [$temporaryStoragePath, $file] = prepareImportCsv(
+            ['Name', 'Status'],
+            [['No password mapping', 'open']],
+            [1 => 'name', 2 => 'status'],
+        );
+
+        $this->withSession([
+            'admin_id' => 1,
+            'admin_is_superadmin' => true,
+            'total_data_import' => 1,
+            'select_column' => [1 => 'name', 2 => 'status'],
+        ])
+            ->post(route('TestCrudControllerPostDoImportChunk').'?'.http_build_query(['file' => $file]))
+            ->assertOk()
+            ->assertExactJson(['status' => true]);
+
+        expect(DB::table('test_crud_records')->where('name', 'No password mapping')->value('password'))->toBeNull();
+    } finally {
+        if ($temporaryStoragePath !== null) {
+            File::deleteDirectory($temporaryStoragePath);
+        }
+    }
+});
+
+it('resolves foreign-key import labels to existing or newly created relation rows', function (): void {
+    Schema::table('test_crud_records', function (Blueprint $table): void {
+        $table->unsignedBigInteger('test_related_records_id')->nullable();
+    });
+    DB::table('cms_moduls')->insert([
+        'name' => 'Related Records',
+        'path' => 'related-records',
+        'table_name' => 'test_related_records',
+        'controller' => 'TestRelatedRecordController',
+    ]);
+
+    $existingId = DB::table('test_related_records')->insertGetId([
+        'parent_id' => 0,
+        'category_id' => 0,
+        'label' => 'Existing relation',
+        'active' => true,
+    ]);
+    $columns = Schema::getColumnListing('test_crud_records');
+    $foreignKeyColumn = array_search('test_related_records_id', $columns, true);
+    $temporaryStoragePath = null;
+
+    try {
+        [$temporaryStoragePath, $file] = prepareImportCsv(
+            ['Name', 'Relation'],
+            [
+                ['Uses existing', 'Existing relation'],
+                ['Creates relation', 'New relation'],
+            ],
+            [
+                array_search('name', $columns, true) => 'name',
+                $foreignKeyColumn => 'relation',
+            ],
+        );
+
+        $this->withSession([
+            'admin_id' => 1,
+            'admin_is_superadmin' => true,
+            'total_data_import' => 2,
+            'select_column' => [
+                array_search('name', $columns, true) => 'name',
+                $foreignKeyColumn => 'relation',
+            ],
+        ])
+            ->post(route('TestCrudControllerPostDoImportChunk').'?'.http_build_query(['file' => $file]))
+            ->assertOk()
+            ->assertExactJson(['status' => true]);
+
+        expect(DB::table('test_crud_records')->orderBy('id')->pluck('test_related_records_id')->all())
+            ->toBe([$existingId, $existingId + 1])
+            ->and(DB::table('test_related_records')->where('label', 'New relation')->exists())->toBeTrue();
+    } finally {
+        if ($temporaryStoragePath !== null) {
+            File::deleteDirectory($temporaryStoragePath);
+        }
+    }
+});
+
+it('rolls back relation inserts when an imported row fails and continues later rows', function (): void {
+    Schema::table('test_crud_records', function (Blueprint $table): void {
+        $table->unsignedBigInteger('test_related_records_id')->nullable();
+        $table->unique('name');
+    });
+    DB::table('cms_moduls')->insert([
+        'name' => 'Related Records',
+        'path' => 'related-records',
+        'table_name' => 'test_related_records',
+        'controller' => 'TestRelatedRecordController',
+    ]);
+
+    $columns = Schema::getColumnListing('test_crud_records');
+    $foreignKeyColumn = array_search('test_related_records_id', $columns, true);
+    $temporaryStoragePath = null;
+
+    try {
+        [$temporaryStoragePath, $file] = prepareImportCsv(
+            ['Name', 'Relation'],
+            [
+                ['Duplicate', 'First relation'],
+                ['Duplicate', 'Must roll back'],
+                ['After failure', 'Later relation'],
+            ],
+            [
+                array_search('name', $columns, true) => 'name',
+                $foreignKeyColumn => 'relation',
+            ],
+        );
+
+        $this->withSession([
+            'admin_id' => 1,
+            'admin_is_superadmin' => true,
+            'total_data_import' => 3,
+            'select_column' => [
+                array_search('name', $columns, true) => 'name',
+                $foreignKeyColumn => 'relation',
+            ],
+        ])
+            ->post(route('TestCrudControllerPostDoImportChunk').'?'.http_build_query(['file' => $file]))
+            ->assertOk()
+            ->assertExactJson(['status' => true]);
+
+        expect(DB::table('test_crud_records')->orderBy('id')->pluck('name')->all())
+            ->toBe(['Duplicate', 'After failure'])
+            ->and(DB::table('test_related_records')->where('label', 'First relation')->exists())->toBeTrue()
+            ->and(DB::table('test_related_records')->where('label', 'Must roll back')->exists())->toBeFalse()
+            ->and(DB::table('test_related_records')->where('label', 'Later relation')->exists())->toBeTrue();
+
+        $this->withSession([
+            'admin_id' => 1,
+            'admin_is_superadmin' => true,
+            'total_data_import' => 3,
+        ])
+            ->post(route('TestCrudControllerPostDoImportChunk').'?'.http_build_query([
+                'file' => $file,
+                'resume' => 1,
+            ]))
+            ->assertOk()
+            ->assertJsonPath('progress', 100)
+            ->assertJsonPath('last_error', fn (?string $error): bool => $error !== null && str_contains($error, 'Duplicate'));
+    } finally {
+        if ($temporaryStoragePath !== null) {
+            File::deleteDirectory($temporaryStoragePath);
+        }
+    }
 });
 
 it('logs in a valid user and stores privilege session keys', function (): void {
