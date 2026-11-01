@@ -6,11 +6,11 @@ use crocodicstudio\crudbooster\helpers\CRUDBooster;
 use Illuminate\Filesystem\FilesystemManager;
 use RuntimeException;
 
-class UploadWorkflow
+class UploadFileAction
 {
     public function __construct(private FilesystemManager $filesystem) {}
 
-    public function upload(string $name, bool $encrypt = false, mixed $id = null): ?string
+    public function execute(string $name, bool $encrypt = false, mixed $id = null): ?string
     {
         if (! request()->hasFile($name)) {
             return null;
@@ -42,13 +42,5 @@ class UploadWorkflow
         }
 
         return $filePath.'/'.$filename;
-    }
-
-    public function deleteIfExists(string $path): void
-    {
-        $disk = $this->filesystem->disk(config('crudbooster.filesystem_driver'));
-        if ($disk->exists($path) && ! $disk->delete($path)) {
-            throw new RuntimeException('Unable to delete the file from the configured filesystem disk.');
-        }
     }
 }

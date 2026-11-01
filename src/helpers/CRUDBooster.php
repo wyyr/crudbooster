@@ -2,7 +2,7 @@
 
 namespace crocodicstudio\crudbooster\helpers;
 
-use crocodicstudio\crudbooster\uploads\UploadWorkflow;
+use crocodicstudio\crudbooster\uploads\UploadFileAction;
 use DateTime;
 use Exception;
 use Illuminate\Support\Facades\Cache;
@@ -66,7 +66,7 @@ class CRUDBooster
 
     public static function uploadFile($name, $encrypt = false, $resize_width = null, $resize_height = null, $id = null)
     {
-        return app(UploadWorkflow::class)->upload($name, (bool) $encrypt, $id);
+        return app(UploadFileAction::class)->execute($name, (bool) $encrypt, $id);
     }
 
     public static function uploadRawFile(string $path, string $content): ?string

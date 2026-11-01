@@ -4,7 +4,8 @@ use App\Http\Controllers\CRUDBooster\TestCrudController;
 use crocodicstudio\crudbooster\helpers\CRUDBooster;
 use crocodicstudio\crudbooster\imports\DefaultImportExcel;
 use crocodicstudio\crudbooster\middlewares\CBBackend;
-use crocodicstudio\crudbooster\uploads\UploadWorkflow;
+use crocodicstudio\crudbooster\uploads\DeleteUploadedFileAction;
+use crocodicstudio\crudbooster\uploads\UploadFileAction;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Filesystem\FilesystemManager;
@@ -526,7 +527,7 @@ it('fails explicitly when storage refuses an uploaded file', function (): void {
     $filesystem = $this->createMock(FilesystemManager::class);
     $filesystem->expects($this->once())->method('disk')->with('local')->willReturn($disk);
 
-    expect(fn () => (new UploadWorkflow($filesystem))->upload('userfile', true))
+    expect(fn () => (new UploadFileAction($filesystem))->execute('userfile', true))
         ->toThrow(RuntimeException::class);
 });
 
@@ -536,9 +537,9 @@ it('deletes existing uploads from the configured disk and tolerates missing file
     $path = 'uploads/7/2026-03/photo.png';
     Storage::disk('local')->put($path, 'image body');
 
-    app(UploadWorkflow::class)->deleteIfExists($path);
+    app(DeleteUploadedFileAction::class)->execute($path);
     Storage::disk('local')->assertMissing($path);
-    app(UploadWorkflow::class)->deleteIfExists($path);
+    app(DeleteUploadedFileAction::class)->execute($path);
 });
 
 it('does not clear an image field when storage deletion fails', function (): void {
@@ -558,8 +559,8 @@ it('does not clear an image field when storage deletion fails', function (): voi
     $filesystem = $this->createMock(FilesystemManager::class);
     $filesystem->expects($this->once())->method('disk')->with('local')->willReturn($disk);
     app()->instance(
-        UploadWorkflow::class,
-        new UploadWorkflow($filesystem),
+        DeleteUploadedFileAction::class,
+        new DeleteUploadedFileAction($filesystem),
     );
 
     expect(fn () => app(TestCrudController::class)->postDeleteImage())

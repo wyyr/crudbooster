@@ -10,9 +10,9 @@ use Intervention\Image\ImageManager;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Response as BaseResponse;
 
-class FilePreviewWorkflow
+class PreviewUploadedFileAction
 {
-    public function preview(string $one, ?string $two = null, ?string $three = null, ?string $four = null, ?string $five = null): BaseResponse
+    public function execute(string $one, ?string $two = null, ?string $three = null, ?string $four = null, ?string $five = null): BaseResponse
     {
         $segments = array_values(array_filter(
             [$one, $two, $three, $four, $five],

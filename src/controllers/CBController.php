@@ -9,7 +9,7 @@ use crocodicstudio\crudbooster\helpers\CB;
 use crocodicstudio\crudbooster\helpers\CRUDBooster;
 use crocodicstudio\crudbooster\imports\ImportWorkflow;
 use crocodicstudio\crudbooster\relations\RelationConfigurationResolver;
-use crocodicstudio\crudbooster\uploads\UploadWorkflow;
+use crocodicstudio\crudbooster\uploads\DeleteUploadedFileAction;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -1715,7 +1715,7 @@ class CBController extends Controller
 
         $file = $row->{$column} ?? null;
         if ($file) {
-            app(UploadWorkflow::class)->deleteIfExists($file);
+            app(DeleteUploadedFileAction::class)->execute($file);
         }
 
         DB::table($this->table)->where($this->primary_key, $id)->update([$column => null]);
