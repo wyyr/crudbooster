@@ -4,7 +4,10 @@ use App\Http\Controllers\CRUDBooster\TestCrudController;
 use crocodicstudio\crudbooster\helpers\CRUDBooster;
 use crocodicstudio\crudbooster\imports\DefaultImportExcel;
 use crocodicstudio\crudbooster\middlewares\CBBackend;
+use crocodicstudio\crudbooster\uploads\UploadWorkflow;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Filesystem\FilesystemManager;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Routing\Route as RoutingRoute;
@@ -28,9 +31,9 @@ function bindCrudRequest(string $uri, string $method = 'GET', array $input = [])
     app()->instance('request', $request);
 }
 
-function bindCrudAction(string $uri, string $action, string $method = 'GET'): void
+function bindCrudAction(string $uri, string $action, string $method = 'GET', array $files = []): void
 {
-    $request = Request::create($uri, $method);
+    $request = Request::create($uri, $method, [], [], $files);
     $request->setLaravelSession(app('session')->driver());
 
     $route = new RoutingRoute($method, trim((string) parse_url($uri, PHP_URL_PATH), '/'), [
@@ -187,7 +190,9 @@ it('registers the CRUD module dynamic routes with expected names, verbs, and URI
         'TestCrudControllerGetImportData' => ['GET', 'admin/crud-test/import-data/{one?}/{two?}/{three?}/{four?}/{five?}'],
         'TestCrudControllerPostDoUploadImportData' => ['POST', 'admin/crud-test/do-upload-import-data/{one?}/{two?}/{three?}/{four?}/{five?}'],
         'TestCrudControllerPostExportData' => ['POST', 'admin/crud-test/export-data/{one?}/{two?}/{three?}/{four?}/{five?}'],
+        'TestCrudControllerPostDeleteImage' => ['POST', 'admin/crud-test/delete-image/{one?}/{two?}/{three?}/{four?}/{five?}'],
         'TestCrudControllerPostUploadFile' => ['POST', 'admin/crud-test/upload-file/{one?}/{two?}/{three?}/{four?}/{five?}'],
+        'TestCrudControllerPostUploadSummernote' => ['POST', 'admin/crud-test/upload-summernote/{one?}/{two?}/{three?}/{four?}/{five?}'],
         'TestCrudControllerGetDataTable' => ['GET', 'admin/crud-test/data-table/{one?}/{two?}/{three?}/{four?}/{five?}'],
         'TestCrudControllerGetModalData' => ['GET', 'admin/crud-test/modal-data/{one?}/{two?}/{three?}/{four?}/{five?}'],
     ];
@@ -202,6 +207,15 @@ it('registers the CRUD module dynamic routes with expected names, verbs, and URI
 
     expect(Route::getRoutes()->getByName('TestCrudControllerGetImportData')->gatherMiddleware())
         ->toContain('web', CBBackend::class)
+        ->and(Route::getRoutes()->getByName('TestCrudControllerPostUploadFile')->gatherMiddleware())
+        ->toContain('web', CBBackend::class)
+        ->and(Route::getRoutes()->getByName('TestCrudControllerPostUploadSummernote')->gatherMiddleware())
+        ->toContain('web', CBBackend::class)
+        ->and(Route::getRoutes()->getByName('TestCrudControllerPostDeleteImage')->gatherMiddleware())
+        ->toContain('web', CBBackend::class)
+        ->and(Route::getRoutes()->getByName('fileControllerPreview')->gatherMiddleware())
+        ->toContain('web')
+        ->not->toContain(CBBackend::class)
         ->and(Route::getRoutes()->getByName('TestCrudControllerPostDoImportChunk')->gatherMiddleware())
         ->toContain('web', CBBackend::class);
 
@@ -331,6 +345,226 @@ it('stores uploaded files on the configured disk without touching the host files
     expect($path)->not->toBeNull()
         ->and($path)->toContain('uploads/7/');
     Storage::disk('local')->assertExists($path);
+});
+
+it('keeps form uploads on their configured field and preserves legacy size and MIME acceptance', function (): void {
+    Storage::fake('local');
+    config()->set('crudbooster.filesystem_driver', 'local');
+    config()->set('crudbooster.prefix_upload', 'tenant');
+    Session::put('admin_id', 7);
+    config()->set('crudbooster.DEFAULT_UPLOAD_MAX_SIZE', 1);
+
+    $request = Request::create('/admin/crud-test/add-save', 'POST', ['name' => 'Uploaded'], [], [
+        'photo' => UploadedFile::fake()->create('oversized.txt', 2, 'application/pdf'),
+        'not_configured' => UploadedFile::fake()->create('ignored.txt', 1, 'text/plain'),
+    ]);
+    $request->setLaravelSession(app('session')->driver());
+    app()->instance('request', $request);
+
+    $controller = app(TestCrudController::class);
+    $controller->cbLoader();
+    $controller->input_assignment();
+    $path = $controller->arr['photo'];
+
+    expect($path)->toMatch('~^tenant/uploads/7/\d{4}-\d{2}/oversized\.txt$~')
+        ->and(array_key_exists('not_configured', $controller->arr))->toBeFalse();
+    Storage::disk('local')->assertExists($path);
+});
+
+it('preserves overwrite behavior for non-encrypted file names', function (): void {
+    Storage::fake('local');
+    config()->set('crudbooster.filesystem_driver', 'local');
+    config()->set('crudbooster.prefix_upload', '');
+    Session::put('admin_id', 7);
+
+    foreach (['first', 'second'] as $content) {
+        $request = Request::create('/admin/crud-test/add-save', 'POST', [], [], [
+            'userfile' => UploadedFile::fake()->createWithContent('same name.txt', $content),
+        ]);
+        $request->setLaravelSession(app('session')->driver());
+        app()->instance('request', $request);
+
+        $path = CRUDBooster::uploadFile('userfile', false, null, null, 7);
+    }
+
+    expect($path)->toBe('/uploads/7/'.date('Y-m').'/same_name.txt')
+        ->and(Storage::disk('local')->get($path))->toBe('second');
+});
+
+it('requires a backend session for upload and image-delete routes', function (): void {
+    $this->post(route('TestCrudControllerPostUploadFile'))
+        ->assertRedirect('/'.config('crudbooster.ADMIN_PATH').'/login');
+
+    $this->post(route('TestCrudControllerPostUploadSummernote'))
+        ->assertRedirect('/'.config('crudbooster.ADMIN_PATH').'/login');
+
+    $this->post(route('TestCrudControllerPostDeleteImage'))
+        ->assertRedirect('/'.config('crudbooster.ADMIN_PATH').'/login');
+});
+
+it('rejects image deletion for a field that is not configured as an upload', function (): void {
+    $response = $this->withSession(['admin_id' => 1, 'admin_is_superadmin' => true])
+        ->post(route('TestCrudControllerPostDeleteImage'), [
+            'id' => 1,
+            'column' => 'status',
+        ]);
+
+    $response->assertNotFound();
+});
+
+it('uploads Summernote files with the legacy plain URL response and an encrypted unique path', function (): void {
+    Storage::fake('local');
+    config()->set('crudbooster.filesystem_driver', 'local');
+    config()->set('crudbooster.prefix_upload', '');
+
+    foreach ([
+        ['upload-file', 'postUploadFile'],
+        ['upload-summernote', 'postUploadSummernote'],
+    ] as [$slug, $method]) {
+        Session::put('admin_id', 7);
+        bindCrudAction(
+            '/admin/crud-test/'.$slug,
+            TestCrudController::class.'@'.$method,
+            'POST',
+            ['userfile' => UploadedFile::fake()->createWithContent('notes.txt', 'editor body')],
+        );
+
+        ob_start();
+        app(TestCrudController::class)->{$method}();
+        $url = trim(ob_get_clean());
+        expect($url)->toContain('/uploads/7/'.date('Y-m').'/')
+            ->and($url)->toMatch('~/[a-f0-9]{32}\.txt$~');
+
+        $path = substr(parse_url($url, PHP_URL_PATH), strlen('/storage/'));
+        Storage::disk('local')->assertExists($path);
+        expect(Storage::disk('local')->get($path))->toBe('editor body');
+    }
+});
+
+it('serves uploaded preview files from the configured disk without backend authentication', function (): void {
+    config()->set('filesystems.disks.preview', [
+        'driver' => 'local',
+        'root' => storage_path('framework/testing/disks/preview'),
+    ]);
+    Storage::fake('preview');
+    config()->set('crudbooster.filesystem_driver', 'preview');
+    Storage::disk('preview')->put('uploads/7/2026-03/notes.txt', 'preview body');
+
+    $response = $this->get(route('fileControllerPreview', [
+        'one' => '7',
+        'two' => '2026-03',
+        'three' => 'notes.txt',
+    ]));
+
+    $response->assertOk();
+    ob_start();
+    $response->baseResponse->sendContent();
+    $content = ob_get_clean();
+    expect($content)->toBe('preview body')
+        ->and($response->headers->get('Content-Disposition'))->toContain('inline')
+        ->and($response->headers->get('Content-Type'))->toContain('text/plain');
+
+    $download = $this->get(route('fileControllerPreview', [
+        'one' => '7',
+        'two' => '2026-03',
+        'three' => 'notes.txt',
+        'download' => 1,
+    ]));
+    $download->assertOk()->assertDownload('notes.txt');
+    ob_start();
+    $download->baseResponse->sendContent();
+    expect(ob_get_clean())->toBe('preview body');
+});
+
+it('serves image bytes and image metadata from the configured storage disk', function (): void {
+    config()->set('filesystems.disks.preview', [
+        'driver' => 'local',
+        'root' => storage_path('framework/testing/disks/preview'),
+    ]);
+    Storage::fake('preview');
+    config()->set('crudbooster.filesystem_driver', 'preview');
+    $image = UploadedFile::fake()->image('pixel.png', 1, 1);
+    $image = File::get($image->getRealPath());
+    Storage::disk('preview')->put('uploads/7/2026-03/pixel.png', $image);
+
+    $response = $this->get(route('fileControllerPreview', [
+        'one' => '7',
+        'two' => '2026-03',
+        'three' => 'pixel.png',
+    ]));
+
+    $response->assertOk();
+    expect($response->getContent())->toBe($image)
+        ->and($response->headers->get('Content-Type'))->toContain('image/png')
+        ->and((int) $response->headers->get('Content-Length'))->toBe(strlen($image));
+
+    $thumbnail = $this->get(route('fileControllerPreview', [
+        'one' => '7',
+        'two' => '2026-03',
+        'three' => 'pixel.png',
+    ]).'?w=1&h=1');
+
+    $thumbnail->assertOk();
+    expect($thumbnail->getContent())->not->toBeEmpty()
+        ->and($thumbnail->headers->get('Content-Type'))->toContain('image/png');
+});
+
+it('fails explicitly when storage refuses an uploaded file', function (): void {
+    config()->set('crudbooster.filesystem_driver', 'local');
+    config()->set('crudbooster.prefix_upload', '');
+    Session::put('admin_id', 7);
+
+    $request = Request::create('/admin/crud-test/upload-file', 'POST', [], [], [
+        'userfile' => UploadedFile::fake()->create('notes.txt', 12, 'text/plain'),
+    ]);
+    $request->setLaravelSession(app('session')->driver());
+    app()->instance('request', $request);
+
+    $disk = $this->createMock(FilesystemAdapter::class);
+    $disk->expects($this->once())->method('makeDirectory')->willReturn(true);
+    $disk->expects($this->once())->method('putFileAs')->willReturn(false);
+    $filesystem = $this->createMock(FilesystemManager::class);
+    $filesystem->expects($this->once())->method('disk')->with('local')->willReturn($disk);
+
+    expect(fn () => (new UploadWorkflow($filesystem))->upload('userfile', true))
+        ->toThrow(RuntimeException::class);
+});
+
+it('deletes existing uploads from the configured disk and tolerates missing files', function (): void {
+    Storage::fake('local');
+    config()->set('crudbooster.filesystem_driver', 'local');
+    $path = 'uploads/7/2026-03/photo.png';
+    Storage::disk('local')->put($path, 'image body');
+
+    app(UploadWorkflow::class)->deleteIfExists($path);
+    Storage::disk('local')->assertMissing($path);
+    app(UploadWorkflow::class)->deleteIfExists($path);
+});
+
+it('does not clear an image field when storage deletion fails', function (): void {
+    Session::put('admin_id', 1);
+    Session::put('admin_is_superadmin', true);
+    $imagePath = 'uploads/1/2026-03/photo.png';
+    $recordId = DB::table('test_crud_records')->insertGetId([
+        'name' => 'Image record',
+        'photo' => $imagePath,
+    ]);
+    bindCrudAction('/admin/crud-test/delete-image', TestCrudController::class.'@postDeleteImage', 'POST');
+    request()->merge(['id' => $recordId, 'column' => 'photo']);
+
+    $disk = $this->createMock(FilesystemAdapter::class);
+    $disk->expects($this->once())->method('exists')->with($imagePath)->willReturn(true);
+    $disk->expects($this->once())->method('delete')->with($imagePath)->willReturn(false);
+    $filesystem = $this->createMock(FilesystemManager::class);
+    $filesystem->expects($this->once())->method('disk')->with('local')->willReturn($disk);
+    app()->instance(
+        UploadWorkflow::class,
+        new UploadWorkflow($filesystem),
+    );
+
+    expect(fn () => app(TestCrudController::class)->postDeleteImage())
+        ->toThrow(RuntimeException::class, 'Unable to delete the file');
+    expect(DB::table('test_crud_records')->where('id', $recordId)->value('photo'))->toBe($imagePath);
 });
 
 it('rejects import uploads that are not spreadsheet files', function (): void {

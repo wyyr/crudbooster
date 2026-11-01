@@ -9,6 +9,7 @@ use crocodicstudio\crudbooster\helpers\CB;
 use crocodicstudio\crudbooster\helpers\CRUDBooster;
 use crocodicstudio\crudbooster\imports\ImportWorkflow;
 use crocodicstudio\crudbooster\relations\RelationConfigurationResolver;
+use crocodicstudio\crudbooster\uploads\UploadWorkflow;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -1694,7 +1695,7 @@ class CBController extends Controller
         $column = request('column');
 
         abort_unless(
-            is_string($column) && collect($this->getConfiguredFields())->contains(
+            is_string($column) && collect($this->form)->contains(
                 fn (array $field): bool => ($field['name'] ?? null) === $column
                     && in_array($field['type'] ?? null, ['upload', 'upload_image', 'upload_file'], true)
             ),
@@ -1713,8 +1714,8 @@ class CBController extends Controller
         }
 
         $file = $row->{$column} ?? null;
-        if ($file && Storage::disk(config('crudbooster.filesystem_driver'))->exists($file)) {
-            Storage::disk(config('crudbooster.filesystem_driver'))->delete($file);
+        if ($file) {
+            app(UploadWorkflow::class)->deleteIfExists($file);
         }
 
         DB::table($this->table)->where($this->primary_key, $id)->update([$column => null]);

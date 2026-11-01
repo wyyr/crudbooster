@@ -2,6 +2,7 @@
 
 namespace crocodicstudio\crudbooster\helpers;
 
+use crocodicstudio\crudbooster\uploads\UploadWorkflow;
 use DateTime;
 use Exception;
 use Illuminate\Support\Facades\Cache;
@@ -65,49 +66,7 @@ class CRUDBooster
 
     public static function uploadFile($name, $encrypt = false, $resize_width = null, $resize_height = null, $id = null)
     {
-        $prefix = config('crudbooster.prefix_upload');
-
-        if (request()->hasFile($name)) {
-            if (! self::myId()) {
-                $userID = 0;
-            } else {
-                $userID = self::myId();
-            }
-
-            if ($id) {
-                $userID = $id;
-            }
-
-            $file = request()->file($name);
-            $ext = $file->getClientOriginalExtension();
-            $filename = str_slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
-            if (method_exists($file, 'getClientSize')) {
-                $filesize = $file->getClientSize() / 1024;
-            } else {
-                $filesize = $file->getSize() / 1024;
-            }
-
-            $file_path = $prefix.'/uploads/'.$userID.'/'.date('Y-m');
-
-            // Create Directory Monthly
-            Storage::disk(config('crudbooster.filesystem_driver'))->makeDirectory($file_path);
-
-            if ($encrypt == true) {
-                $filename = md5(str_random(5)).'.'.$ext;
-            } else {
-                $filename = str_slug($filename, '_').'.'.$ext;
-            }
-
-            if (Storage::disk(config('crudbooster.filesystem_driver'))->putFileAs($file_path, $file, $filename)) {
-                //                self::resizeImage($file, $file_path . '/' . $filename, $resize_width, $resize_height);
-
-                return $file_path.'/'.$filename;
-            } else {
-                return null;
-            }
-        } else {
-            return null;
-        }
+        return app(UploadWorkflow::class)->upload($name, (bool) $encrypt, $id);
     }
 
     public static function uploadRawFile(string $path, string $content): ?string
