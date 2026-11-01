@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CRUDBooster\TestRelationController;
 use crocodicstudio\crudbooster\controllers\ApiCustomController;
+use crocodicstudio\crudbooster\controllers\NotificationController;
 use crocodicstudio\crudbooster\CRUDBoosterServiceProvider;
 use crocodicstudio\crudbooster\helpers\CRUDBooster;
 use Illuminate\Database\Schema\Blueprint;
@@ -120,7 +121,7 @@ it('does not let users mark another user notification as read', function (): voi
 });
 
 it('renders notification read actions with a CSRF-protected POST form', function (): void {
-    $controller = app(\crocodicstudio\crudbooster\controllers\NotificationController::class);
+    $controller = app(NotificationController::class);
     $controller->cbInit();
     $row = (object) ['id' => 7, 'content' => '<script>alert(1)</script>'];
     $callback = $controller->col[0]['callback_php'];

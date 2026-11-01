@@ -24,10 +24,10 @@ class CRUDBoosterServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->loadViewsFrom(__DIR__ . '/views', 'crudbooster');
-        $this->loadMigrationsFrom(__DIR__ . '/database/migrations');
-        $this->loadTranslationsFrom(__DIR__ . '/localization', 'crudbooster');
-        $this->loadRoutesFrom(__DIR__ . '/routes.php');
+        $this->loadViewsFrom(__DIR__.'/views', 'crudbooster');
+        $this->loadMigrationsFrom(__DIR__.'/database/migrations');
+        $this->loadTranslationsFrom(__DIR__.'/localization', 'crudbooster');
+        $this->loadRoutesFrom(__DIR__.'/routes.php');
 
         $this->handlePublishing();
         $this->registerViewComposers();
@@ -41,11 +41,11 @@ class CRUDBoosterServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        if (file_exists(__DIR__ . '/helpers/Helper.php')) {
-            require_once __DIR__ . '/helpers/Helper.php';
+        if (file_exists(__DIR__.'/helpers/Helper.php')) {
+            require_once __DIR__.'/helpers/Helper.php';
         }
 
-        $this->mergeConfigFrom(__DIR__ . '/config/crudbooster.php', 'crudbooster');
+        $this->mergeConfigFrom(__DIR__.'/config/crudbooster.php', 'crudbooster');
 
         $this->registerCommands();
         $this->registerAliases();
@@ -58,22 +58,22 @@ class CRUDBoosterServiceProvider extends ServiceProvider
 
     private function handlePublishing(): void
     {
-        if (!$this->app->runningInConsole()) {
+        if (! $this->app->runningInConsole()) {
             return;
         }
 
         $this->publishes([
-            __DIR__ . '/config/crudbooster.php' => config_path('crudbooster.php'),
+            __DIR__.'/config/crudbooster.php' => config_path('crudbooster.php'),
         ], 'cb-config');
         $this->publishes([
-            __DIR__ . '/userfiles/controllers/CBHook.php' => app_path('Http/Controllers/CRUDBooster/CBHook.php'),
-            __DIR__ . '/userfiles/controllers/CmsUserController.php' => app_path('Http/Controllers/CRUDBooster/CmsUserController.php'),
+            __DIR__.'/userfiles/controllers/CBHook.php' => app_path('Http/Controllers/CRUDBooster/CBHook.php'),
+            __DIR__.'/userfiles/controllers/CmsUserController.php' => app_path('Http/Controllers/CRUDBooster/CmsUserController.php'),
         ], 'cb-controllers');
         $this->publishes([
-            __DIR__ . '/public' => public_path(),
+            __DIR__.'/public' => public_path(),
         ], 'cb-assets');
         $this->publishes([
-            __DIR__ . '/database/seeders/CBSeeder.php' => database_path('seeders/CBSeeder.php'),
+            __DIR__.'/database/seeders/CBSeeder.php' => database_path('seeders/CBSeeder.php'),
         ], 'cb-seeders');
     }
 
